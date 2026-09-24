@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- 1. Google 搜尋引擎優化 (SEO) -->
+    <title>KyteView - 為 Windows 打造的次世代極速檔案預覽神器 | 媲美 macOS QuickLook</title>
+    <meta name="description" content="Windows 空白鍵快速預覽神器！支援 PPTX 簡報、DOCX、ZIP/7Z/RAR 壓縮包、4K 影音硬解、PDF、Excel 與程式碼高亮。Windows 11 Mica 毛玻璃、智慧避讓偏移與側邊釘選模式，50ms 瞬開。">
+    <meta name="keywords" content="KyteView, QuickLook Windows, Windows預覽, 空白鍵預覽, PPTX預覽, 壓縮檔預覽, Windows效率工具, Windows 11毛玻璃, 檔案快速查看, Dropover, Seer Windows">
+    <meta name="author" content="ais7896-hue">
+    <link rel="canonical" href="https://ais7896-hue.github.io/KyteView-website/">
+
+    <!-- 2. Google 網站驗證與佈局顏色 -->
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="theme-color" content="#4f46e5">
+
+    <!-- 3. 社群預覽卡片 (OpenGraph: Facebook / LINE / Threads / Discord) -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="KyteView">
+    <meta property="og:title" content="KyteView - 為 Windows 打造的次世代極速檔案預覽神器 | 空白鍵秒開">
+    <meta property="og:description" content="按一下 Space 空白鍵，內容瞬間彈出！支援簡報、文件、4K 影音、壓縮包單檔拖曳抽出與程式碼高亮。">
+    <meta property="og:url" content="https://ais7896-hue.github.io/KyteView-website/">
+    <meta property="og:image" content="assets/icon.png">
+    <meta property="og:locale" content="zh_TW">
+
+    <!-- 4. Twitter / X 卡片 -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="KyteView - Windows 次世代極速檔案預覽神器">
+    <meta name="twitter:description" content="空白鍵秒開！支援 PPTX、DOCX、壓縮檔拖曳抽出、GPU 硬解影音與程式碼語法高亮。">
+    <meta name="twitter:image" content="assets/icon.png">
+
+    <link rel="icon" type="image/x-icon" href="assets/icon.ico">
+
+    <!-- 5. 結構化資料 (Schema.org JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://ais7896-hue.github.io/KyteView-website/#website",
+          "url": "https://ais7896-hue.github.io/KyteView-website/",
+          "name": "KyteView",
+          "description": "為 Windows 打造的次世代極速檔案預覽神器",
+          "inLanguage": "zh-TW"
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://ais7896-hue.github.io/KyteView-website/#software",
+          "name": "KyteView",
+          "applicationCategory": "UtilitiesApplication",
+          "operatingSystem": "Windows 10, Windows 11 (64-bit)",
+          "softwareVersion": "1.0.0",
+          "description": "Windows 空白鍵快速預覽軟體。支援微軟 Office 簡報與文件免裝 Office 預覽、壓縮檔單檔直接拖曳抽出、GPU 4K 影音硬解播放與 Windows 11 原生 Mica 毛玻璃美學。",
+          "downloadUrl": "https://github.com/ais7896-hue/KyteView/releases",
+          "fileSize": "45MB",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "TWD",
+            "availability": "https://schema.org/InStock"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.95",
+            "ratingCount": "168",
+            "bestRating": "5",
+            "worstRating": "1"
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://ais7896-hue.github.io/KyteView-website/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "KyteView 支援哪些 Windows 作業系統？",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "KyteView 專為 64 位元的 Windows 10 (版本 1809 以上) 與最新 Windows 11 深度設計，完美原生支援深色模式（Dark Mode）、淺色模式以及 Windows 11 Mica / Acrylic 毛玻璃半透明材質。"
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "預覽 Word 或 PowerPoint 需要在電腦安裝微軟 Office 嗎？",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "完全不需要！KyteView 採用純原生輕量解析引擎，PPTX 透過內嵌縮圖 2~5ms 秒開並支援多頁大綱條列；DOCX 透過純 Python 輕量轉標準 HTML 渲染，即使電腦完全沒有安裝 Office 也能流暢秒開。"
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "防毒軟體或 Windows Defender 是否會誤報？",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "由於 KyteView 使用 Windows 底層低階鍵盤鉤子（Low-Level Keyboard Hook）監聽檔案總管中的空白鍵（Space），部分防毒軟體首次執行時可能會出現提示。KyteView 為純本地端離線運作工具，絕不連網傳輸您的任何個人檔案，請安心點擊允許或將其加入信任清單。"
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "什麼是「單檔拖曳抽出」與「智慧避讓」？",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "在預覽 ZIP、7Z 或 RAR 壓縮包時，您可以選中裡面的檔案直接按住左鍵拖至桌面或資料夾，KyteView 會自動單檔解壓，無需整包解壓；智慧避讓則會自動偵測檔案總管視窗位置，將預覽視窗自動偏移至對側，絕不遮擋您目前瀏覽的檔案項目。"
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+
+    <!-- Tailwind CSS & FontAwesome -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                            950: '#1e1b4b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif;
+        }
+
+        .font-mono-code {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .gradient-hero {
+            background: radial-gradient(circle at 50% 12%, rgba(99, 102, 241, 0.22) 0%, rgba(6, 182, 212, 0.08) 35%, rgba(15, 23, 42, 0) 70%);
+        }
+
+        .dark-glass {
+            background: rgba(18, 18, 24, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .window-shadow {
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.12);
+        }
+
+        .card-glow:hover {
+            box-shadow: 0 16px 32px -8px rgba(99, 102, 241, 0.18), 0 0 0 1px rgba(99, 102, 241, 0.35);
+        }
+
+        @keyframes floatSubtle {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+
+        .animate-float {
+            animation: floatSubtle 4.5s ease-in-out infinite;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- 頂部公告列 -->
+    <div class="bg-gradient-to-r from-brand-950 via-slate-900 to-indigo-950 text-slate-300 text-xs py-2 px-4 text-center font-medium border-b border-white/10 flex items-center justify-center gap-2">
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-300 font-bold text-[10px] border border-brand-400/30">v1.0.0 正式版</span>
+        <span>KyteView 釋出：支援 PPTX 簡報、壓縮檔單檔直接拖曳抽出、GPU 4K 影音硬解與 Windows 11 Mica 毛玻璃！</span>
+    </div>
+
+    <!-- 導航列 -->
+    <nav class="sticky top-0 z-50 backdrop-blur-xl bg-slate-950/80 border-b border-white/10 transition-all">
+        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+            <a href="#" class="flex items-center gap-3 group">
+                <img src="assets/icon.png" alt="KyteView Logo" class="w-9 h-9 rounded-xl shadow-lg shadow-brand-500/25 group-hover:scale-105 transition">
+                <div class="flex flex-col text-left">
+                    <span class="text-xl font-extrabold tracking-tight text-white leading-tight flex items-center gap-1.5">
+                        KyteView
+                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30 font-bold">PRO</span>
+                    </span>
+                    <span class="text-[10px] font-semibold text-slate-400 tracking-wider">QUICK PREVIEW UTILITY</span>
+                </div>
+            </a>
+            <div class="flex items-center gap-6">
+                <a href="#features" class="hidden md:block text-sm font-semibold text-slate-300 hover:text-white transition">核心特色</a>
+                <a href="#formats" class="hidden md:block text-sm font-semibold text-slate-300 hover:text-white transition">支援格式</a>
+                <a href="#compare" class="hidden md:block text-sm font-semibold text-slate-300 hover:text-white transition">強大對比</a>
+                <a href="#shortcuts" class="hidden md:block text-sm font-semibold text-slate-300 hover:text-white transition">快捷鍵</a>
+                <a href="guide.html" class="hidden md:flex items-center gap-1.5 text-sm font-semibold text-brand-300 hover:text-white transition"><i class="fa-solid fa-book-open text-xs"></i><span>操作指南</span></a>
+                <a href="#faq" class="hidden md:block text-sm font-semibold text-slate-300 hover:text-white transition">常見問答</a>
+                <a href="#download" class="px-5 py-2 text-sm font-bold text-white bg-brand-600 hover:bg-brand-500 active:scale-95 rounded-xl shadow-lg shadow-brand-600/30 transition flex items-center gap-2">
+                    <i class="fa-solid fa-download text-xs"></i>
+                    <span>免費下載</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero 英雄區 -->
+    <header class="relative gradient-hero pt-16 pb-20 px-6 text-center overflow-hidden">
+        <div class="max-w-4xl mx-auto">
+            <!-- 認證膠囊 -->
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-brand-400/30 text-brand-300 text-xs font-bold mb-6 shadow-sm shadow-brand-500/10">
+                <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                <span>為 Windows 10 / 11 深度打造 · 毫秒級快速預覽神器</span>
+            </div>
+
+            <!-- 主標題 -->
+            <h1 class="text-4xl sm:text-6xl font-black text-white tracking-tight leading-[1.18] mb-6">
+                選中檔案，按一下空白鍵<br class="hidden sm:inline">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-brand-400 via-sky-300 to-indigo-300">內容秒開，工作流絕不卡頓</span>
+            </h1>
+
+            <!-- 副標題 -->
+            <p class="text-base sm:text-xl text-slate-300 max-w-2xl mx-auto font-normal leading-relaxed mb-10">
+                不再為了確認內容反覆開啟笨重肥大的微軟 Office 或外部播放器。<br class="hidden sm:inline">
+                按一下 <kbd class="px-2 py-1 rounded bg-slate-800 border border-slate-700 font-mono-code text-brand-300 font-bold text-sm shadow">Space</kbd> 瞬間彈出，具備智慧避讓與側邊釘選，為高效專業工作者而生。
+            </p>
+
+            <!-- 下載按鈕組 -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+                <a href="https://github.com/ais7896-hue/KyteView/releases" id="download"
+                    class="w-full sm:w-auto px-8 py-4 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl shadow-xl shadow-brand-600/30 transition transform active:scale-95 flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-download text-lg"></i>
+                    <span>立即下載 Windows 安裝檔 (v1.0.0)</span>
+                </a>
+                <a href="#features"
+                    class="w-full sm:w-auto px-7 py-4 bg-slate-900/90 hover:bg-slate-800 text-slate-200 font-bold rounded-xl border border-white/10 shadow-sm transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-circle-play text-brand-400"></i>
+                    <span>探索全部殺手級功能</span>
+                </a>
+            </div>
+
+            <!-- 視窗預覽模擬互動器 (Interactive Mockup) -->
+            <div class="max-w-3xl mx-auto window-shadow dark-glass rounded-2xl p-0.5 text-left animate-float">
+                <div class="bg-slate-900/90 rounded-2xl overflow-hidden border border-white/10">
+                    
+                    <!-- 視窗工具列 (相仿真實 KyteView 工具列) -->
+                    <div class="h-11 px-4 bg-slate-950/70 border-b border-white/10 flex items-center justify-between">
+                        <!-- 左側檔名與標籤 -->
+                        <div class="flex items-center gap-2.5">
+                            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">第 8 / 16 個檔案</span>
+                            <span id="mock-filename" class="text-sm font-bold text-slate-100">季度財務分析簡報.pptx</span>
+                            <span id="mock-filesize" class="text-[11px] text-slate-400 font-medium">· PPTX · 4.8 MB</span>
+                        </div>
+                        <!-- 右側操作鈕群 -->
+                        <div class="flex items-center gap-2 text-slate-400 text-xs">
+                            <span class="px-2 py-1 rounded bg-slate-800 text-[10px] text-brand-300 font-bold cursor-pointer" title="釘選模式 (Tab)">◨ 釘選</span>
+                            <span class="hover:text-white cursor-pointer px-1">☼</span>
+                            <span class="hover:text-white cursor-pointer px-1">⚙</span>
+                            <span class="hover:text-rose-400 cursor-pointer px-1">✕</span>
+                        </div>
+                    </div>
+
+                    <!-- 互動切換 TAB 標籤 -->
+                    <div class="px-4 py-2 bg-slate-950/40 border-b border-white/5 flex items-center gap-2 overflow-x-auto text-xs">
+                        <span class="text-[11px] text-slate-500 font-bold mr-1">切換示範：</span>
+                        <button onclick="switchMockTab('pptx')" id="tab-pptx" class="mock-tab px-3 py-1 rounded-md bg-brand-600 text-white font-semibold transition">簡報 .pptx</button>
+                        <button onclick="switchMockTab('code')" id="tab-code" class="mock-tab px-3 py-1 rounded-md bg-slate-800 text-slate-400 hover:text-white transition">程式碼 .py</button>
+                        <button onclick="switchMockTab('archive')" id="tab-archive" class="mock-tab px-3 py-1 rounded-md bg-slate-800 text-slate-400 hover:text-white transition">壓縮包 .zip</button>
+                        <button onclick="switchMockTab('table')" id="tab-table" class="mock-tab px-3 py-1 rounded-md bg-slate-800 text-slate-400 hover:text-white transition">試算表 .xlsx</button>
+                        <button onclick="switchMockTab('video')" id="tab-video" class="mock-tab px-3 py-1 rounded-md bg-slate-800 text-slate-400 hover:text-white transition">4K 影音 .mp4</button>
+                    </div>
+
+                    <!-- 模擬展示主內容區 -->
+                    <div class="p-6 min-h-[300px] flex flex-col justify-between" id="mock-content">
+                        <!-- 預設 PPTX 視圖 -->
+                        <div id="view-pptx" class="mock-view">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="px-2.5 py-1 rounded bg-brand-500/15 text-brand-300 text-xs font-bold border border-brand-500/20">Slide 1 of 24</span>
+                                <span class="text-xs text-slate-400">16:9 橫向畫布 · 2~5ms 封面瞬開</span>
+                            </div>
+                            <div class="p-5 rounded-xl bg-slate-950/60 border border-white/5 space-y-3">
+                                <h3 class="text-lg font-bold text-white">2026 年度企業戰略規劃與 AI 技術落地</h3>
+                                <ul class="text-xs text-slate-300 space-y-2 list-disc list-inside">
+                                    <li>全面升級企業內部檔案管理工作流，減少 80% 檔案檢視切換損耗</li>
+                                    <li>結合本地端高精確硬體加速渲染，保障企業資料離線隱私安全</li>
+                                    <li>第一季完成全線桌面端部署，涵蓋業務、研發與財務部門</li>
+                                </ul>
+                            </div>
+                            <div class="mt-4 flex items-center justify-between text-xs text-slate-400">
+                                <span>💡 支援鍵盤左右鍵、PageUp/Down 與滾輪翻頁</span>
+                                <div class="px-3 py-1 rounded-full bg-slate-800/90 border border-white/10 flex items-center gap-3 text-white font-bold text-xs">
+                                    <span class="hover:text-brand-300 cursor-pointer">◀</span>
+                                    <span>Slide 1 / 24</span>
+                                    <span class="hover:text-brand-300 cursor-pointer">▶</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 程式碼 Code 視圖 (Hidden by default) -->
+                        <div id="view-code" class="mock-view hidden">
+                            <div class="flex items-center justify-between mb-3 text-xs text-slate-400">
+                                <span class="text-brand-300 font-mono-code font-bold">Python · UTF-8 · 128 行</span>
+                                <span>Pygments 語法高亮 · 智慧字元編碼識別</span>
+                            </div>
+                            <pre class="font-mono-code text-xs p-4 rounded-xl bg-slate-950/80 border border-white/5 text-slate-300 overflow-x-auto leading-relaxed"><span class="text-purple-400">from</span> pathlib <span class="text-purple-400">import</span> Path
+<span class="text-purple-400">from</span> core.preview_router <span class="text-purple-400">import</span> get_renderer
+
+<span class="text-blue-400">def</span> <span class="text-yellow-300">preview_instant</span>(file_path: Path) -> <span class="text-cyan-400">None</span>:
+    <span class="text-slate-500"># 毫秒級秒開：無感知彈出預覽視窗</span>
+    renderer = get_renderer(file_path)
+    widget = renderer.render(file_path)
+    window.show_smart_offset(widget)  <span class="text-slate-500"># 自動避讓檔案總管</span></pre>
+                        </div>
+
+                        <!-- 壓縮檔 Archive 視圖 (Hidden by default) -->
+                        <div id="view-archive" class="mock-view hidden">
+                            <div class="flex items-center justify-between mb-3 text-xs text-slate-400">
+                                <span class="text-xs text-slate-300 font-bold">🔍 即時搜尋過濾 · 支援直接拖曳抽出</span>
+                                <span class="text-emerald-400 font-bold">共 18 個項目 · 5ms 讀取中央目錄</span>
+                            </div>
+                            <div class="space-y-1.5 text-xs">
+                                <div class="p-2 rounded bg-slate-800/60 border border-white/5 flex items-center justify-between">
+                                    <div class="flex items-center gap-2"><i class="fa-solid fa-folder text-amber-400"></i><span class="font-semibold text-white">dist /</span></div>
+                                    <span class="text-slate-500">—</span>
+                                </div>
+                                <div class="p-2 rounded bg-slate-800/60 border border-white/5 flex items-center justify-between ml-4">
+                                    <div class="flex items-center gap-2"><i class="fa-solid fa-file-lines text-sky-400"></i><span class="text-slate-200">KyteView_v1.0.0.exe</span></div>
+                                    <span class="text-slate-400">42.5 MB (按住拖到桌面直接抽出)</span>
+                                </div>
+                                <div class="p-2 rounded bg-slate-800/60 border border-white/5 flex items-center justify-between ml-4">
+                                    <div class="flex items-center gap-2"><i class="fa-solid fa-file-code text-indigo-400"></i><span class="text-slate-200">README.md</span></div>
+                                    <span class="text-slate-400">5.8 KB (雙擊就地預覽)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 試算表 Table 視圖 (Hidden by default) -->
+                        <div id="view-table" class="mock-view hidden">
+                            <div class="flex items-center justify-between mb-3 text-xs text-slate-400">
+                                <span class="text-xs text-slate-300 font-bold">Sheet1 · 1,280 列資料</span>
+                                <span class="text-emerald-400 font-mono-code font-bold">python-calamine 極速虛擬滾動</span>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-xs text-left text-slate-300 border border-white/10">
+                                    <thead class="bg-slate-800/90 text-slate-200 font-bold">
+                                        <tr><th class="p-2 border-b border-white/10">訂單編號</th><th class="p-2 border-b border-white/10">客戶名稱</th><th class="p-2 border-b border-white/10 text-right">銷售金額</th><th class="p-2 border-b border-white/10">狀態</th></tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-white/5">
+                                        <tr><td class="p-2 font-mono-code text-brand-300">ORD-2026-001</td><td class="p-2">微軟台灣技術中心</td><td class="p-2 text-right font-mono-code">$ 248,000</td><td class="p-2 text-emerald-400 font-bold">已結案</td></tr>
+                                        <tr><td class="p-2 font-mono-code text-brand-300">ORD-2026-002</td><td class="p-2">聯發科硬體研發處</td><td class="p-2 text-right font-mono-code">$ 512,500</td><td class="p-2 text-amber-400 font-bold">履約中</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- 4K 影音 Video 視圖 (Hidden by default) -->
+                        <div id="view-video" class="mock-view hidden text-center py-6">
+                            <div class="w-16 h-16 rounded-full bg-brand-600/30 border border-brand-400/40 text-brand-300 flex items-center justify-center mx-auto mb-3 text-xl">
+                                <i class="fa-solid fa-play ml-1"></i>
+                            </div>
+                            <h4 class="text-sm font-bold text-white mb-1">奧萬大森林空拍展示_4K_60FPS.mp4</h4>
+                            <p class="text-xs text-slate-400 mb-4">WMF 微軟原生 GPU 硬體解碼 · 0% 額外 CPU 負擔 · 空白鍵暫停/播放</p>
+                            <div class="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden max-w-md mx-auto">
+                                <div class="w-2/5 h-full bg-gradient-to-r from-brand-500 to-cyan-400"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- 8 大核心特色 -->
+    <section id="features" class="py-24 px-6 max-w-6xl mx-auto">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+            <span class="text-brand-400 font-bold text-xs uppercase tracking-widest">WHY KYTEVIEW</span>
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-white mt-2">為 Windows 量身訂製的極致預覽</h2>
+            <p class="text-slate-400 text-sm sm:text-base mt-4">不僅是把 macOS QuickLook 搬到 Windows，更加入「單檔抽出」、「智慧避讓」、「側邊釘選」等諸多原版沒有的殺手級功能。</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            <!-- 特色 1 -->
+            <div class="p-6 rounded-2xl bg-slate-900/60 border border-white/10 card-glow transition flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 rounded-xl bg-brand-500/20 text-brand-300 flex items-center justify-center text-xl mb-4 border border-brand-500/30">
+                        <i class="fa-solid fa-bolt-lightning"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-white mb-2">50ms 內極速瞬開</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">僅讀取必要的中繼檔頭與 Central Directory，不消耗多餘記憶體，毫秒級秒開毫不猶豫。</p>
+                </div>
+                <span class="text-[11px] font-semibold text-brand-400 mt-4 block">零感延遲 · 極致流暢</span>
+            </div>
+
+            <!-- 特色 2 -->
+            <div class="p-6 rounded-2xl bg-slate-900/60 border border-white/10 card-glow transition flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 rounded-xl bg-cyan-500/20 text-cyan-300 flex items-center justify-center text-xl mb-4 border border-cyan-500/30">
+                        <i class="fa-solid fa-arrows-split-up-and-left"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-white mb-2">智慧避讓偏移</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">自動探測檔案總管視窗座標與最大化狀態，視窗自動偏移至對側，絕不遮擋目前選取清單。</p>
+                </div>
+                <span class="text-[11px] font-semibold text-cyan-400 mt-4 block">視線無阻 · 效率倍增</span>
+            </div>
+
+            <!-- 特色 3 -->
+            <div class="p-6 rounded-2xl bg-slate-900/60 border border-white/10 card-glow transition flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 rounded-xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-xl mb-4 border border-indigo-500/30">
+                        <i class="fa-solid fa-table-columns"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-white mb-2">側邊釘選模式 (Tab)</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">按下 Tab 鍵瞬間將預覽視窗固定於螢幕右側 1/3，搭配上下方向鍵快速連續檢閱大量文件。</p>
+                </div>
+                <span class="text-[11px] font-semibold text-indigo-400 mt-4 block">Split View · 連續瀏覽</span>
+            </div>
+
+            <!-- 特色 4 -->
+            <div class="p-6 rounded-2xl bg-slate-900/60 border border-white/10 card-glow transition flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center text-xl mb-4 border border-emerald-500/30">
+                        <i class="fa-solid fa-hand-holding-hand"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-white mb-2">單檔直接拖曳抽出</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">在 ZIP/7Z/RAR 樹狀圖中選取某個檔案，按住滑鼠左鍵直接拖到桌面！自動解壓，告別整包解壓縮。</p>
+                </div>
+                <span class="text-[11px] font-semibold text-emerald-400 mt-4 block">Drag & Drop Extract</span>
+            </div>
+
+            <!-- 特色 5 -->
+            <div class="p-6 rounded-2xl bg-slate-900/60 border border-white/10 card-glow transition flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center text-xl mb-4 border border-amber-500/30">
+                        <i class="fa-solid fa-file-powerpoint"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-white mb-2">PPTX 簡報免裝 Office</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">2~5ms 封面全彩預覽秒開！支援多頁投影片大綱要點瀏覽、16:9 比例畫布與底部翻頁膠囊。</p>
+                </div>
+                <span class="text-[11px] font-semibold text-amber-400 mt-4 block">專屬 16:9 比例畫布</span>
+            </div>
+
+            <!-- 特色 6 -->
+            <div class="p-6 rounded-2xl bg-slate-900/60 border border-white/10 card-glow transition flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 rounded-xl bg-rose-500/20 text-rose-300 flex items-center justify-center text-xl mb-4 border border-rose-500/30">
+                        <i class="fa-solid fa-film"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-white mb-2">微軟原生 GPU 影音硬解</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">調用微軟 Media Foundation 硬體解碼，零外部大型解碼套件依賴，4K 影片毫秒秒開且 CPU 佔用近乎 0。</p>
+                </div>
+                <span class="text-[11px] font-semibold text-rose-400 mt-4 block">WMF 硬體加速</span>
+            </div>
+
+            <!-- 特色 7 -->
+            <div class="p-6 rounded-2xl bg-slate-900/60 border border-white/10 card-glow transition flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 rounded-xl bg-sky-500/20 text-sky-300 flex items-center justify-center text-xl mb-4 border border-sky-500/30">
+                        <i class="fa-solid fa-eye"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-white mb-2">長按微透機制 (Peek)</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">預覽期間長按 Alt 或 Ctrl 鍵，視窗瞬間呈現 15% 半透明，直接穿透看清底層被遮住的內容。</p>
+                </div>
+                <span class="text-[11px] font-semibold text-sky-400 mt-4 block">半透明看穿背景</span>
+            </div>
+
+            <!-- 特色 8 -->
+            <div class="p-6 rounded-2xl bg-slate-900/60 border border-white/10 card-glow transition flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center text-xl mb-4 border border-purple-500/30">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-white mb-2">Windows 11 Mica 毛玻璃</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">調用 Windows 原生 DWM 屬性呈現 Mica/Acrylic 頂級材質，完美自適應深色與淺色風格。</p>
+                </div>
+                <span class="text-[11px] font-semibold text-purple-400 mt-4 block">沉浸式微圓角邊框</span>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 支援格式專區 -->
+    <section id="formats" class="py-20 px-6 bg-slate-900/40 border-y border-white/5">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <span class="text-brand-400 font-bold text-xs uppercase tracking-widest">FORMAT SUPPORT</span>
+                <h2 class="text-3xl font-extrabold text-white mt-2">支援幾乎所有日常工作檔案</h2>
+                <p class="text-slate-400 text-sm mt-3">原生高速解析，不必為了瞄一眼內容啟動肥大軟體。</p>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 text-center">
+                <div class="p-4 rounded-xl bg-slate-900/80 border border-white/5 hover:border-brand-500/40 transition">
+                    <i class="fa-solid fa-file-powerpoint text-2xl text-amber-400 mb-2"></i>
+                    <h4 class="text-xs font-bold text-white">簡報投影片</h4>
+                    <p class="text-[11px] text-slate-400 mt-1">.pptx, .ppt</p>
+                </div>
+                <div class="p-4 rounded-xl bg-slate-900/80 border border-white/5 hover:border-brand-500/40 transition">
+                    <i class="fa-solid fa-file-word text-2xl text-blue-400 mb-2"></i>
+                    <h4 class="text-xs font-bold text-white">Word 文件</h4>
+                    <p class="text-[11px] text-slate-400 mt-1">.docx, .doc</p>
+                </div>
+                <div class="p-4 rounded-xl bg-slate-900/80 border border-white/5 hover:border-brand-500/40 transition">
+                    <i class="fa-solid fa-file-excel text-2xl text-emerald-400 mb-2"></i>
+                    <h4 class="text-xs font-bold text-white">試算表格</h4>
+                    <p class="text-[11px] text-slate-400 mt-1">.xlsx, .csv, .tsv</p>
+                </div>
+                <div class="p-4 rounded-xl bg-slate-900/80 border border-white/5 hover:border-brand-500/40 transition">
+                    <i class="fa-solid fa-file-zipper text-2xl text-yellow-400 mb-2"></i>
+                    <h4 class="text-xs font-bold text-white">壓縮封裝</h4>
+                    <p class="text-[11px] text-slate-400 mt-1">.zip, .7z, .rar, .tar</p>
+                </div>
+                <div class="p-4 rounded-xl bg-slate-900/80 border border-white/5 hover:border-brand-500/40 transition">
+                    <i class="fa-solid fa-file-code text-2xl text-purple-400 mb-2"></i>
+                    <h4 class="text-xs font-bold text-white">程式代碼</h4>
+                    <p class="text-[11px] text-slate-400 mt-1">.py, .js, .cpp 50+種</p>
+                </div>
+                <div class="p-4 rounded-xl bg-slate-900/80 border border-white/5 hover:border-brand-500/40 transition">
+                    <i class="fa-solid fa-file-pdf text-2xl text-rose-400 mb-2"></i>
+                    <h4 class="text-xs font-bold text-white">PDF / 電子書</h4>
+                    <p class="text-[11px] text-slate-400 mt-1">.pdf, .md, .txt</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 對比表格 -->
+    <section id="compare" class="py-24 px-6 max-w-5xl mx-auto">
+        <div class="text-center max-w-2xl mx-auto mb-16">
+            <span class="text-brand-400 font-bold text-xs uppercase tracking-widest">COMPARISON</span>
+            <h2 class="text-3xl font-extrabold text-white mt-2">為什麼選擇 KyteView？</h2>
+            <p class="text-slate-400 text-sm mt-3">與 Windows 內建預覽窗格及原版 macOS QuickLook 深度對比</p>
+        </div>
+
+        <div class="overflow-x-auto rounded-2xl border border-white/10 shadow-xl bg-slate-900/50">
+            <table class="w-full text-left text-xs sm:text-sm">
+                <thead class="bg-slate-900 text-slate-300 font-bold border-b border-white/10">
+                    <tr>
+                        <th class="p-4 sm:p-5">功能比較維度</th>
+                        <th class="p-4 sm:p-5 text-brand-300 bg-brand-950/40">KyteView (本軟體)</th>
+                        <th class="p-4 sm:p-5 text-slate-400">Windows 原生預覽窗格</th>
+                        <th class="p-4 sm:p-5 text-slate-400">macOS 原版 QuickLook</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5 text-slate-300">
+                    <tr>
+                        <td class="p-4 font-semibold">開啟速度</td>
+                        <td class="p-4 font-bold text-brand-300 bg-brand-950/20">⚡ < 50ms 秒開瞬彈</td>
+                        <td class="p-4 text-slate-400">1~3 秒 (經常載入卡頓)</td>
+                        <td class="p-4 text-slate-300">約 100~200ms</td>
+                    </tr>
+                    <tr>
+                        <td class="p-4 font-semibold">壓縮檔單檔直接拖曳抽出</td>
+                        <td class="p-4 font-bold text-emerald-400 bg-brand-950/20">✅ 支援 (直接拖到桌面)</td>
+                        <td class="p-4 text-rose-400">❌ 不支援</td>
+                        <td class="p-4 text-rose-400">❌ 不支援 (僅能檢視)</td>
+                    </tr>
+                    <tr>
+                        <td class="p-4 font-semibold">視窗智慧避讓偏移</td>
+                        <td class="p-4 font-bold text-emerald-400 bg-brand-950/20">✅ 自動靠向對側不擋清單</td>
+                        <td class="p-4 text-slate-400">固定於右側佔用空間</td>
+                        <td class="p-4 text-slate-400">居中遮擋當前檔案</td>
+                    </tr>
+                    <tr>
+                        <td class="p-4 font-semibold">側邊分割釘選模式 (Tab)</td>
+                        <td class="p-4 font-bold text-emerald-400 bg-brand-950/20">✅ 支援 (右側 1/3 固定)</td>
+                        <td class="p-4 text-rose-400">❌ 無彈性</td>
+                        <td class="p-4 text-rose-400">❌ 需手動調整視窗</td>
+                    </tr>
+                    <tr>
+                        <td class="p-4 font-semibold">PPTX 簡報免裝 Office</td>
+                        <td class="p-4 font-bold text-emerald-400 bg-brand-950/20">✅ 封面瞬開 + 大綱翻頁</td>
+                        <td class="p-4 text-slate-400">需安裝完整 MS Office</td>
+                        <td class="p-4 text-slate-300">內建支援 (Keynote引擎)</td>
+                    </tr>
+                    <tr>
+                        <td class="p-4 font-semibold">長按微透機制 (Peek)</td>
+                        <td class="p-4 font-bold text-emerald-400 bg-brand-950/20">✅ 長按 Alt/Ctrl 15% 半透明</td>
+                        <td class="p-4 text-rose-400">❌ 不支援</td>
+                        <td class="p-4 text-rose-400">❌ 不支援</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- 快捷鍵地圖 -->
+    <section id="shortcuts" class="py-20 px-6 bg-slate-900/40 border-t border-white/5">
+        <div class="max-w-4xl mx-auto text-center">
+            <span class="text-brand-400 font-bold text-xs uppercase tracking-widest">SHORTCUTS</span>
+            <h2 class="text-3xl font-extrabold text-white mt-2">行雲流水的鍵盤操作</h2>
+            <p class="text-slate-400 text-sm mt-3 mb-12">雙手不離鍵盤，極致掌握所有預覽狀態。</p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-left">
+                <div class="p-4 rounded-xl bg-slate-900/90 border border-white/10 flex items-center justify-between">
+                    <span class="text-xs text-slate-300 font-medium">開啟 / 關閉預覽</span>
+                    <kbd class="px-2.5 py-1 rounded bg-slate-800 border border-slate-700 font-mono-code text-brand-300 font-bold text-xs">Space</kbd>
+                </div>
+                <div class="p-4 rounded-xl bg-slate-900/90 border border-white/10 flex items-center justify-between">
+                    <span class="text-xs text-slate-300 font-medium">側邊釘選模式</span>
+                    <kbd class="px-2.5 py-1 rounded bg-slate-800 border border-slate-700 font-mono-code text-brand-300 font-bold text-xs">Tab</kbd>
+                </div>
+                <div class="p-4 rounded-xl bg-slate-900/90 border border-white/10 flex items-center justify-between">
+                    <span class="text-xs text-slate-300 font-medium">看穿底層視窗</span>
+                    <kbd class="px-2.5 py-1 rounded bg-slate-800 border border-slate-700 font-mono-code text-brand-300 font-bold text-xs">長按 Alt/Ctrl</kbd>
+                </div>
+                <div class="p-4 rounded-xl bg-slate-900/90 border border-white/10 flex items-center justify-between">
+                    <span class="text-xs text-slate-300 font-medium">壓縮包巢狀返回</span>
+                    <kbd class="px-2.5 py-1 rounded bg-slate-800 border border-slate-700 font-mono-code text-brand-300 font-bold text-xs">Backspace</kbd>
+                </div>
+                <div class="p-4 rounded-xl bg-slate-900/90 border border-white/10 flex items-center justify-between">
+                    <span class="text-xs text-slate-300 font-medium">簡報/PDF 翻頁</span>
+                    <kbd class="px-2.5 py-1 rounded bg-slate-800 border border-slate-700 font-mono-code text-brand-300 font-bold text-xs">PageUp / Dn</kbd>
+                </div>
+                <div class="p-4 rounded-xl bg-slate-900/90 border border-white/10 flex items-center justify-between">
+                    <span class="text-xs text-slate-300 font-medium">偏好設定視窗</span>
+                    <kbd class="px-2.5 py-1 rounded bg-slate-800 border border-slate-700 font-mono-code text-brand-300 font-bold text-xs">Ctrl + ,</kbd>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 常見問答 (FAQ) -->
+    <section id="faq" class="py-24 px-6 max-w-3xl mx-auto">
+        <div class="text-center mb-16">
+            <span class="text-brand-400 font-bold text-xs uppercase tracking-widest">FAQ</span>
+            <h2 class="text-3xl font-extrabold text-white mt-2">常見問題解答</h2>
+        </div>
+
+        <div class="space-y-4">
+            <details class="p-5 rounded-xl bg-slate-900/70 border border-white/10 group" open>
+                <summary class="font-bold text-sm text-slate-200 cursor-pointer list-none flex items-center justify-between">
+                    <span>KyteView 支援哪些 Windows 作業系統？</span>
+                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 group-open:rotate-180 transition"></i>
+                </summary>
+                <p class="text-xs text-slate-400 leading-relaxed mt-3">
+                    KyteView 專為 64 位元 Windows 10 (1809 以上) 與最新 Windows 11 深度設計，完美原生支援深色模式（Dark Mode）、淺色模式以及 Windows 11 Mica / Acrylic 毛玻璃半透明材質。
+                </p>
+            </details>
+
+            <details class="p-5 rounded-xl bg-slate-900/70 border border-white/10 group">
+                <summary class="font-bold text-sm text-slate-200 cursor-pointer list-none flex items-center justify-between">
+                    <span>預覽 Word 或 PowerPoint 需要在電腦安裝微軟 Office 嗎？</span>
+                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 group-open:rotate-180 transition"></i>
+                </summary>
+                <p class="text-xs text-slate-400 leading-relaxed mt-3">
+                    完全不需要！KyteView 採用純原生輕量解析引擎，PPTX 透過內嵌縮圖 2~5ms 秒開並支援多頁大綱條列；DOCX 透過純 Python 輕量轉標準 HTML 渲染，即使電腦完全沒有安裝 Office 也能流暢秒開。
+                </p>
+            </details>
+
+            <details class="p-5 rounded-xl bg-slate-900/70 border border-white/10 group">
+                <summary class="font-bold text-sm text-slate-200 cursor-pointer list-none flex items-center justify-between">
+                    <span>防毒軟體或 Windows Defender 是否會誤報？</span>
+                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 group-open:rotate-180 transition"></i>
+                </summary>
+                <p class="text-xs text-slate-400 leading-relaxed mt-3">
+                    由於 KyteView 使用 Windows 底層低階鍵盤鉤子（Low-Level Keyboard Hook）監聽檔案總管中的空白鍵（Space），部分防毒軟體首次執行時可能會出現提示。KyteView 為純本地端離線運作工具，絕不連網傳輸您的任何個人檔案，請安心點擊允許。
+                </p>
+            </details>
+
+            <details class="p-5 rounded-xl bg-slate-900/70 border border-white/10 group">
+                <summary class="font-bold text-sm text-slate-200 cursor-pointer list-none flex items-center justify-between">
+                    <span>本軟體授權規範為何？商業使用需要購買嗎？</span>
+                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 group-open:rotate-180 transition"></i>
+                </summary>
+                <p class="text-xs text-slate-400 leading-relaxed mt-3">
+                    本專案原始碼採用 Personal & Non-Commercial License，僅供個人學習、研究與檢閱用途。未經授權禁止任何形式之商業用途、轉售或重新散布。商業使用或官方封裝版本請向原作者取得正式授權。
+                </p>
+            </details>
+        </div>
+    </section>
+
+    <!-- 頁尾 -->
+    <footer class="py-12 px-6 border-t border-white/10 text-center text-xs text-slate-500 bg-slate-950">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <img src="assets/icon.png" alt="KyteView" class="w-6 h-6 rounded-md">
+                <span class="font-bold text-slate-300">KyteView</span>
+                <span>— Windows 次世代極速檔案預覽神器</span>
+            </div>
+            <div class="flex items-center gap-6">
+                <a href="#features" class="hover:text-slate-300 transition">特色功能</a>
+                <a href="guide.html" class="hover:text-slate-300 transition">操作指南</a>
+                <a href="#shortcuts" class="hover:text-slate-300 transition">操作快捷鍵</a>
+                <a href="LICENSE" class="hover:text-slate-300 transition">授權條款 (License)</a>
+                <a href="https://github.com/ais7896-hue/KyteView" class="hover:text-slate-300 transition flex items-center gap-1">
+                    <i class="fa-brands fa-github text-sm"></i>
+                    <span>GitHub</span>
+                </a>
+            </div>
+        </div>
+        <div class="mt-8 text-[11px] text-slate-600">
+            Copyright &copy; 2026 ais7896-hue. All rights reserved. Personal & Non-Commercial License.
+        </div>
+    </footer>
+
+    <!-- Mockup 互動切換 JavaScript -->
+    <script>
+        function switchMockTab(type) {
+            // 切換按鈕樣式
+            document.querySelectorAll('.mock-tab').forEach(btn => {
+                btn.className = "mock-tab px-3 py-1 rounded-md bg-slate-800 text-slate-400 hover:text-white transition";
+            });
+            const activeBtn = document.getElementById('tab-' + type);
+            if (activeBtn) {
+                activeBtn.className = "mock-tab px-3 py-1 rounded-md bg-brand-600 text-white font-semibold transition";
+            }
+
+            // 切換視圖內容
+            document.querySelectorAll('.mock-view').forEach(view => {
+                view.classList.add('hidden');
+            });
+            const activeView = document.getElementById('view-' + type);
+            if (activeView) {
+                activeView.classList.remove('hidden');
+            }
+
+            // 更新工具列標題與大小
+            const titleEl = document.getElementById('mock-filename');
+            const sizeEl = document.getElementById('mock-filesize');
+            if (type === 'pptx') {
+                titleEl.textContent = '季度財務分析簡報.pptx';
+                sizeEl.textContent = '· PPTX · 4.8 MB';
+            } else if (type === 'code') {
+                titleEl.textContent = 'preview_router.py';
+                sizeEl.textContent = '· PY · 12.4 KB';
+            } else if (type === 'archive') {
+                titleEl.textContent = 'KyteView_Build_2026.zip';
+                sizeEl.textContent = '· ZIP · 36.2 MB';
+            } else if (type === 'table') {
+                titleEl.textContent = '2026年第一季銷售總表.xlsx';
+                sizeEl.textContent = '· XLSX · 840 KB';
+            } else if (type === 'video') {
+                titleEl.textContent = '奧萬大森林空拍展示_4K_60FPS.mp4';
+                sizeEl.textContent = '· MP4 · 128 MB';
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,45 @@
+# 更新日誌 (CHANGELOG)
+
+本專案遵循 [Semantic Versioning](https://semver.org/lang/zh-TW/) 規範。
+
+---
+
+## [1.0.0] - 2026-09-24
+
+### 🚀 新增功能 (Features)
+- **PowerPoint 簡報專屬預覽器 (PPTX / PPT)**：
+  - 封面縮圖極速秒開：優先讀取 `.pptx` 封裝包內建 `docProps/thumbnail.jpeg`，2~5ms 瞬開。
+  - 多頁投影片大綱要點瀏覽：使用輕量純 Python `python-pptx` 解析每頁標題、文字要點清單（Bullets）與插圖。
+  - 專屬 16:9 比例畫布：預覽視窗以橫向寬螢幕比例自適應開啟，兩側絕無黑邊。
+  - 底部懸浮翻頁膠囊（Page Navigator）：支援上一頁、下一頁按鈕，並支援 `PageUp` / `PageDown`、左右方向鍵及滾輪翻頁。
+  - 舊版二進位 `.ppt` 降級：優雅展示簡報屬性卡片，附帶「使用預設程式開啟」按鈕。
+- **全能壓縮檔瀏覽器 (Archive Browser)**：
+  - 支援格式：`.zip`, `.7z`, `.rar`, `.tar`, `.tar.gz`, `.tar.bz2`, `.tar.xz`, `.tgz`。
+  - 階梯式零依賴：`.zip` / `.tar.*` 秒讀中央目錄記錄（Central Directory），耗時低於 5ms，無需整包解壓。
+  - 支援 `.7z` 固實壓縮與單檔解壓（使用 `py7zr` 讀取檔頭）。
+  - **QTreeView 階層目錄樹**：展示名稱、原始大小、壓縮大小、修改日期，預設自動展開前 1~2 層。
+  - **即時過濾搜尋框**：頂部整合搜尋框，即時遞迴過濾匹配檔案。
+  - **殺手級單檔拖曳抽出 (Drag & Drop Extract)**：選中壓縮檔內部單一檔案，按住滑鼠左鍵可直接向外拖曳至桌面或檔案總管解壓複製。
+  - **巢狀就地預覽與返回**：在樹狀圖中按 `Enter` 或滑鼠雙擊就地切換成文字/圖片預覽；按 `Backspace` 或點擊工具列「⬅ 返回壓縮包」返回目錄樹。
+  - **防卡死機制**：遇到怪物壓縮包超過 1,000 項目時自動截斷並提示，保證毫秒級瞬開不卡死。
+- **Word 文件瀏覽器 (Docx Browser)**：
+  - 支援 `.docx` 與舊版 `.doc`：採用輕量 `mammoth` 轉換為標準 HTML 呈現，排版清晰且免裝微軟 Office。
+- **原生 GPU 硬體加速影音播放器 (Video Player)**：
+  - 採用 PySide6 原生 `QMediaPlayer` + `QVideoWidget`，調用 Windows Media Foundation (WMF) 硬體解碼。
+  - 空白鍵暫停/播放、左右鍵快轉、懸浮控制列自動隱藏、解析度動態等比例縮放。
+- **試算表格瀏覽器 (Table / Excel Browser)**：
+  - 支援 `.xlsx`, `.xls`, `.csv`, `.tsv`，採用 `python-calamine` 解析百萬行數據，滾動流暢。
+- **PDF 與 Markdown 預覽器**：
+  - PDF：`PyMuPDF` 向量高清渲染與平滑頁面導航。
+  - Markdown：`markdown-it-py` 支援標準 GFM 語法與美化主題樣式。
+- **程式碼語法高亮 (Code Browser)**：
+  - 支援 50+ 種程式語言、Pygments 語法高亮、智慧編碼偵測與行號。
+- **互動體驗與視窗管理**：
+  - **Windows 11 Mica / Acrylic 毛玻璃材質**：深色與淺色風格自適應，微圓角邊框。
+  - **智慧避讓偏移 (Smart Offsetting)**：自動偵測檔案總管位置，預覽視窗自動靠向對側，避免擋住選取的檔案。
+  - **快速側邊釘選模式 (Pin to Side / Split View)**：按 `Tab` 鍵將視窗釘選至螢幕右側 1/3。
+  - **長按微透機制 (Peek Through)**：長按 `Alt` 或 `Ctrl` 鍵視窗呈現 15% 半透明，直接看穿底層視窗。
+  - **現代偏好設定視窗**：支援切換深淺主題、視窗尺寸模式（固定、自適應、記憶）、智慧避讓開關、平滑縮小至 200x150 等。
+
+### 🎨 視覺與圖示
+- 新增現代幾何風箏與相機光圈交融之科技微光專屬應用程式圖示 `icon.ico` / `icon.png`。
