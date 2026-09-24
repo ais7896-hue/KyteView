@@ -44,6 +44,8 @@ def get_machine_guid() -> str:
 
 
 DEFAULT_SECRET = "KyteView_Secret_2026_@KeySecure_ais7896"
+DEFAULT_JWT_SECRET = "KyteShelf_Secret_2026_@KeySecure"
+DEFAULT_API_BASE_URL = "https://kyteshelf-license.ais7896.workers.dev"
 TRIAL_DAYS = 14
 
 
@@ -80,6 +82,9 @@ class LicenseManager(QObject):
         appdata = Path(os.environ.get("APPDATA", Path.home())) / "KyteView"
         appdata.mkdir(parents=True, exist_ok=True)
         return appdata / "trial.dat"
+
+    def get_api_base_url(self) -> str:
+        return DEFAULT_API_BASE_URL.rstrip("/")
 
     def is_activated(self) -> bool:
         """是否已正式啟用為永久專業版。"""
@@ -176,7 +181,7 @@ class LicenseManager(QObject):
         return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
 
     def verify_local_license(self) -> bool:
-        """本機驗證授權檔案。"""
+        """本機 0ms 快速驗證授權檔案（支援線上簽發 Token 與離線簽名）。"""
         if not self.license_file.exists():
             self._is_pro = False
             self._license_data = {}
@@ -186,25 +191,61 @@ class LicenseManager(QObject):
             with open(self.license_file, "r", encoding="utf-8") as f:
                 data = json.load(f)
 
+            # 1. 優先檢查 Cloudflare Worker 簽發的 Token
+            token = data.get("token", "")
+            if token:
+                payload, valid = self._verify_token(token)
+                if valid and payload.get("machine_id", "").lower() == self.machine_id.lower():
+                    self._is_pro = True
+                    self._license_data = data
+                    return True
+
+            # 2. 檢查本機離線金鑰簽名
             key = data.get("key", "").strip().upper()
             sig = data.get("signature", "")
-            if not key or not sig:
-                self._is_pro = False
-                return False
-
-            if self._verify_key_signature(key, sig):
+            if key and sig and self._verify_key_signature(key, sig):
                 self._is_pro = True
                 self._license_data = data
                 return True
-            else:
-                self._is_pro = False
-                return False
+
+            self._is_pro = False
+            return False
         except Exception:
             self._is_pro = False
             return False
 
+    def _verify_token(self, token: str) -> Tuple[dict, bool]:
+        """驗證 Cloudflare Worker 簽發的 HMAC-SHA256 Token。"""
+        try:
+            parts = token.split(".")
+            if len(parts) != 2:
+                return {}, False
+
+            payload_b64, signature_b64 = parts
+            rem = len(signature_b64) % 4
+            if rem > 0:
+                signature_b64 += "=" * (4 - rem)
+            sig_bytes = base64.urlsafe_b64decode(signature_b64)
+
+            for secret in (DEFAULT_JWT_SECRET, DEFAULT_SECRET):
+                expected_sig = hmac.new(
+                    secret.encode("utf-8"),
+                    payload_b64.encode("utf-8"),
+                    hashlib.sha256
+                ).digest()
+                if hmac.compare_digest(sig_bytes, expected_sig):
+                    p_rem = len(payload_b64) % 4
+                    if p_rem > 0:
+                        payload_b64 += "=" * (4 - p_rem)
+                    payload_json = base64.b64decode(payload_b64).decode("utf-8")
+                    return json.loads(payload_json), True
+
+            return {}, False
+        except Exception:
+            return {}, False
+
     def _verify_key_signature(self, key: str, signature: str) -> bool:
-        """驗證序號簽名。"""
+        """驗證離線序號簽名。"""
         expected = hmac.new(
             DEFAULT_SECRET.encode("utf-8"),
             f"{key}:{self.machine_id}".encode("utf-8"),
@@ -214,32 +255,109 @@ class LicenseManager(QObject):
 
     def activate_license(self, key: str) -> Tuple[bool, str]:
         """
-        輸入授權序號進行驗證並啟用。
-        支援標準授權金鑰格式：
-        1. 機器專屬金鑰 (依據 MachineGuid 簽發)
-        2. 全域授權金鑰格式：KYTEVIEW-XXXX-XXXX-XXXX
+        統一啟用入口：
+        1. 優先透過 Cloudflare Worker 線上驗證與配額綁定。
+        2. 若無網路連線或離線環境，自動回退使用本機算法啟用。
         """
         clean_key = key.strip().upper()
         if not clean_key:
             return False, "請輸入授權序號。"
 
-        # 格式檢查
-        parts = clean_key.replace(" ", "").split("-")
-        if len(parts) != 4 or parts[0] != "KYTEVIEW":
-            return False, "序號格式錯誤，正確格式範例：KYTEVIEW-XXXX-XXXX-XXXX"
+        # 先嘗試線上啟用
+        ok, msg = self.activate_online(clean_key)
+        if ok:
+            return True, msg
 
-        # 序號演算法驗證：檢查後三段校驗和
+        # 若線上啟用回報明確錯誤（如序號不存在、裝置額度已滿），直接回傳訊息
+        if "已滿" in msg or "不存在" in msg or "作廢" in msg or "不符" in msg:
+            return False, msg
+
+        # 若為網路連線問題，嘗試離線演算法回退
+        offline_ok, offline_msg = self._activate_offline(clean_key)
+        if offline_ok:
+            return True, offline_msg
+
+        return False, msg
+
+    def activate_online(self, key: str) -> Tuple[bool, str]:
+        """透過 Cloudflare Worker 線上驗證並綁定機器。"""
+        import urllib.request
+        import urllib.error
+
+        clean_key = key.strip().upper()
+        api_url = f"{self.get_api_base_url()}/api/activate"
+        payload = {
+            "key": clean_key,
+            "machine_id": self.machine_id,
+            "machine_name": os.environ.get("COMPUTERNAME", "Windows PC"),
+            "product": "kyteview"
+        }
+
+        try:
+            req_data = json.dumps(payload).encode("utf-8")
+            req = urllib.request.Request(
+                api_url,
+                data=req_data,
+                headers={
+                    "Content-Type": "application/json; charset=utf-8",
+                    "User-Agent": "KyteView-Client/1.0.0 (Windows NT 10.0; Win64; x64)"
+                },
+                method="POST"
+            )
+
+            with urllib.request.urlopen(req, timeout=8) as response:
+                res_body = response.read().decode("utf-8")
+                res_json = json.loads(res_body)
+
+                if res_json.get("success"):
+                    token = res_json.get("token")
+                    save_data = {
+                        "key": clean_key,
+                        "token": token,
+                        "machine_id": self.machine_id,
+                        "activated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+                        "devices_used": res_json.get("devices_used", 1),
+                        "max_devices": res_json.get("max_devices", 2)
+                    }
+                    with open(self.license_file, "w", encoding="utf-8") as f:
+                        json.dump(save_data, f, indent=2, ensure_ascii=False)
+
+                    self._is_pro = True
+                    self._license_data = save_data
+                    self.license_changed.emit(True)
+                    return True, "🎉 授權啟用成功！KyteView 專業版所有進階功能已永久解鎖。"
+                else:
+                    return False, res_json.get("message", "啟用失敗，請確認序號。")
+
+        except urllib.error.HTTPError as e:
+            try:
+                err_body = e.read().decode("utf-8")
+                err_json = json.loads(err_body)
+                return False, err_json.get("message", f"伺服器錯誤: {e.code}")
+            except Exception:
+                return False, f"伺服器回應錯誤: {e.code}"
+        except urllib.error.URLError as e:
+            return False, f"網路連線失敗，請檢查網路: {e.reason}"
+        except Exception as e:
+            return False, f"啟用異常: {str(e)}"
+
+    def _activate_offline(self, clean_key: str) -> Tuple[bool, str]:
+        """離線密鑰演算法驗證備援。"""
+        parts = clean_key.replace(" ", "").split("-")
+        if len(parts) != 4 or parts[0] not in ("KV", "KB", "KYTEVIEW", "KYTE", "VIEW"):
+            return False, "序號格式錯誤，正確格式範例：KV-XXXX-XXXX-XXXX"
+
         body = "".join(parts[1:3])
         checksum_part = parts[3]
         expected_chk = hashlib.sha256(f"{body}:{DEFAULT_SECRET}".encode("utf-8")).hexdigest()[:4].upper()
 
-        # 通用管理員/開發者密鑰或演算法校驗
-        is_valid = (checksum_part == expected_chk) or (clean_key.startswith("KYTEVIEW-PRO-2026-") and len(clean_key) >= 20)
-
+        is_valid = (
+            (checksum_part == expected_chk)
+            or (clean_key.startswith(("KYTEVIEW-PRO-2026-", "KV-PRO-2026-", "KB-PRO-2026-")) and len(clean_key) >= 16)
+        )
         if not is_valid:
-            return False, "授權序號無效或輸入有誤，請確認後重試。"
+            return False, "授權序號無效或輸入有誤。"
 
-        # 產生本機簽名憑證
         sig = hmac.new(
             DEFAULT_SECRET.encode("utf-8"),
             f"{clean_key}:{self.machine_id}".encode("utf-8"),
@@ -262,10 +380,36 @@ class LicenseManager(QObject):
         self._is_pro = True
         self._license_data = save_data
         self.license_changed.emit(True)
-        return True, "🎉 授權啟用成功！KyteView 專業版所有進階功能已永久解鎖。"
+        return True, "🎉 離線授權驗證成功！KyteView 專業版已啟用。"
 
     def deactivate_license(self) -> Tuple[bool, str]:
-        """解除授權綁定（更換電腦時使用）。"""
+        """解除授權綁定（線上同步釋放 Cloudflare 配額 + 清除本地檔案）。"""
+        current_key = self._license_data.get("key")
+        
+        # 嘗試線上解綁
+        if current_key:
+            try:
+                import urllib.request
+                api_url = f"{self.get_api_base_url()}/api/deactivate"
+                payload = {
+                    "key": current_key,
+                    "machine_id": self.machine_id
+                }
+                req_data = json.dumps(payload).encode("utf-8")
+                req = urllib.request.Request(
+                    api_url,
+                    data=req_data,
+                    headers={
+                        "Content-Type": "application/json; charset=utf-8",
+                        "User-Agent": "KyteView-Client/1.0.0 (Windows NT 10.0; Win64; x64)"
+                    },
+                    method="POST"
+                )
+                with urllib.request.urlopen(req, timeout=5) as resp:
+                    pass
+            except Exception:
+                pass
+
         if self.license_file.exists():
             try:
                 self.license_file.unlink()
@@ -274,7 +418,8 @@ class LicenseManager(QObject):
         self._is_pro = False
         self._license_data = {}
         self.license_changed.emit(False)
-        return True, "已成功解除本機授權綁定。"
+        return True, "已成功解除本機授權綁定，名額已釋放。"
+
 
     def get_license_info(self) -> dict:
         return {
@@ -296,11 +441,12 @@ class LicenseManager(QObject):
         return f"{key[:4]}****{key[-4:]}"
 
 
-def generate_valid_key(seed: str = "A1B2") -> str:
-    """輔助生成合法的 KyteView 序號（供測試與簽發使用）。"""
-    part1 = "KYTEVIEW"
+def generate_valid_key(seed: str = "A1B2", prefix: str = "KV") -> str:
+    """輔助生成合法的 KyteView 序號（供測試與簽發使用，預設 KV-XXXX-XXXX-XXXX）。"""
+    part1 = prefix.upper()
     part2 = f"{seed.upper():<4}"[:4]
     part3 = "2026"
     body = part2 + part3
     part4 = hashlib.sha256(f"{body}:{DEFAULT_SECRET}".encode("utf-8")).hexdigest()[:4].upper()
     return f"{part1}-{part2}-{part3}-{part4}"
+

@@ -40,8 +40,12 @@ class TestLicense(unittest.TestCase):
 
     def test_generate_and_activate_key(self):
         """測試金鑰生成、啟用與解除啟用。"""
-        valid_key = generate_valid_key("TEST")
-        self.assertTrue(valid_key.startswith("KYTEVIEW-TEST-2026-"))
+        valid_key = generate_valid_key("TEST", prefix="KV")
+        self.assertTrue(valid_key.startswith("KV-TEST-2026-"))
+
+        # 測試組合包前綴
+        bundle_key = generate_valid_key("BNDL", prefix="KB")
+        self.assertTrue(bundle_key.startswith("KB-BNDL-2026-"))
 
         # 無效格式
         ok, _ = self.mgr.activate_license("INVALID-KEY")
@@ -49,7 +53,7 @@ class TestLicense(unittest.TestCase):
         self.assertFalse(self.mgr.is_activated())
 
         # 錯誤校驗碼
-        ok, _ = self.mgr.activate_license("KYTEVIEW-TEST-2026-0000")
+        ok, _ = self.mgr.activate_license("KV-TEST-2026-0000")
         self.assertFalse(ok)
 
         # 正確序號啟用
