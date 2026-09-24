@@ -100,6 +100,14 @@ class _Toolbar(QWidget):
 
         layout.addLayout(left_box, 1)
 
+        # 授權方案膠囊徽章
+        self.btn_license = QPushButton("✨ 試用")
+        self.btn_license.setObjectName("btn_license")
+        self.btn_license.setFixedHeight(24)
+        self.btn_license.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_license.clicked.connect(parent.open_license_dialog)
+        layout.addWidget(self.btn_license)
+
         # 右側操作按鈕群（統一俐落單色字元）
         self.btn_pin = self._make_btn("◨", "快速側邊釘選模式 (Tab)")
         self.btn_pin.clicked.connect(parent.toggle_pin_mode)
@@ -135,6 +143,65 @@ class _Toolbar(QWidget):
         self.btn_theme.setText("☼" if is_dark else "☽")
         self.title.setStyleSheet(f"color: {c['title_color']}; font-weight: 600; font-size: 13px;")
         self.subtitle.setStyleSheet(f"color: {c['subtitle_color']}; font-size: 11px;")
+
+        # 更新授權方案徽章
+        from core.license import LicenseManager
+        lic = LicenseManager.get_instance()
+        plan = lic.get_plan_type()
+        if plan == "pro":
+            self.btn_license.setText("★ 專業版")
+            self.btn_license.setToolTip("KyteView 專業版已永久啟用")
+            self.btn_license.setStyleSheet("""
+                QPushButton#btn_license {
+                    background: rgba(245, 158, 11, 0.18);
+                    color: #fbbf24;
+                    font-size: 11px;
+                    font-weight: 700;
+                    border: 1px solid rgba(245, 158, 11, 0.4);
+                    border-radius: 12px;
+                    padding: 0 8px;
+                }
+                QPushButton#btn_license:hover {
+                    background: rgba(245, 158, 11, 0.28);
+                }
+            """)
+        elif plan == "trial":
+            days = lic.get_trial_days_left()
+            self.btn_license.setText(f"✨ 試用剩 {days} 天")
+            self.btn_license.setToolTip(f"14 天全功能試用中 (剩餘 {days} 天)，點擊管理授權")
+            self.btn_license.setStyleSheet("""
+                QPushButton#btn_license {
+                    background: rgba(99, 102, 241, 0.15);
+                    color: #818cf8;
+                    font-size: 11px;
+                    font-weight: 600;
+                    border: 1px solid rgba(99, 102, 241, 0.35);
+                    border-radius: 12px;
+                    padding: 0 8px;
+                }
+                QPushButton#btn_license:hover {
+                    background: rgba(99, 102, 241, 0.25);
+                }
+            """)
+        else:
+            self.btn_license.setText("🔒 免費版")
+            self.btn_license.setToolTip("試用期已結束，點擊輸入序號解鎖專業版進階功能")
+            self.btn_license.setStyleSheet("""
+                QPushButton#btn_license {
+                    background: rgba(148, 163, 184, 0.15);
+                    color: #94a3b8;
+                    font-size: 11px;
+                    font-weight: 600;
+                    border: 1px solid rgba(148, 163, 184, 0.3);
+                    border-radius: 12px;
+                    padding: 0 8px;
+                }
+                QPushButton#btn_license:hover {
+                    background: rgba(99, 102, 241, 0.2);
+                    color: #818cf8;
+                    border-color: #818cf8;
+                }
+            """)
 
         badge_bg = "rgba(255, 255, 255, 0.08)" if is_dark else "rgba(0, 0, 0, 0.06)"
         badge_c = "#a1a1aa" if is_dark else "#71717a"
@@ -248,7 +315,11 @@ class PreviewWindow(QWidget):
         self._last_index_info: str = ""
         self._last_breadcrumb: str = ""
         self._settings_dialog = None
+        self._license_dialog = None
         self._history_stack: list[tuple[Optional[Path], str, str]] = []
+
+        from core.license import LicenseManager
+        LicenseManager.get_instance().license_changed.connect(self._on_license_changed)
 
         self._build_ui()
         self.apply_theme()
@@ -299,7 +370,10 @@ class PreviewWindow(QWidget):
     def apply_theme(self) -> None:
         c = get_theme_colors()
         is_dark = settings.is_dark()
-        bg_style = c['window_bg'] if settings.enable_acrylic else ("#18181b" if is_dark else "#ffffff")
+        from core.license import LicenseManager
+        is_unlimited = LicenseManager.get_instance().is_unlimited()
+        use_acrylic = settings.enable_acrylic and is_unlimited
+        bg_style = c['window_bg'] if use_acrylic else ("#18181b" if is_dark else "#ffffff")
         scroll_handle_bg = "rgba(255, 255, 255, 0.2)" if is_dark else "rgba(0, 0, 0, 0.18)"
         scroll_handle_hover = "rgba(255, 255, 255, 0.38)" if is_dark else "rgba(0, 0, 0, 0.35)"
 
@@ -382,10 +456,29 @@ class PreviewWindow(QWidget):
         self._settings_dialog.raise_()
         self._settings_dialog.activateWindow()
 
+    def open_license_dialog(self) -> None:
+        """開啟授權管理與專業版啟用視窗。"""
+        from ui.license_dialog import LicenseDialog
+        if getattr(self, "_license_dialog", None) is None:
+            self._license_dialog = LicenseDialog(self)
+        else:
+            self._license_dialog.refresh_ui_state()
+        self._license_dialog.show()
+        self._license_dialog.raise_()
+        self._license_dialog.activateWindow()
+
+    def _on_license_changed(self, is_activated: bool) -> None:
+        self.apply_theme()
+        if self.isVisible() and self._current_path:
+            self.refresh()
+
     # ── 新增進階互動模式 ──────────────────────────────────────────────────────
 
     def set_peek_through(self, enabled: bool) -> None:
-        """長按 Alt/Ctrl 微透機制：半透明 0.15 看穿背景。"""
+        """長按 Alt/Ctrl 微透機制：半透明 0.15 看穿背景（專業版/試用期專屬）。"""
+        from core.license import LicenseManager
+        if not LicenseManager.get_instance().is_unlimited():
+            return
         if not settings.enable_peek:
             return
         self.setWindowOpacity(0.15 if enabled else 1.0)
@@ -401,7 +494,11 @@ class PreviewWindow(QWidget):
             self.apply_theme()
 
     def toggle_pin_mode(self) -> None:
-        """快速側邊釘選模式切換 (Tab)。"""
+        """快速側邊釘選模式切換 (Tab)（專業版/試用期專屬）。"""
+        from core.license import LicenseManager
+        if not LicenseManager.get_instance().is_unlimited():
+            self.open_license_dialog()
+            return
         if not settings.enable_pin_dock:
             return
         self._is_pinned = not self._is_pinned
@@ -740,7 +837,8 @@ class PreviewWindow(QWidget):
         self.setWindowOpacity(1.0)
         self.show()
         self.raise_()
-        if settings.enable_acrylic:
+        from core.license import LicenseManager
+        if settings.enable_acrylic and LicenseManager.get_instance().is_unlimited():
             _apply_acrylic(int(self.winId()))
 
     def resizeEvent(self, event) -> None:

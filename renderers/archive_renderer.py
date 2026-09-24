@@ -241,8 +241,34 @@ class ArchiveBrowserWidget(QWidget):
         self._search_edit.textChanged.connect(self._on_search_changed)
         top_bar.addWidget(self._search_edit, 1)
 
-        lbl_drag_hint = QLabel("💡 支援選中檔案直接拖曳抽出")
-        lbl_drag_hint.setStyleSheet("color: #71717a; font-size: 11px;")
+        from core.license import LicenseManager
+        is_pro = LicenseManager.get_instance().is_unlimited()
+
+        if is_pro:
+            lbl_drag_hint = QLabel("💡 支援選中檔案直接拖曳抽出")
+            lbl_drag_hint.setStyleSheet("color: #71717a; font-size: 11px;")
+        else:
+            lbl_drag_hint = QPushButton("🔒 拖曳抽出與巢狀預覽 (點擊解鎖)")
+            lbl_drag_hint.setCursor(Qt.CursorShape.PointingHandCursor)
+            lbl_drag_hint.setStyleSheet("""
+                QPushButton {
+                    color: #818cf8;
+                    font-size: 11px;
+                    font-weight: 600;
+                    background: transparent;
+                    border: none;
+                    text-decoration: underline;
+                }
+                QPushButton:hover {
+                    color: #a5b4fc;
+                }
+            """)
+            def _open_lic():
+                from ui.license_dialog import LicenseDialog
+                dlg = LicenseDialog(self)
+                dlg.exec()
+            lbl_drag_hint.clicked.connect(_open_lic)
+
         top_bar.addWidget(lbl_drag_hint)
         layout.addLayout(top_bar)
 
@@ -456,6 +482,21 @@ class ArchiveBrowserWidget(QWidget):
 
     def start_drag_extract(self) -> None:
         """單檔拖曳抽出核心：使用者拖動樹狀項目，直接將單檔拖到 Windows 桌面或資料夾。"""
+        from core.license import LicenseManager
+        if not LicenseManager.get_instance().is_unlimited():
+            from PySide6.QtWidgets import QMessageBox
+            reply = QMessageBox.information(
+                self,
+                "專業版專屬功能",
+                "「單檔直接拖曳抽出」為 KyteView 專業版專屬功能。\n升級專業版即可直接拖曳壓縮檔內單一檔案至桌面或資料夾，省去整包解壓縮的繁瑣步驟！",
+                QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Open,
+            )
+            if reply == QMessageBox.StandardButton.Open:
+                from ui.license_dialog import LicenseDialog
+                dlg = LicenseDialog(self)
+                dlg.exec()
+            return
+
         selected = self._get_selected_entry_info()
         if not selected or selected[1]:  # 是目錄則忽略
             return
@@ -473,6 +514,21 @@ class ArchiveBrowserWidget(QWidget):
 
     def _on_item_double_clicked(self, index: QModelIndex) -> None:
         """雙擊檔案觸發就地巢狀預覽。"""
+        from core.license import LicenseManager
+        if not LicenseManager.get_instance().is_unlimited():
+            from PySide6.QtWidgets import QMessageBox
+            reply = QMessageBox.information(
+                self,
+                "專業版專屬功能",
+                "壓縮包「巢狀就地預覽」為 KyteView 專業版專屬功能。\n升級專業版即可就地檢視壓縮包內部的文字、代碼與圖片，並可一鍵返回目錄樹！",
+                QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Open,
+            )
+            if reply == QMessageBox.StandardButton.Open:
+                from ui.license_dialog import LicenseDialog
+                dlg = LicenseDialog(self)
+                dlg.exec()
+            return
+
         selected = self._get_selected_entry_info()
         if not selected or selected[1]:
             return

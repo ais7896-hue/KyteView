@@ -106,6 +106,23 @@ class PdfRenderer(BaseRenderer):
         def show_page(page_idx: int):
             if not self._doc:
                 return
+
+            from core.license import LicenseManager
+            is_pro = LicenseManager.get_instance().is_unlimited()
+            if not is_pro and page_idx >= 3:
+                from PySide6.QtWidgets import QMessageBox
+                reply = QMessageBox.information(
+                    container,
+                    "專業版專屬功能",
+                    "免費版支援前 3 頁 PDF 預覽。\n升級至專業版即可無限制翻閱完整合約、報告與電子書！",
+                    QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Open,
+                )
+                if reply == QMessageBox.StandardButton.Open:
+                    from ui.license_dialog import LicenseDialog
+                    dlg = LicenseDialog(container)
+                    dlg.exec()
+                return
+
             page_idx = max(0, min(page_idx, self._total_pages - 1))
             self._current_page = page_idx
             page = self._doc[page_idx]

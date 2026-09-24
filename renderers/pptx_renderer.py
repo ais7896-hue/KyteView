@@ -528,6 +528,180 @@ class PptxBrowserWidget(QWidget):
             super().wheelEvent(event)
 
 
+def _extract_pptx_meta(path: Path) -> dict:
+    meta = {
+        "creator": "未知",
+        "modified": "未知",
+        "created": "未知",
+        "slides": "未知",
+    }
+    try:
+        with zipfile.ZipFile(path, "r") as zf:
+            nl = zf.namelist()
+            if "docProps/core.xml" in nl:
+                root = ET.fromstring(zf.read("docProps/core.xml"))
+                for elem in root.iter():
+                    tag = elem.tag.lower()
+                    if tag.endswith("creator") and elem.text:
+                        meta["creator"] = elem.text.strip()
+                    elif tag.endswith("created") and elem.text:
+                        meta["created"] = elem.text.replace("T", " ").replace("Z", "")[:19]
+                    elif tag.endswith("modified") and elem.text:
+                        meta["modified"] = elem.text.replace("T", " ").replace("Z", "")[:19]
+            if "docProps/app.xml" in nl:
+                root = ET.fromstring(zf.read("docProps/app.xml"))
+                for elem in root.iter():
+                    tag = elem.tag.lower()
+                    if tag.endswith("slides") and elem.text:
+                        meta["slides"] = elem.text.strip()
+    except Exception:
+        pass
+    return meta
+
+
+class _PptxProCardWidget(QWidget):
+    """免費版降級模式：顯示封面縮圖、簡報屬性卡片（頁數、作者、時間）與專業版解鎖引導。"""
+    def __init__(self, path: Path, parent: Optional[QWidget] = None) -> None:
+        super().__init__(parent)
+        self._path = path
+        layout = QVBoxLayout(self)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.setSpacing(12)
+
+        is_dark = settings.is_dark()
+        c = get_theme_colors()
+
+        # 1. 嘗試載入封面縮圖
+        thumb_bytes = _extract_thumbnail(path)
+        if thumb_bytes:
+            qimg = QImage.fromData(thumb_bytes)
+            if not qimg.isNull():
+                lbl_thumb = QLabel()
+                pix = QPixmap.fromImage(qimg)
+                lbl_thumb.setPixmap(pix.scaled(440, 248, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+                lbl_thumb.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                lbl_thumb.setStyleSheet("""
+                    QLabel {
+                        border: 1px solid rgba(255, 255, 255, 0.12);
+                        border-radius: 8px;
+                        background: #000000;
+                    }
+                """)
+                layout.addWidget(lbl_thumb)
+            else:
+                lbl_icon = QLabel("📊")
+                lbl_icon.setFont(QFont("Segoe UI Emoji", 40))
+                lbl_icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                layout.addWidget(lbl_icon)
+        else:
+            lbl_icon = QLabel("📊")
+            lbl_icon.setFont(QFont("Segoe UI Emoji", 40))
+            lbl_icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            layout.addWidget(lbl_icon)
+
+        title_lbl = QLabel(path.name)
+        title_lbl.setFont(QFont("Segoe UI", 12, QFont.Weight.Bold))
+        title_lbl.setStyleSheet(f"color: {c.text};")
+        title_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(title_lbl)
+
+        meta = _extract_pptx_meta(path)
+        try:
+            size_kb = path.stat().st_size / 1024
+            size_str = f"{size_kb:.1f} KB" if size_kb < 1024 else f"{size_kb/1024:.1f} MB"
+        except Exception:
+            size_str = "未知大小"
+
+        card = QFrame()
+        card.setFixedWidth(380)
+        card_bg = "rgba(255, 255, 255, 0.04)" if is_dark else "rgba(0, 0, 0, 0.03)"
+        card_border = "rgba(255, 255, 255, 0.08)" if is_dark else "rgba(0, 0, 0, 0.08)"
+        card.setStyleSheet(f"""
+            QFrame {{
+                background: {card_bg};
+                border: 1px solid {card_border};
+                border-radius: 8px;
+                padding: 10px 16px;
+            }}
+        """)
+        c_layout = QVBoxLayout(card)
+        c_layout.setSpacing(6)
+
+        def add_row(k: str, v: str):
+            row = QHBoxLayout()
+            lbl_k = QLabel(k)
+            lbl_k.setStyleSheet(f"color: {c.text_secondary}; font-size: 11px;")
+            lbl_v = QLabel(v)
+            lbl_v.setStyleSheet(f"color: {c.text}; font-size: 11px; font-weight: 500;")
+            lbl_v.setAlignment(Qt.AlignmentFlag.AlignRight)
+            row.addWidget(lbl_k)
+            row.addWidget(lbl_v)
+            c_layout.addLayout(row)
+
+        add_row("簡報大小", size_str)
+        if meta["slides"] != "未知":
+            add_row("投影片張數", f"{meta['slides']} 頁")
+        if meta["creator"] != "未知":
+            add_row("建立者", meta["creator"])
+        if meta["modified"] != "未知":
+            add_row("最後修改", meta["modified"])
+
+        layout.addWidget(card)
+
+        # 專業版提示橫條
+        tip_lbl = QLabel("🔒 多頁投影片翻頁與大綱解析為專業版專屬功能，免費版提供封面與屬性預覽")
+        tip_lbl.setStyleSheet(f"color: {c.text_secondary}; font-size: 11px;")
+        tip_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(tip_lbl)
+
+        btn_box = QHBoxLayout()
+        btn_box.setSpacing(10)
+        btn_box.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        btn_unlock = QPushButton("★ 解鎖完整簡報多頁翻閱")
+        btn_unlock.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_unlock.setFixedHeight(32)
+        btn_unlock.setStyleSheet("""
+            QPushButton {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #d97706, stop:1 #f59e0b);
+                color: #ffffff;
+                font-weight: 600;
+                font-size: 11px;
+                border-radius: 6px;
+                padding: 4px 16px;
+                border: none;
+            }
+            QPushButton:hover {
+                background: #b45309;
+            }
+        """)
+        from ui.license_dialog import show_license_dialog
+        btn_unlock.clicked.connect(lambda: show_license_dialog(self.window()))
+        btn_box.addWidget(btn_unlock)
+
+        btn_open = QPushButton("↗ 系統預設程式開啟")
+        btn_open.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_open.setFixedHeight(32)
+        btn_open_bg = "rgba(255, 255, 255, 0.08)" if is_dark else "rgba(0, 0, 0, 0.06)"
+        btn_open.setStyleSheet(f"""
+            QPushButton {{
+                background: {btn_open_bg};
+                color: {c.text};
+                font-size: 11px;
+                border-radius: 6px;
+                padding: 4px 14px;
+                border: 1px solid {card_border};
+            }}
+            QPushButton:hover {{
+                background: rgba(255, 255, 255, 0.14);
+            }}
+        """)
+        btn_open.clicked.connect(lambda: os.startfile(str(path)))
+        btn_box.addWidget(btn_open)
+
+        layout.addLayout(btn_box)
+
+
 # ── Renderer 接口 ─────────────────────────────────────────────────────────────
 class PptxRenderer(BaseRenderer):
     """PowerPoint 簡報渲染器。"""
@@ -536,6 +710,11 @@ class PptxRenderer(BaseRenderer):
 
     def render(self, path: Path) -> QWidget:
         suffix = path.suffix.lower()
+        from core.license import LicenseManager
+        if not LicenseManager.get_instance().is_unlimited():
+            self._current_widget = _PptxProCardWidget(path)
+            return self._current_widget
+
         if suffix == ".ppt":
             self._current_widget = _PptLegacyWidget(path)
         else:
@@ -544,3 +723,4 @@ class PptxRenderer(BaseRenderer):
 
     def cleanup(self) -> None:
         self._current_widget = None
+

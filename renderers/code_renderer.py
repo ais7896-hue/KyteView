@@ -155,7 +155,15 @@ def _build_html(code: str, path: Path) -> str:
             style=fallback_style,
             linespans="line",
         )
-    pygments_css = formatter.get_style_defs(".highlight")
+    from core.license import LicenseManager
+    is_pro = LicenseManager.get_instance().is_unlimited()
+
+    if not is_pro:
+        # 免費降級模式：無語法著色黑白純文字呈現
+        pygments_css = ".highlight * { color: inherit !important; background: transparent !important; }"
+    else:
+        pygments_css = formatter.get_style_defs(".highlight")
+
     full_css = css_template.replace("/*PYGMENTS_CSS*/", pygments_css)
     highlighted = highlight(code, lexer, formatter)
 
@@ -252,7 +260,83 @@ class CodeRenderer(BaseRenderer):
                 background: transparent;
             }}
         """)
+        from core.license import LicenseManager
+        is_pro = LicenseManager.get_instance().is_unlimited()
+
+        # 頂部小工具列（複製純代碼）
+        code_top = QWidget()
+        code_top_layout = QHBoxLayout(code_top)
+        code_top_layout.setContentsMargins(12, 4, 12, 4)
+        code_top_layout.addStretch()
+
+        btn_copy_code = QPushButton("📋 複製純代碼" if is_pro else "🔒 複製純代碼")
+        btn_copy_code.setFixedHeight(22)
+        btn_copy_code.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_copy_code.setStyleSheet(f"""
+            QPushButton {{
+                background: {'rgba(99, 102, 241, 0.15)' if is_pro else 'rgba(148, 163, 184, 0.15)'};
+                color: {'#818cf8' if is_pro else '#94a3b8'};
+                font-size: 11px;
+                font-weight: 600;
+                padding: 0 8px;
+                border-radius: 4px;
+                border: 1px solid {'rgba(99, 102, 241, 0.3)' if is_pro else 'rgba(148, 163, 184, 0.25)'};
+            }}
+            QPushButton:hover {{
+                background: {'#6366f1' if is_pro else 'rgba(99, 102, 241, 0.2)'};
+                color: #ffffff;
+            }}
+        """)
+
+        def _on_copy_code():
+            if is_pro:
+                src_text, _, _ = self._read_source(path)
+                QApplication.clipboard().setText(src_text)
+                btn_copy_code.setText("✓ 已複製代碼")
+            else:
+                from PySide6.QtWidgets import QMessageBox
+                reply = QMessageBox.information(
+                    container,
+                    "專業版專屬功能",
+                    "程式碼語法高亮與快速複製為 KyteView 專業版專屬功能。\n一次買斷即可永久享受 500+ 種語言語法著色與無限制複製！",
+                    QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Open,
+                )
+                if reply == QMessageBox.StandardButton.Open:
+                    from ui.license_dialog import LicenseDialog
+                    dlg = LicenseDialog(container)
+                    dlg.exec()
+
+        btn_copy_code.clicked.connect(_on_copy_code)
+        code_top_layout.addWidget(btn_copy_code)
+        layout.addWidget(code_top)
+
         layout.addWidget(browser)
+
+        if not is_pro:
+            banner_pro = QPushButton("🔒 免費版僅支援無顏色純文字 ｜ 點擊輸入序號解鎖 500+ 語言語法著色與快速複製")
+            banner_pro.setCursor(Qt.CursorShape.PointingHandCursor)
+            banner_pro.setStyleSheet("""
+                QPushButton {
+                    background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #1e1b4b, stop:1 #312e81);
+                    color: #c7d2fe;
+                    font-size: 11px;
+                    font-weight: 600;
+                    padding: 6px 12px;
+                    border: none;
+                    border-top: 1px solid rgba(99, 102, 241, 0.3);
+                    text-align: center;
+                }
+                QPushButton:hover {
+                    color: #ffffff;
+                    background: #4338ca;
+                }
+            """)
+            def _open_lic():
+                from ui.license_dialog import LicenseDialog
+                dlg = LicenseDialog(container)
+                dlg.exec()
+            banner_pro.clicked.connect(_open_lic)
+            layout.addWidget(banner_pro)
 
         if truncated:
             bar = QLabel(

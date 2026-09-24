@@ -101,6 +101,10 @@ class TableRenderer(BaseRenderer):
         encoding, delimiter = self._detect_csv_format(path)
 
         rows: list[list[str]] = []
+        from core.license import LicenseManager
+        is_pro = LicenseManager.get_instance().is_unlimited()
+        row_limit = MAX_TABLE_ROWS if is_pro else 10
+
         try:
             with path.open("r", encoding=encoding, errors="replace", newline="") as f:
                 reader = csv.reader(f, delimiter=delimiter)
@@ -108,7 +112,7 @@ class TableRenderer(BaseRenderer):
                     # 過濾空行
                     if not any(cell.strip() for cell in row):
                         continue
-                    if len(rows) >= MAX_TABLE_ROWS:
+                    if len(rows) >= row_limit:
                         break
                     rows.append([c.strip() for c in row[:MAX_TABLE_COLS]])
         except Exception as e:
@@ -133,6 +137,33 @@ class TableRenderer(BaseRenderer):
 
         table_view = self._create_table_view(headers, data_rows)
         layout.addWidget(table_view)
+
+        if not is_pro:
+            from PySide6.QtWidgets import QPushButton
+            banner_table = QPushButton("🔒 已顯示前 10 行預覽 ｜ 點擊輸入序號解鎖完整試算表")
+            banner_table.setCursor(Qt.CursorShape.PointingHandCursor)
+            banner_table.setStyleSheet("""
+                QPushButton {
+                    background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #1e1b4b, stop:1 #312e81);
+                    color: #c7d2fe;
+                    font-size: 11px;
+                    font-weight: 600;
+                    padding: 6px 12px;
+                    border: none;
+                    border-top: 1px solid rgba(99, 102, 241, 0.3);
+                    text-align: center;
+                }
+                QPushButton:hover {
+                    color: #ffffff;
+                    background: #4338ca;
+                }
+            """)
+            def _open_lic():
+                from ui.license_dialog import LicenseDialog
+                dlg = LicenseDialog(container)
+                dlg.exec()
+            banner_table.clicked.connect(_open_lic)
+            layout.addWidget(banner_table)
 
         # 底部統計
         stat = QLabel(
@@ -241,7 +272,11 @@ class TableRenderer(BaseRenderer):
                 content_layout.addWidget(QLabel("此工作表為空"))
                 return
 
-            preview_data = raw_data[:MAX_TABLE_ROWS]
+            from core.license import LicenseManager
+            is_pro = LicenseManager.get_instance().is_unlimited()
+            row_limit = (MAX_TABLE_ROWS + 1) if is_pro else 11
+
+            preview_data = raw_data[:row_limit]
             first_row = preview_data[0]
             headers = [
                 str(c) if c is not None and str(c).strip() else f"Col {j + 1}"
@@ -256,6 +291,33 @@ class TableRenderer(BaseRenderer):
 
             t_view = self._create_table_view(headers, rows)
             content_layout.addWidget(t_view)
+
+            if not is_pro and len(raw_data) > 11:
+                from PySide6.QtWidgets import QPushButton
+                banner_excel = QPushButton("🔒 已顯示前 10 行預覽 ｜ 點擊輸入序號解鎖完整試算表")
+                banner_excel.setCursor(Qt.CursorShape.PointingHandCursor)
+                banner_excel.setStyleSheet("""
+                    QPushButton {
+                        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #1e1b4b, stop:1 #312e81);
+                        color: #c7d2fe;
+                        font-size: 11px;
+                        font-weight: 600;
+                        padding: 6px 12px;
+                        border: none;
+                        border-top: 1px solid rgba(99, 102, 241, 0.3);
+                        text-align: center;
+                    }
+                    QPushButton:hover {
+                        color: #ffffff;
+                        background: #4338ca;
+                    }
+                """)
+                def _open_lic():
+                    from ui.license_dialog import LicenseDialog
+                    dlg = LicenseDialog(container)
+                    dlg.exec()
+                banner_excel.clicked.connect(_open_lic)
+                content_layout.addWidget(banner_excel)
 
             info = QLabel(
                 f"工作表: {sheet.name} · 預覽 {len(rows)} 列 · 共 {max_col} 欄 (總行數: {sheet.total_height})"
