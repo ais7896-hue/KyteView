@@ -34,6 +34,7 @@ Write-Host "`n>>> [2/3] 正在執行 PyInstaller 編譯 (無黑窗、獨立目�
     --name "KyteView" `
     --icon "assets/icon.ico" `
     --add-data "assets;assets" `
+    --collect-all "pygments" `
     --hidden-import "py7zr" `
     --hidden-import "mammoth" `
     --hidden-import "pptx" `
@@ -42,9 +43,12 @@ Write-Host "`n>>> [2/3] 正在執行 PyInstaller 編譯 (無黑窗、獨立目�
     --hidden-import "miniaudio" `
     --hidden-import "calamine" `
     --hidden-import "python_calamine" `
-    --hidden-import "pygments" `
     --hidden-import "markdown_it" `
     --hidden-import "win32timezone" `
+    --hidden-import "PySide6.QtSvg" `
+    --hidden-import "PySide6.QtSvgWidgets" `
+    --hidden-import "PySide6.QtMultimedia" `
+    --hidden-import "PySide6.QtMultimediaWidgets" `
     main.py
 
 if ($LASTEXITCODE -ne 0) {
@@ -77,10 +81,16 @@ foreach ($cand in $isccCandidates) {
 if ($foundIscc) {
     Write-Host "使用編譯器：$foundIscc " -ForegroundColor DarkCyan
     & $foundIscc setup.iss
-    Write-Host "`n=============================================" -ForegroundColor Green
-    Write-Host " [SUCCESS] 安裝精靈打包成功！ " -ForegroundColor Green
-    Write-Host " 安裝檔位置：dist\KyteView_Setup_1.0.0.exe " -ForegroundColor Green
-    Write-Host "=============================================" -ForegroundColor Green
+
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "`n=============================================" -ForegroundColor Green
+        Write-Host " [SUCCESS] 安裝精靈打包成功！ " -ForegroundColor Green
+        Write-Host " 安裝檔位置：dist\KyteView_Setup_1.0.0.exe " -ForegroundColor Green
+        Write-Host "=============================================" -ForegroundColor Green
+    } else {
+        Write-Host "`n[ERROR] Inno Setup 封裝失敗，請檢查 setup.iss 設定！ " -ForegroundColor Red
+        exit 1
+    }
 } else {
     Write-Host "`n[WARNING] 未偵測到 Inno Setup 編譯器 (ISCC.exe)。 " -ForegroundColor Yellow
     Write-Host "已為您完成 dist\KyteView 免安裝獨立目錄版。 " -ForegroundColor Yellow
