@@ -1,24 +1,31 @@
 """
 main.py
-KyteView 入口：系統托盤常駐 + 全域 Space 監聽。
+KyteView 入口：單一實例防多開 + 系統托盤常駐 + 全域 Space 監聽 + 檔案總管焦點提示。
 """
 from __future__ import annotations
 
 import sys
 import os
+import time
 from pathlib import Path
 from typing import Optional
 
 # 確保專案根目錄在 PYTHONPATH
 sys.path.insert(0, os.path.dirname(__file__))
 
+import win32gui
 from PySide6.QtCore import QTimer, Qt, QObject, Signal
 from PySide6.QtGui import QIcon, QPixmap, QPainter, QColor, QFont
 from PySide6.QtWidgets import QApplication, QSystemTrayIcon, QMenu
+from PySide6.QtNetwork import QLocalServer, QLocalSocket
 
+from config.settings import settings
 from core.file_watcher import get_selected_files, is_explorer_window, get_file_nav_context
 from core.hotkey_listener import HotkeyListener
 from ui.preview_window import PreviewWindow
+from ui.status_pill import StatusPill
+
+IPC_SERVER_NAME = "KyteView_SingleInstance_IPC"
 
 
 def _make_tray_icon() -> QIcon:
@@ -43,6 +50,7 @@ def _make_tray_icon() -> QIcon:
     p.end()
     return QIcon(px)
 
+
 class KyteViewApp(QObject):
     # Signal 是執行緒安全的，hook 執行緒 emit → 主執行緒 slot 執行
     _sig_open       = Signal(object)  # hwnd (64-bit safe)
@@ -51,13 +59,20 @@ class KyteViewApp(QObject):
     _sig_peek       = Signal(bool)    # peek through (Alt/Ctrl)
     _sig_toggle_pin = Signal()        # toggle side-pin mode (Tab)
 
-    def __init__(self, app: QApplication) -> None:
+    def __init__(self, app: QApplication, local_server: Optional[QLocalServer] = None) -> None:
         super().__init__()
         self._app = app
+        self._local_server = local_server
         self._window = PreviewWindow()
+        self._pill = StatusPill()
         self._current_paths: list[Path] = []
         self._current_index: int = 0
         self._last_explorer_hwnd: Optional[int] = None
+
+        # 狀態監視
+        self._last_checked_hwnd: Optional[int] = None
+        self._last_was_explorer: bool = False
+        self._last_hud_time: float = 0.0
 
         # 連接 Signal → Slot（均在主執行緒執行）
         self._sig_open.connect(self._on_open_main)
@@ -66,19 +81,50 @@ class KyteViewApp(QObject):
         self._sig_peek.connect(self._window.set_peek_through)
         self._sig_toggle_pin.connect(self._window.toggle_pin_mode)
 
+        self._setup_ipc()
         self._setup_tray()
         self._setup_hotkey()
+        self._setup_focus_monitor()
+
+    # ── 單一實例 IPC ──────────────────────────────────────────────────────────
+
+    def _setup_ipc(self) -> None:
+        if self._local_server:
+            self._local_server.newConnection.connect(self._on_ipc_connection)
+
+    def _on_ipc_connection(self) -> None:
+        """當另一個 KyteView 嘗試啟動時接收喚醒訊號。"""
+        if not self._local_server:
+            return
+        sock = self._local_server.nextPendingConnection()
+        if not sock:
+            return
+        sock.waitForReadyRead(300)
+        data = sock.readAll().data().decode("utf-8", errors="ignore")
+        sock.disconnectFromServer()
+
+        if "SHOW_ALIVE" in data:
+            self.notify_already_running()
+
+    def notify_already_running(self) -> None:
+        """通知使用者程式早已在運行中，避免重複開啟。"""
+        self._tray.showMessage(
+            "KyteView 正在背景運行中",
+            "程式已在此常駐！在檔案總管中選取檔案，按下 [空白鍵 Space] 即可預覽。\n請勿重複啟動。",
+            QSystemTrayIcon.MessageIcon.Information,
+            4000,
+        )
+        self._pill.flash("⚡ KyteView 正在運行中 · [Space] 預覽", 3000)
 
     # ── 托盤 ──────────────────────────────────────────────────────────────────
 
     def _setup_tray(self) -> None:
-        from config.settings import settings
-
         self._tray = QSystemTrayIcon(_make_tray_icon(), self._app)
-        self._tray.setToolTip("KyteView")
+        self._tray.setToolTip("KyteView (運行中)\n在檔案總管選取檔案後按 [Space] 快速預覽")
+        self._tray.activated.connect(self._on_tray_activated)
 
         menu = QMenu()
-        menu.addAction("KyteView").setEnabled(False)
+        menu.addAction("KyteView (運行中)").setEnabled(False)
         menu.addSeparator()
 
         act_theme = menu.addAction(f"切換主題 (目前: {'深色' if settings.is_dark() else '淺色'})")
@@ -99,6 +145,27 @@ class KyteViewApp(QObject):
         self._tray.setContextMenu(menu)
         self._tray.show()
 
+        # 啟動時發送歡迎提示（如果設定開啟）
+        if settings.get("show_startup_notification", True):
+            QTimer.singleShot(600, self._show_startup_balloon)
+
+    def _show_startup_balloon(self) -> None:
+        self._tray.showMessage(
+            "KyteView 已在背景就緒",
+            "在檔案總管中選取任意檔案，按下 [空白鍵] 即可快速預覽！",
+            QSystemTrayIcon.MessageIcon.Information,
+            3000,
+        )
+
+    def _on_tray_activated(self, reason: QSystemTrayIcon.ActivationReason) -> None:
+        """點擊托盤圖示回饋。"""
+        if reason == QSystemTrayIcon.ActivationReason.Trigger:  # 左鍵單擊
+            if self._window.is_visible():
+                self._window.activateWindow()
+                self._window.raise_()
+            else:
+                self._pill.flash("⚡ KyteView 待命中 · [Space] 預覽", 2000)
+
     # ── 熱鍵 ──────────────────────────────────────────────────────────────────
 
     def _setup_hotkey(self) -> None:
@@ -112,6 +179,37 @@ class KyteViewApp(QObject):
             is_explorer=is_explorer_window,
         )
         self._listener.start()
+
+    # ── 檔案總管焦點監控 (HUD 微光提示) ────────────────────────────────────────
+
+    def _setup_focus_monitor(self) -> None:
+        self._focus_timer = QTimer(self)
+        self._focus_timer.setInterval(400)
+        self._focus_timer.timeout.connect(self._check_explorer_focus)
+        self._focus_timer.start()
+
+    def _check_explorer_focus(self) -> None:
+        if not settings.get("show_explorer_hud", True):
+            return
+        try:
+            hwnd = win32gui.GetForegroundWindow()
+            if not hwnd or hwnd == self._last_checked_hwnd:
+                return
+
+            self._last_checked_hwnd = hwnd
+            is_exp = is_explorer_window(hwnd)
+
+            # 剛由其他程式切換進入檔案總管
+            if is_exp and not self._last_was_explorer:
+                now = time.time()
+                # 8 秒冷卻機制，避免使用者頻繁切換視窗時被干擾
+                if now - self._last_hud_time > 8.0:
+                    self._last_hud_time = now
+                    self._pill.flash("⚡ KyteView 待命中 · [Space] 預覽", 1500)
+
+            self._last_was_explorer = is_exp
+        except Exception:
+            pass
 
     # ── Slot（主執行緒）──────────────────────────────────────────────────────
 
@@ -153,8 +251,14 @@ class KyteViewApp(QObject):
     # ── 結束 ──────────────────────────────────────────────────────────────────
 
     def _quit(self) -> None:
+        if hasattr(self, "_focus_timer"):
+            self._focus_timer.stop()
+        if self._local_server:
+            self._local_server.close()
+            QLocalServer.removeServer(IPC_SERVER_NAME)
         self._listener.stop()
         self._tray.hide()
+        self._pill.hide()
         self._app.quit()
 
 
@@ -166,11 +270,27 @@ def main() -> None:
     app.setQuitOnLastWindowClosed(False)
     app.setWindowIcon(_make_tray_icon())
 
-    kyte = KyteViewApp(app)
+    # ── 單一實例檢測 (Single Instance Check) ─────────────────────────────────
+    socket = QLocalSocket()
+    socket.connectToServer(IPC_SERVER_NAME)
+    if socket.waitForConnected(300):
+        # 已有執行中實例，通知喚醒並退出
+        socket.write(b"SHOW_ALIVE")
+        socket.waitForBytesWritten(300)
+        socket.disconnectFromServer()
+        print("[INFO] KyteView 已在執行中，已向主行程發送提示並安全退出。")
+        sys.exit(0)
+
+    # 首次啟動：建立 IPC 伺服器
+    QLocalServer.removeServer(IPC_SERVER_NAME)
+    local_server = QLocalServer()
+    if not local_server.listen(IPC_SERVER_NAME):
+        print(f"[WARN] QLocalServer 監聽失敗: {local_server.errorString()}")
+
+    kyte = KyteViewApp(app, local_server)
 
     print("[OK] KyteView started. Press Space in Explorer to preview.")
     sys.exit(app.exec())
-
 
 
 if __name__ == "__main__":

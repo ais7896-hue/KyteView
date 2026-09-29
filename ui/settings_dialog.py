@@ -122,7 +122,7 @@ class SettingsDialog(QDialog):
         nav_layout.addStretch()
 
         # 版本提示
-        lbl_ver = QLabel("v1.2.0 • 64-bit")
+        lbl_ver = QLabel("v1.3.0 • 64-bit")
         lbl_ver.setStyleSheet("color: #71717a; font-size: 11px;")
         nav_layout.addWidget(lbl_ver)
 
@@ -449,7 +449,21 @@ class SettingsDialog(QDialog):
         self._cb_enable_pin.toggled.connect(lambda v: setattr(settings, "enable_pin_dock", v))
         grp_interact_layout.addWidget(self._cb_enable_pin)
 
+        # 4. 運行狀態與提醒通知
+        grp_notify = QGroupBox("狀態提示與通知 (Notifications & Presence)")
+        grp_notify_layout = QVBoxLayout(grp_notify)
+        grp_notify_layout.setSpacing(10)
+
+        self._cb_show_startup_notification = QCheckBox("程式啟動時發送系統通知提示")
+        self._cb_show_startup_notification.toggled.connect(lambda v: setattr(settings, "show_startup_notification", v))
+        grp_notify_layout.addWidget(self._cb_show_startup_notification)
+
+        self._cb_show_explorer_hud = QCheckBox("切換至檔案總管時，右下角淡入待命提示 (HUD)")
+        self._cb_show_explorer_hud.toggled.connect(lambda v: setattr(settings, "show_explorer_hud", v))
+        grp_notify_layout.addWidget(self._cb_show_explorer_hud)
+
         layout.addWidget(grp_interact)
+        layout.addWidget(grp_notify)
         layout.addStretch()
         return w
 
@@ -504,6 +518,8 @@ class SettingsDialog(QDialog):
         self._cb_smart_offset.setChecked(settings.smart_offset)
         self._cb_enable_peek.setChecked(settings.enable_peek)
         self._cb_enable_pin.setChecked(settings.enable_pin_dock)
+        self._cb_show_startup_notification.setChecked(settings.get("show_startup_notification", True))
+        self._cb_show_explorer_hud.setChecked(settings.get("show_explorer_hud", True))
 
     def _populate_code_themes(self) -> None:
         """依當前深淺色模式過濾出專屬適合的程式碼著色風格。"""
@@ -622,6 +638,8 @@ class SettingsDialog(QDialog):
             "smart_offset": self._cb_smart_offset.isChecked(),
             "enable_peek": self._cb_enable_peek.isChecked(),
             "enable_pin_dock": self._cb_enable_pin.isChecked(),
+            "show_startup_notification": self._cb_show_startup_notification.isChecked(),
+            "show_explorer_hud": self._cb_show_explorer_hud.isChecked(),
         }
 
         code_theme = self._combo_code_theme.currentData()

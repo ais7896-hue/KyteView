@@ -71,6 +71,9 @@ _DEFAULTS: dict[str, Any] = {
     "smart_offset": True,              # 智慧避讓偏移
     "enable_peek": True,               # Alt/Ctrl 長按透視
     "enable_pin_dock": True,           # Tab 側邊釘選
+    # 四、 提醒與狀態指示
+    "show_startup_notification": True, # 啟動時發送托盤提示
+    "show_explorer_hud": True,         # 切換至檔案總管時右下角淡入待命提示
 }
 
 
@@ -121,6 +124,30 @@ class SettingsManager(QObject):
 
     def get_config_path(self) -> Path:
         return self._config_path
+
+    def get(self, key: str, default: Any = None) -> Any:
+        """通用讀取設定項，支援預設值。"""
+        return self._data.get(key, default)
+
+    @property
+    def show_startup_notification(self) -> bool:
+        return bool(self._data.get("show_startup_notification", True))
+
+    @show_startup_notification.setter
+    def show_startup_notification(self, val: bool) -> None:
+        self._data["show_startup_notification"] = bool(val)
+        self._save()
+        self.settings_changed.emit("show_startup_notification")
+
+    @property
+    def show_explorer_hud(self) -> bool:
+        return bool(self._data.get("show_explorer_hud", True))
+
+    @show_explorer_hud.setter
+    def show_explorer_hud(self, val: bool) -> None:
+        self._data["show_explorer_hud"] = bool(val)
+        self._save()
+        self.settings_changed.emit("show_explorer_hud")
 
     # ── 一、 外觀與主題 ──────────────────────────────────────────────────────
 
