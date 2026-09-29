@@ -43,6 +43,7 @@ class PdfRenderer(BaseRenderer):
             self._doc = pymupdf.open(str(path))
             self._total_pages = len(self._doc)
             self._current_page = 0
+            container.destroyed.connect(lambda: self.cleanup())
         except Exception as e:
             err = QLabel(f"⚠️ 無法開啟 PDF 檔案\n{e}")
             err.setAlignment(Qt.AlignmentFlag.AlignCenter)

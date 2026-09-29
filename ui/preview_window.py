@@ -104,6 +104,7 @@ class _Toolbar(QWidget):
         self.btn_license = QPushButton("✨ 試用")
         self.btn_license.setObjectName("btn_license")
         self.btn_license.setFixedHeight(24)
+        self.btn_license.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
         self.btn_license.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_license.clicked.connect(parent.open_license_dialog)
         layout.addWidget(self.btn_license)
@@ -159,7 +160,10 @@ class _Toolbar(QWidget):
                     font-weight: 700;
                     border: 1px solid rgba(245, 158, 11, 0.4);
                     border-radius: 12px;
-                    padding: 0 8px;
+                    padding: 0 10px;
+                    min-width: 75px;
+                    max-width: 95px;
+                    height: 24px;
                 }
                 QPushButton#btn_license:hover {
                     background: rgba(245, 158, 11, 0.28);
@@ -177,7 +181,10 @@ class _Toolbar(QWidget):
                     font-weight: 600;
                     border: 1px solid rgba(99, 102, 241, 0.35);
                     border-radius: 12px;
-                    padding: 0 8px;
+                    padding: 0 10px;
+                    min-width: 105px;
+                    max-width: 135px;
+                    height: 24px;
                 }
                 QPushButton#btn_license:hover {
                     background: rgba(99, 102, 241, 0.25);
@@ -194,7 +201,10 @@ class _Toolbar(QWidget):
                     font-weight: 600;
                     border: 1px solid rgba(148, 163, 184, 0.3);
                     border-radius: 12px;
-                    padding: 0 8px;
+                    padding: 0 10px;
+                    min-width: 75px;
+                    max-width: 95px;
+                    height: 24px;
                 }
                 QPushButton#btn_license:hover {
                     background: rgba(99, 102, 241, 0.2);
@@ -238,6 +248,13 @@ class _Toolbar(QWidget):
             QPushButton#btn_close:hover {{
                 background: {'rgba(239, 68, 68, 0.2)' if is_dark else 'rgba(239, 68, 68, 0.12)'};
                 color: #ef4444;
+            }}
+            QPushButton#btn_license {{
+                min-width: 75px;
+                max-width: 140px;
+                min-height: 24px;
+                max-height: 24px;
+                padding: 0 10px;
             }}
             QPushButton#btn_back {{
                 background: {'rgba(99, 102, 241, 0.18)' if is_dark else 'rgba(79, 70, 229, 0.12)'};
@@ -460,7 +477,7 @@ class PreviewWindow(QWidget):
         """開啟授權管理與專業版啟用視窗。"""
         from ui.license_dialog import LicenseDialog
         if getattr(self, "_license_dialog", None) is None:
-            self._license_dialog = LicenseDialog(self)
+            self._license_dialog = LicenseDialog(None)
         else:
             self._license_dialog.refresh_ui_state()
         self._license_dialog.show()

@@ -32,11 +32,31 @@ class LicenseDialog(QDialog):
         self.license_mgr = LicenseManager.get_instance()
         self.setWindowTitle("KyteView 軟體授權與專業版啟用")
         self.setFixedSize(500, 520)
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowType.WindowContextHelpButtonHint)
+        self.setWindowFlags(
+            Qt.WindowType.Dialog
+            | Qt.WindowType.WindowTitleHint
+            | Qt.WindowType.WindowCloseButtonHint
+            | Qt.WindowType.WindowSystemMenuHint
+        )
 
         self.license_mgr.license_changed.connect(self.refresh_ui_state)
         self._build_ui()
         self.refresh_ui_state()
+
+    def reject(self) -> None:
+        """覆寫 QDialog.reject()，確保在非模態或模態下點擊關閉按鈕/按 ESC 能順利關閉視窗。"""
+        super().reject()
+        self.close()
+
+    def closeEvent(self, event) -> None:
+        event.accept()
+        super().closeEvent(event)
+
+    def keyPressEvent(self, event) -> None:
+        if event.key() == Qt.Key.Key_Escape:
+            self.reject()
+            return
+        super().keyPressEvent(event)
 
     def _build_ui(self) -> None:
         c = get_theme_colors()
