@@ -49,6 +49,27 @@ def _apply_acrylic(hwnd: int) -> None:
         pass
 
 
+# ── Win32 邊緣拖曳縮放 (WM_NCHITTEST) 結構與常數 ─────────────────────────────
+class _MSG(ctypes.Structure):
+    _fields_ = [
+        ("hwnd", ctypes.wintypes.HWND),
+        ("message", ctypes.wintypes.UINT),
+        ("wParam", ctypes.wintypes.WPARAM),
+        ("lParam", ctypes.wintypes.LPARAM),
+        ("time", ctypes.wintypes.DWORD),
+        ("pt", ctypes.wintypes.POINT),
+    ]
+
+_HTLEFT = 10
+_HTRIGHT = 11
+_HTTOP = 12
+_HTTOPLEFT = 13
+_HTTOPRIGHT = 14
+_HTBOTTOM = 15
+_HTBOTTOMLEFT = 16
+_HTBOTTOMRIGHT = 17
+
+
 # ── 工具列 ────────────────────────────────────────────────────────────────────
 class _Toolbar(QWidget):
     def __init__(self, parent: "PreviewWindow"):
@@ -872,6 +893,54 @@ class PreviewWindow(QWidget):
 
     def paintEvent(self, event: QPaintEvent) -> None:
         super().paintEvent(event)
+
+    def nativeEvent(self, eventType, message):
+        """Win32 原生無邊框 8 方向邊緣/角落自由拖曳縮放支援。"""
+        if eventType in (b"windows_generic_MSG", "windows_generic_MSG"):
+            if not self._is_pinned:
+                msg = ctypes.cast(int(message), ctypes.POINTER(_MSG)).contents
+                if msg.message == 0x0084:  # WM_NCHITTEST
+                    try:
+                        rect = win32gui.GetWindowRect(int(self.winId()))
+                    except Exception:
+                        return super().nativeEvent(eventType, message)
+
+                    left, top, right, bottom = rect
+                    win_w = right - left
+                    win_h = bottom - top
+
+                    # 取 Windows 螢幕實體座標（LOWORD/HIWORD 帶符號整數）
+                    x = ctypes.c_short(msg.lParam & 0xFFFF).value
+                    y = ctypes.c_short((msg.lParam >> 16) & 0xFFFF).value
+
+                    # 純實體像素相對座標，完全消除 High-DPI 縮放坐標錯位
+                    lx = x - left
+                    ly = y - top
+
+                    dpr = self.devicePixelRatio() or 1.0
+                    border = max(8, int(8 * dpr))
+                    corner = max(16, int(16 * dpr))
+
+                    # 4 角落優先判斷（加大感應熱區）
+                    if lx < corner and ly < corner:
+                        return True, _HTTOPLEFT
+                    elif lx >= win_w - corner and ly < corner:
+                        return True, _HTTOPRIGHT
+                    elif lx < corner and ly >= win_h - corner:
+                        return True, _HTBOTTOMLEFT
+                    elif lx >= win_w - corner and ly >= win_h - corner:
+                        return True, _HTBOTTOMRIGHT
+                    # 4 邊緣判斷
+                    elif lx < border:
+                        return True, _HTLEFT
+                    elif lx >= win_w - border:
+                        return True, _HTRIGHT
+                    elif ly < border:
+                        return True, _HTTOP
+                    elif ly >= win_h - border:
+                        return True, _HTBOTTOM
+
+        return super().nativeEvent(eventType, message)
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         if event.key() == Qt.Key.Key_Escape:

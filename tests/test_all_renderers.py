@@ -111,6 +111,10 @@ class TestAllRenderers(unittest.TestCase):
         pw.show_file(txt, "1 / 1", "")
         pw.hide_window()
 
+        docx_f = self.tdp / "test.docx"
+        pw.show_file(docx_f, "1 / 1", "")
+        pw.hide_window()
+
         sd = SettingsDialog(None)
         sd._on_save_clicked()
 

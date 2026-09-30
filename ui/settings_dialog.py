@@ -122,7 +122,7 @@ class SettingsDialog(QDialog):
         nav_layout.addStretch()
 
         # 版本提示
-        lbl_ver = QLabel("v1.3.0 • 64-bit")
+        lbl_ver = QLabel("v1.4.0 • 64-bit")
         lbl_ver.setStyleSheet("color: #71717a; font-size: 11px;")
         nav_layout.addWidget(lbl_ver)
 
