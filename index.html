@@ -252,17 +252,17 @@
                 </a>
             </div>
 
-            <!-- 視窗預覽模擬互動器 (Interactive Mockup) -->
-            <div class="max-w-3xl mx-auto window-shadow dark-glass rounded-2xl p-0.5 text-left animate-float">
+            <!-- 視窗預覽模擬與實機錄影展示 (Interactive & Real Video Mockup) -->
+            <div class="max-w-4xl mx-auto window-shadow dark-glass rounded-2xl p-0.5 text-left animate-float">
                 <div class="bg-slate-900/90 rounded-2xl overflow-hidden border border-white/10">
                     
                     <!-- 視窗工具列 (相仿真實 KyteView 工具列) -->
                     <div class="h-11 px-4 bg-slate-950/70 border-b border-white/10 flex items-center justify-between">
                         <!-- 左側檔名與標籤 -->
                         <div class="flex items-center gap-2.5">
-                            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">第 8 / 16 個檔案</span>
-                            <span id="mock-filename" class="text-sm font-bold text-slate-100">季度財務分析簡報.pptx</span>
-                            <span id="mock-filesize" class="text-[11px] text-slate-400 font-medium">· PPTX · 4.8 MB</span>
+                            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">真實操作實錄</span>
+                            <span id="mock-filename" class="text-sm font-bold text-slate-100">Windows 檔案總管連續秒開實測</span>
+                            <span id="mock-filesize" class="text-[11px] text-slate-400 font-medium">· 實機錄影 · 20 秒無冷場</span>
                         </div>
                         <!-- 右側操作鈕群 -->
                         <div class="flex items-center gap-2 text-slate-400 text-xs">
@@ -275,18 +275,46 @@
 
                     <!-- 互動切換 TAB 標籤 -->
                     <div class="px-4 py-2 bg-slate-950/40 border-b border-white/5 flex items-center gap-2 overflow-x-auto text-xs">
-                        <span class="text-[11px] text-slate-500 font-bold mr-1">切換示範：</span>
-                        <button onclick="switchMockTab('pptx')" id="tab-pptx" class="mock-tab px-3 py-1 rounded-md bg-brand-600 text-white font-semibold transition">簡報 .pptx</button>
+                        <span class="text-[11px] text-slate-500 font-bold mr-1">切換展示：</span>
+                        <button onclick="switchMockTab('demo')" id="tab-demo" class="mock-tab px-3 py-1 rounded-md bg-brand-600 text-white font-semibold transition flex items-center gap-1.5 shadow-sm shadow-brand-600/30">
+                            <i class="fa-solid fa-circle-play text-xs text-cyan-300"></i>
+                            <span>🎬 實機秒開實錄 (Demo)</span>
+                        </button>
+                        <button onclick="switchMockTab('pptx')" id="tab-pptx" class="mock-tab px-3 py-1 rounded-md bg-slate-800 text-slate-400 hover:text-white transition">簡報 .pptx</button>
                         <button onclick="switchMockTab('code')" id="tab-code" class="mock-tab px-3 py-1 rounded-md bg-slate-800 text-slate-400 hover:text-white transition">程式碼 .py</button>
                         <button onclick="switchMockTab('archive')" id="tab-archive" class="mock-tab px-3 py-1 rounded-md bg-slate-800 text-slate-400 hover:text-white transition">壓縮包 .zip</button>
                         <button onclick="switchMockTab('table')" id="tab-table" class="mock-tab px-3 py-1 rounded-md bg-slate-800 text-slate-400 hover:text-white transition">試算表 .xlsx</button>
-                        <button onclick="switchMockTab('video')" id="tab-video" class="mock-tab px-3 py-1 rounded-md bg-slate-800 text-slate-400 hover:text-white transition">4K 影音 .mp4</button>
                     </div>
 
                     <!-- 模擬展示主內容區 -->
-                    <div class="p-6 min-h-[300px] flex flex-col justify-between" id="mock-content">
-                        <!-- 預設 PPTX 視圖 -->
-                        <div id="view-pptx" class="mock-view">
+                    <div class="min-h-[300px] flex flex-col justify-between" id="mock-content">
+                        <!-- 實機真實操作錄影 (預設優先展示) -->
+                        <div id="view-demo" class="mock-view relative group overflow-hidden bg-black flex items-center justify-center">
+                            <video 
+                                id="demo-video"
+                                src="assets/demo.mp4" 
+                                poster="assets/demo_poster.jpg"
+                                autoplay 
+                                loop 
+                                muted 
+                                playsinline 
+                                preload="metadata"
+                                class="w-full h-auto block object-cover max-h-[460px] cursor-pointer"
+                                onclick="toggleDemoPlay(this)"
+                                title="點擊暫停 / 播放">
+                            </video>
+                            <!-- 懸浮提示膠囊 -->
+                            <div class="absolute bottom-3 left-3 px-3 py-1.5 rounded-full bg-slate-950/85 backdrop-blur-md border border-white/10 text-[11px] text-slate-200 flex items-center gap-2 pointer-events-none shadow-lg">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                                <span>檔案總管按 Space 鍵連續預覽 · 毫秒級切換</span>
+                            </div>
+                            <div class="absolute top-3 right-3 px-2.5 py-1 rounded-md bg-black/60 backdrop-blur-md border border-white/10 text-[10px] text-slate-300 pointer-events-none">
+                                點擊畫面暫停 / 播放
+                            </div>
+                        </div>
+
+                        <!-- 預設 PPTX 視圖 (改為切換時顯示) -->
+                        <div id="view-pptx" class="mock-view hidden p-6">
                             <div class="flex items-center justify-between mb-4">
                                 <span class="px-2.5 py-1 rounded bg-brand-500/15 text-brand-300 text-xs font-bold border border-brand-500/20">Slide 1 of 24</span>
                                 <span class="text-xs text-slate-400">16:9 橫向畫布 · 2~5ms 封面瞬開</span>
@@ -710,6 +738,14 @@
 
     <!-- Mockup 互動切換 JavaScript -->
     <script>
+        function toggleDemoPlay(video) {
+            if (video.paused) {
+                video.play();
+            } else {
+                video.pause();
+            }
+        }
+
         function switchMockTab(type) {
             // 切換按鈕樣式
             document.querySelectorAll('.mock-tab').forEach(btn => {
@@ -717,7 +753,7 @@
             });
             const activeBtn = document.getElementById('tab-' + type);
             if (activeBtn) {
-                activeBtn.className = "mock-tab px-3 py-1 rounded-md bg-brand-600 text-white font-semibold transition";
+                activeBtn.className = "mock-tab px-3 py-1 rounded-md bg-brand-600 text-white font-semibold transition flex items-center gap-1.5 shadow-sm shadow-brand-600/30";
             }
 
             // 切換視圖內容
@@ -729,10 +765,23 @@
                 activeView.classList.remove('hidden');
             }
 
+            // 控制影片播放狀態
+            const demoVideo = document.getElementById('demo-video');
+            if (demoVideo) {
+                if (type === 'demo') {
+                    demoVideo.play().catch(() => {});
+                } else {
+                    demoVideo.pause();
+                }
+            }
+
             // 更新工具列標題與大小
             const titleEl = document.getElementById('mock-filename');
             const sizeEl = document.getElementById('mock-filesize');
-            if (type === 'pptx') {
+            if (type === 'demo') {
+                titleEl.textContent = 'Windows 檔案總管連續秒開實測';
+                sizeEl.textContent = '· 實機錄影 · 20 秒無冷場';
+            } else if (type === 'pptx') {
                 titleEl.textContent = '季度財務分析簡報.pptx';
                 sizeEl.textContent = '· PPTX · 4.8 MB';
             } else if (type === 'code') {
@@ -744,9 +793,6 @@
             } else if (type === 'table') {
                 titleEl.textContent = '2026年第一季銷售總表.xlsx';
                 sizeEl.textContent = '· XLSX · 840 KB';
-            } else if (type === 'video') {
-                titleEl.textContent = '奧萬大森林空拍展示_4K_60FPS.mp4';
-                sizeEl.textContent = '· MP4 · 128 MB';
             }
         }
     </script>
