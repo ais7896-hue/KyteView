@@ -31,7 +31,7 @@ class LicenseDialog(QDialog):
         super().__init__(parent)
         self.license_mgr = LicenseManager.get_instance()
         self.setWindowTitle("KyteView 軟體授權與專業版啟用")
-        self.setFixedSize(500, 520)
+        self.setFixedSize(500, 545)
         self.setWindowFlags(
             Qt.WindowType.Dialog
             | Qt.WindowType.WindowTitleHint
@@ -179,6 +179,23 @@ class LicenseDialog(QDialog):
         action_row.addWidget(self.btn_deactivate, 1)
 
         bottom_box.addLayout(action_row)
+
+        # 客服與技術支援列（預填 mailto 範本）
+        mailto_url = (
+            "mailto:kyteview.support@aisming.com?subject=%5B%E5%95%8F%E9%A1%8C%E5%9B%9E%E5%A0%B1%5D%20KyteView%20%E4%BD%BF%E7%94%A8%E8%AB%AE%E8%A9%A2%20-%20%E8%A8%82%E5%96%AE/%E5%BA%8F%E8%99%9F%EF%BC%9A(%E8%8B%A5%E6%9C%89%E8%AB%8B%E5%A1%AB%E5%AF%AB)"
+            "&body=1.%20%E4%BD%9C%E6%A5%AD%E7%B3%BB%E7%B5%B1%E7%89%88%E6%9C%AC%20(%E4%BE%8B%E5%A6%82%20Win11%2023H2)%EF%BC%9A%0A"
+            "2.%20%E7%99%BC%E7%94%9F%E7%9A%84%E5%95%8F%E9%A1%8C%E6%8F%8F%E8%BF%B0%EF%BC%9A%0A"
+            "3.%20%E9%A0%90%E8%A6%BD%E5%93%AA%E7%A8%AE%E9%A1%9E%E5%9E%8B%E7%9A%84%E6%AA%94%E6%A1%88%E6%99%82%E7%99%BC%E7%94%9F%20(%E4%BE%8B%E5%A6%82%20.xlsx%20/%20.mp4)%EF%BC%9A%0A"
+            "4.%20%E6%88%AA%E5%9C%96%E6%88%96%E9%8C%AF%E8%AA%A4%E8%A8%8A%E6%81%AF%EF%BC%9A%0A"
+        )
+        support_lbl = QLabel(
+            f"技術支援與售後聯絡：<a href='{mailto_url}' style='color: #818cf8; text-decoration: underline;'>kyteview.support@aisming.com</a>"
+        )
+        support_lbl.setOpenExternalLinks(True)
+        support_lbl.setStyleSheet(f"font-size: 11px; color: {c['subtitle_color']}; padding-top: 4px;")
+        support_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        bottom_box.addWidget(support_lbl)
+
         layout.addLayout(bottom_box)
 
         self._apply_dialog_styles()

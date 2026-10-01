@@ -256,28 +256,14 @@ class LicenseManager(QObject):
     def activate_license(self, key: str) -> Tuple[bool, str]:
         """
         統一啟用入口：
-        1. 優先透過 Cloudflare Worker 線上驗證與配額綁定。
-        2. 若無網路連線或離線環境，自動回退使用本機算法啟用。
+        必須連線至官方 Cloudflare 伺服器進行身分驗證與配額綁定，防止未授權算號。
         """
         clean_key = key.strip().upper()
         if not clean_key:
             return False, "請輸入授權序號。"
 
-        # 先嘗試線上啟用
-        ok, msg = self.activate_online(clean_key)
-        if ok:
-            return True, msg
-
-        # 若線上啟用回報明確錯誤（如序號不存在、裝置額度已滿），直接回傳訊息
-        if "已滿" in msg or "不存在" in msg or "作廢" in msg or "不符" in msg:
-            return False, msg
-
-        # 若為網路連線問題，嘗試離線演算法回退
-        offline_ok, offline_msg = self._activate_offline(clean_key)
-        if offline_ok:
-            return True, offline_msg
-
-        return False, msg
+        # 必須透過線上伺服器安全驗證與綁定
+        return self.activate_online(clean_key)
 
     def activate_online(self, key: str) -> Tuple[bool, str]:
         """透過 Cloudflare Worker 線上驗證並綁定機器。"""
@@ -340,47 +326,6 @@ class LicenseManager(QObject):
             return False, f"網路連線失敗，請檢查網路: {e.reason}"
         except Exception as e:
             return False, f"啟用異常: {str(e)}"
-
-    def _activate_offline(self, clean_key: str) -> Tuple[bool, str]:
-        """離線密鑰演算法驗證備援。"""
-        parts = clean_key.replace(" ", "").split("-")
-        if len(parts) != 4 or parts[0] not in ("KV", "KB", "KYTEVIEW", "KYTE", "VIEW"):
-            return False, "序號格式錯誤，正確格式範例：KV-XXXX-XXXX-XXXX"
-
-        body = "".join(parts[1:3])
-        checksum_part = parts[3]
-        expected_chk = hashlib.sha256(f"{body}:{DEFAULT_SECRET}".encode("utf-8")).hexdigest()[:4].upper()
-
-        is_valid = (
-            (checksum_part == expected_chk)
-            or (clean_key.startswith(("KYTEVIEW-PRO-2026-", "KV-PRO-2026-", "KB-PRO-2026-")) and len(clean_key) >= 16)
-        )
-        if not is_valid:
-            return False, "授權序號無效或輸入有誤。"
-
-        sig = hmac.new(
-            DEFAULT_SECRET.encode("utf-8"),
-            f"{clean_key}:{self.machine_id}".encode("utf-8"),
-            hashlib.sha256
-        ).hexdigest()[:32]
-
-        save_data = {
-            "key": clean_key,
-            "signature": sig,
-            "machine_id": self.machine_id,
-            "activated_at": time.strftime("%Y-%m-%d %H:%M:%S")
-        }
-
-        try:
-            with open(self.license_file, "w", encoding="utf-8") as f:
-                json.dump(save_data, f, indent=2, ensure_ascii=False)
-        except Exception as e:
-            return False, f"儲存授權資料失敗: {e}"
-
-        self._is_pro = True
-        self._license_data = save_data
-        self.license_changed.emit(True)
-        return True, "🎉 離線授權驗證成功！KyteView 專業版已啟用。"
 
     def deactivate_license(self) -> Tuple[bool, str]:
         """解除授權綁定（線上同步釋放 Cloudflare 配額 + 清除本地檔案）。"""

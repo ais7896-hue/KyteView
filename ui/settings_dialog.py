@@ -13,6 +13,7 @@ from pathlib import Path
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont, QFontDatabase, QIcon, QIntValidator
 from PySide6.QtWidgets import (
+    QApplication,
     QButtonGroup,
     QCheckBox,
     QComboBox,
@@ -121,10 +122,22 @@ class SettingsDialog(QDialog):
 
         nav_layout.addStretch()
 
-        # 版本提示
+        # 版本提示與技術支援
         lbl_ver = QLabel("v1.4.0 • 64-bit")
         lbl_ver.setStyleSheet("color: #71717a; font-size: 11px;")
         nav_layout.addWidget(lbl_ver)
+
+        mailto_support = (
+            "mailto:kyteview.support@aisming.com?subject=%5B%E5%95%8F%E9%A1%8C%E5%9B%9E%E5%A0%B1%5D%20KyteView%20%E4%BD%BF%E7%94%A8%E8%AB%AE%E8%A9%A2%20-%20%E8%A8%82%E5%96%AE/%E5%BA%8F%E8%99%9F%EF%BC%9A(%E8%8B%A5%E6%9C%89%E8%AB%8B%E5%A1%AB%E5%AF%AB)"
+            "&body=1.%20%E4%BD%9C%E6%A5%AD%E7%B3%BB%E7%B5%B1%E7%89%88%E6%9C%AC%20(%E4%BE%8B%E5%A6%82%20Win11%2023H2)%EF%BC%9A%0A"
+            "2.%20%E7%99%BC%E7%94%9F%E7%9A%84%E5%95%8F%E9%A1%8C%E6%8F%8F%E8%BF%B0%EF%BC%9A%0A"
+            "3.%20%E9%A0%90%E8%A6%BD%E5%93%AA%E7%A8%AE%E9%A1%9E%E5%9E%8B%E7%9A%84%E6%AA%94%E6%A1%88%E6%99%82%E7%99%BC%E7%94%9F%20(%E4%BE%8B%E5%A6%82%20.xlsx%20/%20.mp4)%EF%BC%9A%0A"
+            "4.%20%E6%88%AA%E5%9C%96%E6%88%96%E9%8C%AF%E8%AA%A4%E8%A8%8A%E6%81%AF%EF%BC%9A%0A"
+        )
+        lbl_support = QLabel(f"<a href='{mailto_support}' style='color: #818cf8; text-decoration: none;'>✉ 聯絡技術支援</a>")
+        lbl_support.setOpenExternalLinks(True)
+        lbl_support.setStyleSheet("font-size: 11px;")
+        nav_layout.addWidget(lbl_support)
 
         main_layout.addWidget(self._nav_frame)
 
@@ -141,10 +154,19 @@ class SettingsDialog(QDialog):
 
         content_layout.addWidget(self._pages, 1)
 
-        # ── 底部操作按鈕列 (Cancel / Save) ───────────────────────────────────
+        # ── 底部操作按鈕列 (Cancel / Save / Diagnostic) ─────────────────────
         bottom_bar = QHBoxLayout()
         bottom_bar.setContentsMargins(0, 6, 0, 0)
         bottom_bar.setSpacing(10)
+
+        # 系統診斷資訊小按鈕
+        self._btn_diag = QPushButton("📋 複製系統診斷資訊")
+        self._btn_diag.setObjectName("btn_dialog_diag")
+        self._btn_diag.setFixedHeight(34)
+        self._btn_diag.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._btn_diag.setToolTip("收集當前作業系統、軟體版本、螢幕解析度與 Office 狀態複製至剪貼簿，方便回報問題")
+        self._btn_diag.clicked.connect(self._copy_diagnostic_info)
+        bottom_bar.addWidget(self._btn_diag)
 
         # 儲存成功即時反饋標籤
         self._lbl_save_status = QLabel("")
@@ -863,6 +885,20 @@ class SettingsDialog(QDialog):
             QPushButton#btn_dialog_cancel:hover {{
                 background-color: {'#3f3f46' if is_dark else '#e4e4e7'};
             }}
+            QPushButton#btn_dialog_diag {{
+                background-color: transparent;
+                color: {'#a1a1aa' if is_dark else '#6b7280'};
+                border: 1px dashed {border_c};
+                border-radius: 6px;
+                padding: 6px 12px;
+                font-size: 11px;
+                font-weight: 500;
+            }}
+            QPushButton#btn_dialog_diag:hover {{
+                background-color: {'rgba(99, 102, 241, 0.14)' if is_dark else 'rgba(99, 102, 241, 0.08)'};
+                color: {'#818cf8' if is_dark else '#4f46e5'};
+                border: 1px solid {'#818cf8' if is_dark else '#4f46e5'};
+            }}
         """)
 
         nav_btn_color = "#a1a1aa" if is_dark else "#3f3f46"
@@ -897,3 +933,52 @@ class SettingsDialog(QDialog):
                 font-weight: bold;
             }}
         """)
+
+    def _copy_diagnostic_info(self) -> None:
+        """收集系統與環境診斷資訊並複製至剪貼簿，方便回報問題與排錯。"""
+        import platform
+        import sys
+        import winreg
+
+        lines = [
+            "```yaml",
+            "# KyteView 系統環境診斷報告",
+            "KyteView_Version: v1.4.0 (64-bit)",
+            f"Python_Version: {platform.python_version()} ({platform.architecture()[0]})",
+            f"OS: {platform.system()} {sys.getwindowsversion().major}.{sys.getwindowsversion().minor} (Build {sys.getwindowsversion().build})",
+        ]
+
+        screen = QApplication.primaryScreen()
+        if screen:
+            geo = screen.geometry()
+            dpr = screen.devicePixelRatio()
+            lines.append(f"Screen_Primary: {geo.width()}x{geo.height()} @ DPR {dpr:.2f} ({int(dpr * 100)}%)")
+            lines.append(f"Screen_Count: {len(QApplication.screens())}")
+
+        word_installed = False
+        try:
+            with winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, r"Word.Application"):
+                word_installed = True
+        except OSError:
+            pass
+        lines.append(f"Word_COM_Available: {word_installed}")
+
+        from core.license import LicenseManager
+        lic = LicenseManager.get_instance()
+        lines.append(f"License_Plan: {lic.get_plan_type().upper()}")
+        lines.append(f"Trial_Days_Left: {lic.get_trial_days_left()}")
+        lines.append(f"Machine_ID: {lic.machine_id[:12]}...")
+
+        lines.append(f"Theme_Mode: {settings.theme_mode} (is_dark={settings.is_dark()})")
+        lines.append(f"Acrylic_Mica: {settings.enable_acrylic}")
+        lines.append(f"Smart_Offset: {settings.smart_offset}")
+        lines.append(f"Size_Mode: {settings.window_size_mode}")
+        lines.append("```")
+
+        diag_text = "\n".join(lines)
+        QApplication.clipboard().setText(diag_text)
+
+        self._btn_diag.setText("✅ 已複製診斷資訊！")
+        self._lbl_save_status.setText("系統診斷資訊已複製到剪貼簿")
+        QTimer.singleShot(2500, lambda: self._btn_diag.setText("📋 複製系統診斷資訊"))
+        QTimer.singleShot(3500, lambda: self._lbl_save_status.setText("") if self._lbl_save_status.text() == "系統診斷資訊已複製到剪貼簿" else None)

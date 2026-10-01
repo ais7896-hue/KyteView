@@ -83,57 +83,20 @@
 
 ---
 
-## 四、 PowerShell 批次產生序號指令
+## 四、 批次產生序號與管理員 API（⚠️ 已失效並廢除公開方式）
 
-打開 Windows PowerShell，直接調用 API 即可批次產生序號，直接複製去蝦皮上架或給自動發卡機器人：
-
-### 1. 產生 10 組 KyteView 專用序號 (`KV-`)
-```powershell
-$headers = @{ "X-Admin-Secret" = "AdminSuperSecret_2026"; "Content-Type" = "application/json" }
-$body = @{ count = 10; max_devices = 2; product = "kyteview"; note = "KyteView 蝦皮首批" } | ConvertTo-Json
-$response = Invoke-RestMethod -Uri "https://kyteshelf-license.ais7896.workers.dev/api/admin/generate-keys" -Method Post -Headers $headers -Body $body
-$response.keys
-```
-**輸出範例：**
-```text
-KV-8F2B-4N8C-Z7W1
-KV-M3F5-8K1P-A6D2
-KV-T7V9-2E4X-L8Q3
-```
-
-### 2. 產生 10 組 KyteShelf 專用序號 (`KS-`)
-```powershell
-$body = @{ count = 10; max_devices = 2; product = "kyteshelf"; note = "KyteShelf 新版序號" } | ConvertTo-Json
-$response = Invoke-RestMethod -Uri "https://kyteshelf-license.ais7896.workers.dev/api/admin/generate-keys" -Method Post -Headers $headers -Body $body
-$response.keys
-```
-**輸出範例：**
-```text
-KS-9H2B-4N8C-Z7W1
-KS-L2D8-7P4Q-R9K6
-```
-
-### 3. 產生 5 組雙軟體合購全家桶序號 (`KB-`，一組啟用兩款)
-```powershell
-$body = @{ count = 5; max_devices = 2; product = "all"; note = "雙軟體合購同捆包" } | ConvertTo-Json
-$response = Invoke-RestMethod -Uri "https://kyteshelf-license.ais7896.workers.dev/api/admin/generate-keys" -Method Post -Headers $headers -Body $body
-$response.keys
-```
-**輸出範例：**
-```text
-KB-7V92-E4XL-8Q3A
-KB-M4N8-2P9X-W1C5
-```
+> ⚠️ **【重要安全性聲明】**  
+> 原先公開於此處的固定管理者密鑰與測試指令**已全面失效並停止支援**。  
+> 為了保障軟體授權防偽與金流安全，系統已全面升級為 Cloudflare 後台動態密鑰保護。  
+> **正確且受保護的產號與管理方式請參閱私密維運手冊**（不會收錄於公開儲存庫）。
 
 ---
 
-## 五、 查詢序號狀態（售後與設備查詢）
+## 五、 查詢序號狀態（⚠️ 公開方式已失效）
 
-當顧客詢問換電腦或無法啟用時，執行此指令查詢綁定狀態：
-```powershell
-$headers = @{ "X-Admin-Secret" = "AdminSuperSecret_2026" }
-Invoke-RestMethod -Uri "https://kyteshelf-license.ais7896.workers.dev/api/admin/query-key?key=KV-8F2B-4N8C-Z7W1" -Headers $headers
-```
+> ⚠️ **【重要安全性聲明】**  
+> 此處舊指令已失效。請透過具備私密權限的管理者環境執行查詢。
+
 
 ---
 

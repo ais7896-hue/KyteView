@@ -246,10 +246,9 @@ async function handleDeactivate(request, env, corsHeaders) {
  */
 async function handleAdminGenerate(request, env, corsHeaders) {
   const adminSecret = request.headers.get("X-Admin-Secret");
-  const expectedSecret = env.ADMIN_SECRET || "AdminSuperSecret_2026";
 
-  if (!adminSecret || adminSecret !== expectedSecret) {
-    return jsonResponse({ success: false, message: "管理員身分驗證失敗" }, 401, corsHeaders);
+  if (!env.ADMIN_SECRET || !adminSecret || adminSecret !== env.ADMIN_SECRET) {
+    return jsonResponse({ success: false, message: "管理員身分驗證失敗：未授權或未設定 ADMIN_SECRET" }, 401, corsHeaders);
   }
 
   const body = await request.json().catch(() => ({}));
@@ -309,10 +308,9 @@ async function handleAdminGenerate(request, env, corsHeaders) {
  */
 async function handleAdminQuery(request, env, corsHeaders) {
   const adminSecret = request.headers.get("X-Admin-Secret");
-  const expectedSecret = env.ADMIN_SECRET || "AdminSuperSecret_2026";
 
-  if (!adminSecret || adminSecret !== expectedSecret) {
-    return jsonResponse({ success: false, message: "管理員身分驗證失敗" }, 401, corsHeaders);
+  if (!env.ADMIN_SECRET || !adminSecret || adminSecret !== env.ADMIN_SECRET) {
+    return jsonResponse({ success: false, message: "管理員身分驗證失敗：未授權或未設定 ADMIN_SECRET" }, 401, corsHeaders);
   }
 
   const url = new URL(request.url);
