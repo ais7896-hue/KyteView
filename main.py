@@ -93,18 +93,40 @@ class KyteViewApp(QObject):
             self._local_server.newConnection.connect(self._on_ipc_connection)
 
     def _on_ipc_connection(self) -> None:
-        """當另一個 KyteView 嘗試啟動時接收喚醒訊號。"""
+        """當另一個 KyteView 或外部程式 (KyteRename/KyteShelf) 傳送訊號時接收處理。"""
         if not self._local_server:
             return
         sock = self._local_server.nextPendingConnection()
         if not sock:
             return
         sock.waitForReadyRead(300)
-        data = sock.readAll().data().decode("utf-8", errors="ignore")
+        data = sock.readAll().data().decode("utf-8", errors="ignore").strip()
         sock.disconnectFromServer()
 
-        if "SHOW_ALIVE" in data:
+        if data.startswith("PREVIEW:"):
+            target_str = data[len("PREVIEW:"):].strip()
+            if target_str:
+                self.preview_external_path(Path(target_str))
+        elif "SHOW_ALIVE" in data:
             self.notify_already_running()
+
+    def preview_external_path(self, path: Path) -> None:
+        """接收外部程式 (如 KyteRename / KyteShelf) 傳來的特定檔案預覽請求。"""
+        if not path.exists():
+            return
+
+        # 若目前已在預覽同一個檔案且視窗開啟中，則 Space 鍵行為是隱藏切換 (Toggle)
+        if self._window.is_visible() and getattr(self, "_current_paths", None):
+            if self._current_paths and self._current_paths[self._current_index].resolve() == path.resolve():
+                self._window.hide_window()
+                return
+
+        self._current_paths = [path]
+        self._current_index = 0
+        index_info, breadcrumb = get_file_nav_context(path, 0, 1)
+        self._window.show_file(path, index_info, breadcrumb, None)
+        self._window.activateWindow()
+        self._window.raise_()
 
     def notify_already_running(self) -> None:
         """通知使用者程式早已在運行中，避免重複開啟。"""
@@ -271,11 +293,20 @@ def main() -> None:
     app.setWindowIcon(_make_tray_icon())
 
     # ── 單一實例檢測 (Single Instance Check) ─────────────────────────────────
+    target_arg_path = None
+    if len(sys.argv) > 1:
+        cand_p = Path(sys.argv[1])
+        if cand_p.exists():
+            target_arg_path = cand_p.resolve()
+
     socket = QLocalSocket()
     socket.connectToServer(IPC_SERVER_NAME)
     if socket.waitForConnected(300):
-        # 已有執行中實例，通知喚醒並退出
-        socket.write(b"SHOW_ALIVE")
+        # 已有執行中實例，通知預覽或喚醒並退出
+        if target_arg_path:
+            socket.write(f"PREVIEW:{str(target_arg_path)}\n".encode("utf-8"))
+        else:
+            socket.write(b"SHOW_ALIVE")
         socket.waitForBytesWritten(300)
         socket.disconnectFromServer()
         print("[INFO] KyteView 已在執行中，已向主行程發送提示並安全退出。")
@@ -288,6 +319,8 @@ def main() -> None:
         print(f"[WARN] QLocalServer 監聽失敗: {local_server.errorString()}")
 
     kyte = KyteViewApp(app, local_server)
+    if target_arg_path:
+        QTimer.singleShot(150, lambda: kyte.preview_external_path(target_arg_path))
 
     print("[OK] KyteView started. Press Space in Explorer to preview.")
     sys.exit(app.exec())
