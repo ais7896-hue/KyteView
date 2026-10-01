@@ -128,7 +128,7 @@ class SettingsDialog(QDialog):
         nav_layout.addWidget(lbl_ver)
 
         mailto_support = (
-            "mailto:kyteview.support@aisming.com?subject=%5B%E5%95%8F%E9%A1%8C%E5%9B%9E%E5%A0%B1%5D%20KyteView%20%E4%BD%BF%E7%94%A8%E8%AB%AE%E8%A9%A2%20-%20%E8%A8%82%E5%96%AE/%E5%BA%8F%E8%99%9F%EF%BC%9A(%E8%8B%A5%E6%9C%89%E8%AB%8B%E5%A1%AB%E5%AF%AB)"
+            "mailto:support@aisming.com?subject=%5B%E5%95%8F%E9%A1%8C%E5%9B%9E%E5%A0%B1%5D%20KyteView%20%E4%BD%BF%E7%94%A8%E8%AB%AE%E8%A9%A2%20-%20%E8%A8%82%E5%96%AE/%E5%BA%8F%E8%99%9F%EF%BC%9A(%E8%8B%A5%E6%9C%89%E8%AB%8B%E5%A1%AB%E5%AF%AB)"
             "&body=1.%20%E4%BD%9C%E6%A5%AD%E7%B3%BB%E7%B5%B1%E7%89%88%E6%9C%AC%20(%E4%BE%8B%E5%A6%82%20Win11%2023H2)%EF%BC%9A%0A"
             "2.%20%E7%99%BC%E7%94%9F%E7%9A%84%E5%95%8F%E9%A1%8C%E6%8F%8F%E8%BF%B0%EF%BC%9A%0A"
             "3.%20%E9%A0%90%E8%A6%BD%E5%93%AA%E7%A8%AE%E9%A1%9E%E5%9E%8B%E7%9A%84%E6%AA%94%E6%A1%88%E6%99%82%E7%99%BC%E7%94%9F%20(%E4%BE%8B%E5%A6%82%20.xlsx%20/%20.mp4)%EF%BC%9A%0A"
