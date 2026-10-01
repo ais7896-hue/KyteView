@@ -103,20 +103,28 @@ class KyteViewApp(QObject):
         data = sock.readAll().data().decode("utf-8", errors="ignore").strip()
         sock.disconnectFromServer()
 
-        if data.startswith("PREVIEW:"):
+        if data.startswith("PREVIEW_UPDATE:"):
+            target_str = data[len("PREVIEW_UPDATE:"):].strip()
+            if target_str:
+                self.preview_external_path(Path(target_str), is_update_only=True)
+        elif data.startswith("PREVIEW:"):
             target_str = data[len("PREVIEW:"):].strip()
             if target_str:
-                self.preview_external_path(Path(target_str))
+                self.preview_external_path(Path(target_str), is_update_only=False)
         elif "SHOW_ALIVE" in data:
             self.notify_already_running()
 
-    def preview_external_path(self, path: Path) -> None:
+    def preview_external_path(self, path: Path, is_update_only: bool = False) -> None:
         """接收外部程式 (如 KyteRename / KyteShelf) 傳來的特定檔案預覽請求。"""
         if not path.exists():
             return
 
-        # 若目前已在預覽同一個檔案且視窗開啟中，則 Space 鍵行為是隱藏切換 (Toggle)
-        if self._window.is_visible() and getattr(self, "_current_paths", None):
+        # 若僅為游標移動同步 (is_update_only)，且目前預覽視窗根本未開啟，則靜默忽略
+        if is_update_only and not self._window.is_visible():
+            return
+
+        # 若使用者按下 Space 觸發，且目前已在預覽同一個檔案且視窗開啟中，則 Space 鍵行為是隱藏切換 (Toggle)
+        if not is_update_only and self._window.is_visible() and getattr(self, "_current_paths", None):
             if self._current_paths and self._current_paths[self._current_index].resolve() == path.resolve():
                 self._window.hide_window()
                 return
@@ -125,8 +133,11 @@ class KyteViewApp(QObject):
         self._current_index = 0
         index_info, breadcrumb = get_file_nav_context(path, 0, 1)
         self._window.show_file(path, index_info, breadcrumb, None)
-        self._window.activateWindow()
-        self._window.raise_()
+
+        # 僅當不是單純上下鍵同步時才拉到前景，避免搶走 KyteRename 等呼叫端的鍵盤焦點
+        if not is_update_only:
+            self._window.activateWindow()
+            self._window.raise_()
 
     def notify_already_running(self) -> None:
         """通知使用者程式早已在運行中，避免重複開啟。"""

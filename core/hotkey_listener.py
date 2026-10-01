@@ -173,18 +173,21 @@ class HotkeyListener:
                         self._on_toggle_pin()
                         return 1  # 吞噬
 
-                # ── 方向鍵：放行給 Explorer，再通知刷新 ──────────────────────────
+                # ── 方向鍵：僅當前景為 Explorer 時放行並通知刷新 ──────────────────────────
                 elif vk in (VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT):
                     if self._is_preview_visible():
-                        direction = {
-                            VK_UP: "up", VK_DOWN: "down",
-                            VK_LEFT: "left", VK_RIGHT: "right",
-                        }[vk]
-                        result = ctypes.windll.user32.CallNextHookEx(
-                            self._hook, nCode, wParam, lParam
-                        )
-                        self._on_navigate(direction)
-                        return result
+                        hwnd = win32gui.GetForegroundWindow()
+                        if self._is_explorer(hwnd):
+                            direction = {
+                                VK_UP: "up", VK_DOWN: "down",
+                                VK_LEFT: "left", VK_RIGHT: "right",
+                            }[vk]
+                            result = ctypes.windll.user32.CallNextHookEx(
+                                self._hook, nCode, wParam, lParam
+                            )
+                            self._on_navigate(direction)
+                            return result
+
 
         return ctypes.windll.user32.CallNextHookEx(
             self._hook, nCode, wParam, lParam
