@@ -1,7 +1,11 @@
-build_installer.ps1
-# KyteView 一鍵打包與安裝程式編譯腳本
+# build_installer.ps1
+# KyteView 一鍵打包與安裝程式編譯腳本 (含 Portable 綠色版)
 
 $ErrorActionPreference = "Stop"
+
+if ($PSScriptRoot) {
+    Set-Location -Path $PSScriptRoot
+}
 
 Write-Host "=============================================" -ForegroundColor Cyan
 Write-Host "   KyteView 自動化編譯與安裝檔封裝程序   " -ForegroundColor Cyan
