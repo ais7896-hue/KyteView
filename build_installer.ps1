@@ -60,6 +60,15 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host "`n[OK] PyInstaller 打包成功！綠色免安裝目錄位於 dist\KyteView\ " -ForegroundColor Green
+
+# 2.5 打包免安裝綠色版 (Portable Zip)
+Write-Host "`n>>> 正在打包免安裝綠色版 (Portable Zip)... " -ForegroundColor Yellow
+$portableZip = "dist\KyteView_1.4.0_Portable.zip"
+if (Test-Path $portableZip) { Remove-Item -Force $portableZip }
+Compress-Archive -Path "dist\KyteView\*" -DestinationPath $portableZip -Force
+Write-Host " [SUCCESS] 綠色免安裝包已產出：$portableZip " -ForegroundColor Green
+
 # 3. Inno Setup 封裝
 Write-Host "`n>>> [3/3] 正在使用 Inno Setup 封裝安裝精靈... " -ForegroundColor Yellow
 $isccCandidates = @(
