@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="zh-TW" class="scroll-smooth">
+<html lang="en" class="scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KyteView 使用手冊與操作指南 - Windows 次世代極速檔案預覽神器</title>
-    <meta name="description" content="KyteView 完整圖文使用手冊：空白鍵秒開、智慧避讓偏移、側邊釘選、壓縮包單檔拖曳抽出、PPTX 簡報瀏覽、4K 影音硬解播放與快捷鍵總整理。">
+    <title>KyteView User Manual & Guide - Next-Gen Instant File Preview for Windows</title>
+    <meta name="description" content="KyteView comprehensive user manual: Spacebar instant launch, smart offsetting, side pinning, single-file archive drag extraction, PPTX presentations, 4K GPU media decoding, and keyboard shortcuts.">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
@@ -37,7 +37,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap');
 
         body {
-            font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         code, kbd {
@@ -64,7 +64,7 @@
 
 <body class="bg-slate-50 text-slate-800 antialiased selection:bg-brand-600 selection:text-white">
 
-    <!-- 頂部導航列 -->
+    <!-- Top Navigation Bar -->
     <nav class="sticky top-0 z-50 backdrop-blur-md bg-white/90 border-b border-slate-200/80 transition-all">
         <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
             <a href="index.html" class="flex items-center gap-3 group">
@@ -76,413 +76,410 @@
             </a>
 
             <div class="flex items-center gap-4 sm:gap-6">
-                <a href="guide_en.html" class="text-sm font-semibold text-slate-600 hover:text-brand-600 transition flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-slate-100">
+                <a href="guide.html" class="text-sm font-semibold text-slate-600 hover:text-brand-600 transition flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-slate-100">
                     <i class="fa-solid fa-globe text-xs"></i>
-                    <span>English</span>
+                    <span>繁體中文</span>
                 </a>
                 <a href="index.html" class="text-sm font-semibold text-slate-600 hover:text-brand-600 transition flex items-center gap-1.5">
                     <i class="fa-solid fa-arrow-left text-xs"></i>
-                    <span>返回產品首頁</span>
+                    <span>Back to Home</span>
                 </a>
                 <a href="index.html#download"
                     class="px-4 py-2 text-xs sm:text-sm font-bold text-white bg-brand-600 hover:bg-brand-700 active:scale-95 rounded-xl shadow-md shadow-brand-600/20 transition flex items-center gap-2">
                     <i class="fa-solid fa-download"></i>
-                    <span>下載最新版 (v1.5.0)</span>
+                    <span>Download (v1.5.0)</span>
                 </a>
             </div>
         </div>
     </nav>
 
-    <!-- 標題橫幅 (Header) -->
+    <!-- Header Banner -->
     <header class="gradient-banner pt-12 pb-12 border-b border-slate-200/60 bg-white">
         <div class="max-w-5xl mx-auto px-6 text-center">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-50 border border-brand-200 text-brand-700 text-xs font-bold mb-4">
                 <i class="fa-solid fa-book-open"></i>
-                <span>官方全功能圖文使用說明手冊 · 適用 Windows 10 / 11</span>
+                <span>Official User Guide & Documentation • Windows 10 & 11</span>
             </div>
             <h1 class="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight mb-4">
-                KyteView 操作指南
+                KyteView User Manual
             </h1>
             <p class="text-slate-600 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
-                涵蓋從空白鍵瞬開、智慧避讓、側邊釘選、壓縮包單檔抽出，到 PPTX 簡報與 GPU 硬解影音的完整技巧。
+                Step-by-step guidance covering Spacebar instant preview, Smart Offsetting, side pinning, single-file drag extraction, PPTX presentations, and hardware-accelerated media playback.
             </p>
         </div>
     </header>
 
-    <!-- 主要內容區 (雙欄結構) -->
+    <!-- Main Content Area -->
     <div class="max-w-7xl mx-auto px-6 py-10">
         <div class="flex flex-col lg:flex-row gap-10 items-start">
 
-            <!-- 側邊固定目錄 (Sticky Sidebar) -->
-            <!-- 固定目錄 (Sticky Sidebar) -->
+            <!-- Sticky Sidebar -->
             <aside class="w-full lg:w-64 flex-shrink-0 lg:sticky lg:top-24 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                <div class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-3">指南目錄</div>
+                <div class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-3">Contents</div>
                 <nav class="space-y-2 text-sm font-medium text-slate-600">
-                    <a href="#section-quickstart" class="sidebar-link block py-1">1. 快速開始與空白鍵瞬開</a>
-                    <a href="#section-offset" class="sidebar-link block py-1">2. 智慧避讓偏移機制</a>
-                    <a href="#section-pin" class="sidebar-link block py-1">3. 側邊釘選模式 (Tab)</a>
-                    <a href="#section-archive" class="sidebar-link block py-1">4. 壓縮包目錄樹與單檔拖曳</a>
-                    <a href="#section-resize" class="sidebar-link block py-1 font-bold text-brand-600">5. 8向邊緣縮放與尺寸記憶</a>
-                    <a href="#section-office" class="sidebar-link block py-1">6. PPTX 與 Word 免裝 Office</a>
-                    <a href="#section-media" class="sidebar-link block py-1">7. 4K 影音硬解與黑膠音訊</a>
-                    <a href="#section-hud" class="sidebar-link block py-1 font-bold text-brand-600">8. 狀態指示膠囊與長按微透</a>
-                    <a href="#section-tray" class="sidebar-link block py-1 font-bold text-brand-600">9. 系統托盤管理與實例守護</a>
-                    <a href="#section-settings" class="sidebar-link block py-1">10. 偏好設定功能與常見問題</a>
+                    <a href="#section-quickstart" class="sidebar-link block py-1">1. Quick Start & Spacebar Launch</a>
+                    <a href="#section-offset" class="sidebar-link block py-1">2. Smart Offsetting Mechanics</a>
+                    <a href="#section-pin" class="sidebar-link block py-1">3. Side Pinning Mode (Tab)</a>
+                    <a href="#section-archive" class="sidebar-link block py-1">4. Archive Tree & Single File Drag</a>
+                    <a href="#section-resize" class="sidebar-link block py-1 font-bold text-brand-600">5. 8-Directional Edge Resizing</a>
+                    <a href="#section-office" class="sidebar-link block py-1">6. PPTX & Word Without Office</a>
+                    <a href="#section-media" class="sidebar-link block py-1">7. 4K GPU Playback & Vinyl Audio</a>
+                    <a href="#section-hud" class="sidebar-link block py-1 font-bold text-brand-600">8. Status Capsule HUD & Peek</a>
+                    <a href="#section-tray" class="sidebar-link block py-1 font-bold text-brand-600">9. System Tray & Mutex Guard</a>
+                    <a href="#section-settings" class="sidebar-link block py-1">10. Preferences & FAQ</a>
                 </nav>
                 <div class="mt-6 pt-5 border-t border-slate-100">
                     <a href="index.html"
                         class="block w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl text-center shadow transition flex items-center justify-center gap-2">
                         <i class="fa-solid fa-house text-sm"></i>
-                        <span>回到產品首頁</span>
+                        <span>Back to Home</span>
                     </a>
                 </div>
             </aside>
 
-<!-- 右側主要文件內容 -->
+            <!-- Main Documentation -->
             <main class="flex-1 w-full space-y-12">
 
-                <!-- 1. 快速開始 -->
+                <!-- 1. Quick Start -->
                 <section id="section-quickstart" class="doc-section bg-white p-8 sm:p-10 rounded-3xl border border-slate-200 shadow-sm">
                     <div class="flex items-center gap-3 text-brand-600 mb-4">
                         <span class="w-8 h-8 rounded-xl bg-brand-100 flex items-center justify-center font-black text-sm">01</span>
-                        <h2 class="text-2xl font-black text-slate-900">快速開始與空白鍵瞬開</h2>
+                        <h2 class="text-2xl font-black text-slate-900">Quick Start & Spacebar Instant Launch</h2>
                     </div>
                     <p class="text-slate-600 text-sm leading-relaxed mb-6">
-                        KyteView 啟動後會安靜常駐於 Windows 右下角系統托盤。您不需要學習繁瑣的指令，只需在 Windows 檔案總管或桌面保持自然的習慣操作：
+                        Once KyteView is launched, it resides quietly in your Windows system tray. You don't need to learn any complex commands—simply use standard file browsing gestures:
                     </p>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-start gap-3">
                             <span class="p-2 rounded-lg bg-brand-100 text-brand-600 font-bold text-xs"><i class="fa-solid fa-arrow-pointer"></i></span>
                             <div>
-                                <h4 class="text-xs font-bold text-slate-800">開啟 / 關閉預覽</h4>
-                                <p class="text-xs text-slate-500 mt-1">選中檔案按下 <kbd class="px-2 py-0.5 rounded bg-white border border-slate-300 shadow-sm font-bold text-brand-600">Space</kbd> 立即彈出；再按一次或按 <kbd class="px-2 py-0.5 rounded bg-white border border-slate-300 shadow-sm font-bold">ESC</kbd> 瞬間關閉。</p>
+                                <h4 class="text-xs font-bold text-slate-800">Open / Close Preview</h4>
+                                <p class="text-xs text-slate-500 mt-1">Select any file and tap <kbd class="px-2 py-0.5 rounded bg-white border border-slate-300 shadow-sm font-bold text-brand-600">Space</kbd> for instant preview; press Space again or <kbd class="px-2 py-0.5 rounded bg-white border border-slate-300 shadow-sm font-bold">ESC</kbd> to close.</p>
                             </div>
                         </div>
                         <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-start gap-3">
                             <span class="p-2 rounded-lg bg-emerald-100 text-emerald-600 font-bold text-xs"><i class="fa-solid fa-arrows-up-down-left-right"></i></span>
                             <div>
-                                <h4 class="text-xs font-bold text-slate-800">連續切換瀏覽</h4>
-                                <p class="text-xs text-slate-500 mt-1">預覽視窗開啟時，直接按鍵盤方向鍵 <kbd class="px-1.5 py-0.5 rounded bg-white border border-slate-300 text-xs">↑</kbd> <kbd class="px-1.5 py-0.5 rounded bg-white border border-slate-300 text-xs">↓</kbd> <kbd class="px-1.5 py-0.5 rounded bg-white border border-slate-300 text-xs">←</kbd> <kbd class="px-1.5 py-0.5 rounded bg-white border border-slate-300 text-xs">→</kbd>，預覽視窗會無縫切換當前檔案。</p>
+                                <h4 class="text-xs font-bold text-slate-800">Continuous Navigation</h4>
+                                <p class="text-xs text-slate-500 mt-1">While preview is active, use arrow keys <kbd class="px-1.5 py-0.5 rounded bg-white border border-slate-300 text-xs">↑</kbd> <kbd class="px-1.5 py-0.5 rounded bg-white border border-slate-300 text-xs">↓</kbd> <kbd class="px-1.5 py-0.5 rounded bg-white border border-slate-300 text-xs">←</kbd> <kbd class="px-1.5 py-0.5 rounded bg-white border border-slate-300 text-xs">→</kbd> to seamlessly switch between items in Explorer.</p>
                             </div>
                         </div>
                     </div>
 
                     <div class="p-4 bg-amber-50 border border-amber-200/80 rounded-2xl text-xs text-amber-900 leading-relaxed flex items-center gap-3">
                         <i class="fa-solid fa-lightbulb text-amber-600 text-base flex-shrink-0"></i>
-                        <span><b>焦點保護機制</b>：KyteView 彈出預覽視窗時，不會奪走檔案總管的鍵盤焦點，因此您可以持續以方向鍵、PageUp/Down 在檔案總管中自由移動。</span>
+                        <span><b>Non-Stealing Focus Architecture</b>: KyteView never steals keyboard focus from Windows Explorer when popping up, allowing you to freely navigate files without interruptions.</span>
                     </div>
                 </section>
 
-                <!-- 2. 智慧避讓 -->
+                <!-- 2. Smart Offsetting -->
                 <section id="section-offset" class="doc-section bg-white p-8 sm:p-10 rounded-3xl border border-slate-200 shadow-sm">
                     <div class="flex items-center gap-3 text-brand-600 mb-4">
                         <span class="w-8 h-8 rounded-xl bg-brand-100 flex items-center justify-center font-black text-sm">02</span>
-                        <h2 class="text-2xl font-black text-slate-900">智慧避讓 (Smart Offsetting)</h2>
+                        <h2 class="text-2xl font-black text-slate-900">Smart Offsetting Mechanics</h2>
                     </div>
                     <p class="text-slate-600 text-sm leading-relaxed mb-6">
-                        傳統預覽工具（如 macOS QuickLook）總是死板居中彈出，在 Windows 多欄檔案總管挑選檔案時，常會擋住游標前後項目的檔名。KyteView 導入自適應動態避讓：
+                        Traditional preview tools blindly center windows on screen, obscuring file lists and filenames in multi-pane Explorer views. KyteView introduces adaptive dynamic offsetting:
                     </p>
 
                     <div class="space-y-3 mb-6">
                         <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/70 flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-                                <span class="text-xs font-bold text-slate-800">檔案總管靠左時</span>
+                                <span class="text-xs font-bold text-slate-800">Explorer on the Left</span>
                             </div>
-                            <span class="text-xs font-medium text-slate-500">預覽視窗自動偏移至<b>螢幕右半側</b>展示，完整露出檔案清單</span>
+                            <span class="text-xs font-medium text-slate-500">Preview automatically offsets to the <b>right side of the screen</b>, leaving the file list fully visible.</span>
                         </div>
                         <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/70 flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
-                                <span class="text-xs font-bold text-slate-800">檔案總管靠右時</span>
+                                <span class="text-xs font-bold text-slate-800">Explorer on the Right</span>
                             </div>
-                            <span class="text-xs font-medium text-slate-500">預覽視窗自動鏡像偏移至<b>螢幕左半側</b>，兩側視窗互不遮蔽</span>
+                            <span class="text-xs font-medium text-slate-500">Preview dynamically mirrors to the <b>left side</b>, eliminating overlap between active windows.</span>
                         </div>
                         <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/70 flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                                <span class="text-xs font-bold text-slate-800">多螢幕環境下</span>
+                                <span class="text-xs font-bold text-slate-800">Multi-Monitor Setups</span>
                             </div>
-                            <span class="text-xs font-medium text-slate-500">自動感應滑鼠所在顯示器與 DPI 縮放比例，始終呈現最佳尺寸</span>
+                            <span class="text-xs font-medium text-slate-500">Automatically detects the active monitor and per-monitor DPI scaling, ensuring optimal crispness.</span>
                         </div>
                     </div>
                 </section>
 
-                <!-- 3. 側邊釘選 -->
+                <!-- 3. Side Pinning -->
                 <section id="section-pin" class="doc-section bg-white p-8 sm:p-10 rounded-3xl border border-slate-200 shadow-sm">
                     <div class="flex items-center gap-3 text-brand-600 mb-4">
                         <span class="w-8 h-8 rounded-xl bg-brand-100 flex items-center justify-center font-black text-sm">03</span>
-                        <h2 class="text-2xl font-black text-slate-900">側邊釘選模式 (Pin to Side / Split View)</h2>
+                        <h2 class="text-2xl font-black text-slate-900">Side Pinning Mode (Tab / Split View)</h2>
                     </div>
                     <p class="text-slate-600 text-sm leading-relaxed mb-6">
-                        需要一邊查看合約/規格書、一邊打字輸入時，按一下 <kbd class="px-2 py-0.5 rounded bg-slate-100 border border-slate-300 font-bold text-brand-600">Tab</kbd> 鍵，視窗立刻鎖定為固定常駐狀態：
+                        Need to reference a contract, spec sheet, or reference image while typing? Press <kbd class="px-2 py-0.5 rounded bg-slate-100 border border-slate-300 font-bold text-brand-600">Tab</kbd> to lock the preview into pinned split view:
                     </p>
 
                     <div class="p-5 rounded-2xl bg-indigo-50/60 border border-indigo-200/80 mb-6">
                         <h4 class="text-xs font-bold text-indigo-950 mb-3 flex items-center gap-2">
                             <i class="fa-solid fa-thumbtack text-brand-600"></i>
-                            <span>釘選模式三大特性：</span>
+                            <span>Three Core Characteristics of Pinning:</span>
                         </h4>
                         <ul class="text-xs text-indigo-900 space-y-2 leading-relaxed">
-                            <li>• <b>視窗恆定置頂 (Always-on-Top)</b>：切換其他任何軟體輸入時，預覽視窗絕不沉底消失。</li>
-                            <li>• <b>釋放焦點 (Focus Freedom)</b>：可任意點擊瀏覽器、Word、Excel，預覽內容保持清晰對照。</li>
-                            <li>• <b>再按一次 Tab 解除</b>：按鍵即刻切換為一般預覽隨選隨開模式，彈性流暢。</li>
+                            <li>• <b>Always-on-Top Window</b>: Remains pinned on top even when clicking Word, Excel, or code editors.</li>
+                            <li>• <b>Focus Freedom</b>: Type and click freely in any target application while keeping reference material clearly in view.</li>
+                            <li>• <b>Tap Tab Again to Unpin</b>: Immediately toggles back to normal auto-dismiss preview mode.</li>
                         </ul>
                     </div>
                 </section>
 
-                <!-- 4. 壓縮包目錄樹與單檔拖曳 -->
+                <!-- 4. Archive Tree & Single File Drag -->
                 <section id="section-archive" class="doc-section bg-white p-8 sm:p-10 rounded-3xl border border-slate-200 shadow-sm">
                     <div class="flex items-center gap-3 text-brand-600 mb-4">
                         <span class="w-8 h-8 rounded-xl bg-brand-100 flex items-center justify-center font-black text-sm">04</span>
-                        <h2 class="text-2xl font-black text-slate-900">壓縮包目錄樹與單檔拖曳抽出</h2>
+                        <h2 class="text-2xl font-black text-slate-900">Archive Tree & Single-File Drag Extraction</h2>
                     </div>
                     <p class="text-slate-600 text-sm leading-relaxed mb-6">
-                        KyteView 徹底顛覆了以往處理壓縮包（.zip, .7z, .rar, .tar.gz）必須「整包解壓縮 $
-ightarrow$ 找檔案 $
-ightarrow$ 刪除暫存」的痛苦流程：
+                        KyteView completely transforms how you handle compressed archives (.zip, .7z, .rar, .tar.gz), removing the tedious cycle of "extract whole archive → find file → delete temp folder":
                     </p>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div class="p-5 rounded-2xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
                             <div>
                                 <span class="text-xs font-black text-brand-600">STEP 1</span>
-                                <h4 class="text-sm font-bold text-slate-800 mt-1 mb-2">5ms 極速讀取目錄樹</h4>
-                                <p class="text-xs text-slate-500 leading-relaxed">僅讀取檔案尾端中央目錄，不解壓任何多餘內容，千筆檔案瞬間呈現 QTreeView 階層目錄樹與精確檔案大小。</p>
+                                <h4 class="text-sm font-bold text-slate-800 mt-1 mb-2">5ms Instant Central Directory Read</h4>
+                                <p class="text-xs text-slate-500 leading-relaxed">Reads only the central directory headers without decompressing bulk data. Instantly displays thousands of items in an interactive tree view with file sizes.</p>
                             </div>
                         </div>
                         <div class="p-5 rounded-2xl border border-brand-200 bg-brand-50/40 flex flex-col justify-between">
                             <div>
-                                <span class="text-xs font-black text-brand-600">STEP 2 (殺手級功能)</span>
-                                <h4 class="text-sm font-bold text-slate-900 mt-1 mb-2">單檔直接拖曳抽出</h4>
-                                <p class="text-xs text-slate-600 leading-relaxed">按住滑鼠左鍵選中某個檔案，直接向外拖到<b>桌面</b>或<b>資料夾</b>，背景自動秒解該單檔，瞬間寫入目標路徑！</p>
+                                <span class="text-xs font-black text-brand-600">STEP 2 (Killer Feature)</span>
+                                <h4 class="text-sm font-bold text-slate-900 mt-1 mb-2">Single-File Drag Extraction</h4>
+                                <p class="text-xs text-slate-600 leading-relaxed">Hold down the left mouse button on any single file inside the archive and drag it directly to the <b>desktop</b> or any <b>folder</b>. KyteView extracts only that specific file on the fly!</p>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- 5. 8向邊緣視窗自由縮放與尺寸記憶 -->
+                <!-- 5. 8-Directional Edge Resizing & Window Memory -->
                 <section id="section-resize" class="doc-section bg-white p-8 sm:p-10 rounded-3xl border border-slate-200 shadow-sm">
                     <div class="flex items-center gap-3 text-brand-600 mb-4">
                         <span class="w-8 h-8 rounded-xl bg-brand-100 flex items-center justify-center font-black text-sm">05</span>
-                        <h2 class="text-2xl font-black text-slate-900">8 方向邊緣自由縮放與尺寸記憶</h2>
+                        <h2 class="text-2xl font-black text-slate-900">8-Directional Edge Resizing & Window Memory</h2>
                     </div>
                     <p class="text-slate-600 text-sm leading-relaxed mb-6">
-                        為解決無邊框預覽視窗無法隨意調整大小的難題，KyteView 內建精準的原生 8 方向邊緣感知引擎，提供如傳統視窗般的流暢縮放體驗：
+                        Frameless windows in Windows often sacrifice natural resizing. KyteView features a native 8-directional edge sensor engine that behaves just like a standard system window:
                     </p>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl">
                             <div class="flex items-center gap-2 text-brand-600 font-bold text-xs mb-2">
                                 <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
-                                <span>8 個邊界感知觸發區</span>
+                                <span>8 Interactive Resize Hitboxes</span>
                             </div>
                             <p class="text-xs text-slate-600 leading-relaxed">
-                                滑鼠移至預覽視窗的<b>上、下、左、右</b>四邊或<b>四個對角</b>，鼠標會自動變換為對應縮放雙向箭頭（↔、↕、⤡、⤢），按住即可直接拖拉擴展視窗。
+                                Hover over any of the <b>top, bottom, left, right edges</b> or <b>four corners</b>. The cursor automatically transforms into resize arrows (↔, ↕, ⤡, ⤢) for smooth dragging.
                             </p>
                         </div>
                         <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl">
                             <div class="flex items-center gap-2 text-brand-600 font-bold text-xs mb-2">
                                 <i class="fa-solid fa-bookmark"></i>
-                                <span>自動記憶個人黃金尺寸</span>
+                                <span>Persistent Golden Ratio Memory</span>
                             </div>
                             <p class="text-xs text-slate-600 leading-relaxed">
-                                拖曳調整視窗後，軟體會自動儲存尺寸；下次按空白鍵瞬開同類型檔案時，將自動以您最習慣的最佳視角展開呈現。
+                                After resizing, your custom window dimensions are remembered per category. Next time you hit Spacebar, the preview expands to your preferred dimensions.
                             </p>
                         </div>
                     </div>
                 </section>
 
-                <!-- 6. PPTX 與 Word 免裝 Office -->
+                <!-- 6. PPTX & Word Without Office -->
                 <section id="section-office" class="doc-section bg-white p-8 sm:p-10 rounded-3xl border border-slate-200 shadow-sm">
                     <div class="flex items-center gap-3 text-brand-600 mb-4">
                         <span class="w-8 h-8 rounded-xl bg-brand-100 flex items-center justify-center font-black text-sm">06</span>
-                        <h2 class="text-2xl font-black text-slate-900">免裝 Office 簡報與極速 Office 預覽</h2>
+                        <h2 class="text-2xl font-black text-slate-900">Zero-Install PPTX & High-Speed Office Viewer</h2>
                     </div>
                     <p class="text-slate-600 text-sm leading-relaxed mb-6">
-                        許多工作電腦未安裝微軟 Office 或受限於授權。KyteView 具備業界領先的雙軌解碼引擎：
+                        Many workstations lack Microsoft Office or have restricted licensing. KyteView incorporates an industry-leading dual-path rendering engine:
                     </p>
 
                     <div class="space-y-4 mb-6 text-xs text-slate-600">
                         <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50">
                             <h4 class="font-bold text-slate-800 mb-1 text-sm flex items-center gap-2">
                                 <i class="fa-solid fa-file-powerpoint text-orange-500"></i>
-                                <span>PPTX 原生解析器（電腦完全不需安裝 PowerPoint）</span>
+                                <span>Native PPTX Parser (Zero PowerPoint Installation Required)</span>
                             </h4>
-                            <p class="leading-relaxed">底層直接解構 OpenXML 投影片 XML 與關聯媒體，自動提取高解析度預渲染縮圖，零載入等待，並提供換頁按鈕快速閱覽全簡報。</p>
+                            <p class="leading-relaxed">Directly decodes OpenXML slides and relationships to extract high-resolution rendered thumbnails with zero cold-start delay, offering slide switching controls.</p>
                         </div>
                         <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50">
                             <h4 class="font-bold text-slate-800 mb-1 text-sm flex items-center gap-2">
                                 <i class="fa-solid fa-file-word text-blue-500"></i>
-                                <span>Word / Excel 高速向量快取</span>
+                                <span>Word / Excel Vector Cache Acceleration</span>
                             </h4>
-                            <p class="leading-relaxed">若本機已安裝 Office，KyteView 會自動調用 COM 高速向量快取引擎，排版 100% 精準不跑版；若無安裝 Office，則以結構化文字預覽確保資料秒開不中斷。</p>
+                            <p class="leading-relaxed">When Office is present, KyteView connects to COM vector caching for 100% faithful layout fidelity; without Office, it seamlessly falls back to structured text extraction.</p>
                         </div>
                     </div>
                 </section>
 
-                <!-- 7. 4K 影音硬解與黑膠音訊 -->
+                <!-- 7. 4K GPU Playback & Vinyl Audio -->
                 <section id="section-media" class="doc-section bg-white p-8 sm:p-10 rounded-3xl border border-slate-200 shadow-sm">
                     <div class="flex items-center gap-3 text-brand-600 mb-4">
                         <span class="w-8 h-8 rounded-xl bg-brand-100 flex items-center justify-center font-black text-sm">07</span>
-                        <h2 class="text-2xl font-black text-slate-900">GPU 硬體加速影音與黑膠音訊播放</h2>
+                        <h2 class="text-2xl font-black text-slate-900">GPU Hardware Accelerated Media & Vinyl Audio Player</h2>
                     </div>
                     <p class="text-slate-600 text-sm leading-relaxed mb-6">
-                        KyteView 不打包肥大且耗電的外部 FFmpeg 播放器，而是直接調用微軟 Windows Media Foundation (WMF) 進行 GPU 硬體解碼：
+                        Instead of bundling bulky, power-hungry FFmpeg player binaries, KyteView invokes Microsoft Windows Media Foundation (WMF) for true native GPU hardware decoding:
                     </p>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div class="p-5 rounded-2xl border border-slate-200 bg-slate-50">
                             <h4 class="text-xs font-bold text-slate-800 flex items-center gap-2 mb-2">
                                 <i class="fa-solid fa-film text-rose-500"></i>
-                                <span>影片播放 (.mp4, .mov, .webm, .mkv)</span>
+                                <span>Video Playback (.mp4, .mov, .webm, .mkv)</span>
                             </h4>
                             <p class="text-xs text-slate-600 leading-relaxed">
-                                • 4K 影片毫秒級秒開，CPU 佔用近乎 0%。<br>
-                                • 支援進度拖曳條，懸浮控制列在滑鼠靜止 2 秒後自動淡出隱藏。
+                                • 4K video opens in milliseconds with near 0% CPU consumption.<br>
+                                • Interactive seekbar; floating controls auto-fade after 2 seconds of inactivity.
                             </p>
                         </div>
                         <div class="p-5 rounded-2xl border border-slate-200 bg-slate-50">
                             <h4 class="text-xs font-bold text-slate-800 flex items-center gap-2 mb-2">
                                 <i class="fa-solid fa-music text-purple-500"></i>
-                                <span>音訊播放 (.mp3, .flac, .wav, .m4a)</span>
+                                <span>Audio Playback (.mp3, .flac, .wav, .m4a)</span>
                             </h4>
                             <p class="text-xs text-slate-600 leading-relaxed">
-                                • 經典現代黑膠唱片旋轉封面視覺動效。<br>
-                                • 支援進度拖曳條、時間碼即時顯示。<br>
-                                • 輕量零負擔，音質無損原音重現。
+                                • Elegant rotating vinyl record animation with embedded cover art.<br>
+                                • Real-time timecode readout and interactive scrubbing bar.<br>
+                                • Zero system overhead and lossless audio fidelity.
                             </p>
                         </div>
                     </div>
                 </section>
 
-                <!-- 8. 狀態指示膠囊與長按微透 -->
+                <!-- 8. Status Capsule HUD & Peek -->
                 <section id="section-hud" class="doc-section bg-white p-8 sm:p-10 rounded-3xl border border-slate-200 shadow-sm">
                     <div class="flex items-center gap-3 text-brand-600 mb-4">
                         <span class="w-8 h-8 rounded-xl bg-brand-100 flex items-center justify-center font-black text-sm">08</span>
-                        <h2 class="text-2xl font-black text-slate-900">視覺感知狀態膠囊 (HUD) 與長按微透視</h2>
+                        <h2 class="text-2xl font-black text-slate-900">Status Capsule HUD & Hold to Peek Translucency</h2>
                     </div>
                     <p class="text-slate-600 text-sm leading-relaxed mb-6">
-                        預覽檔案時，最怕繁雜的多餘彈窗打斷工作心流。KyteView 採用頂級微動態設計，讓資訊以極致低調優雅的方式即時反饋：
+                        Intrusive UI popups interrupt creative flow. KyteView utilizes micro-motion design to provide feedback in the most subtle, elegant manner:
                     </p>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl">
                             <div class="flex items-center gap-2 text-brand-600 font-bold text-xs mb-2">
                                 <i class="fa-solid fa-capsules"></i>
-                                <span>右下角待命提示膠囊 (Status Pill HUD)</span>
+                                <span>Bottom-Right Status Pill HUD</span>
                             </div>
                             <p class="text-xs text-slate-600 leading-relaxed">
-                                當您切換至檔案總管時，螢幕右下角會以毛玻璃動畫短暫淡入「⚡ KyteView 待命中 · [Space] 預覽」，提示系統已就緒，低調美觀且完全不干擾工作。
+                                When switching to Explorer, a frosted capsule briefly fades in showing "⚡ KyteView Ready · [Space] Preview", quietly letting you know the daemon is active without disruption.
                             </p>
                         </div>
                         <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl">
                             <div class="flex items-center gap-2 text-brand-600 font-bold text-xs mb-2">
                                 <i class="fa-solid fa-eye"></i>
-                                <span>長按 Alt/Ctrl 瞬間透視底層</span>
+                                <span>Hold Alt/Ctrl to Peek Beneath</span>
                             </div>
                             <p class="text-xs text-slate-600 leading-relaxed">
-                                預覽視窗遮擋住底層檔案名稱或背景桌面時，只需<b>長按 Alt 或 Ctrl 鍵</b>，視窗瞬間淡化為 20% 半透明；鬆開按鍵即刻恢復 100% 清晰預覽！
+                                If the preview covers file names or desktop icons underneath, <b>hold Alt or Ctrl</b> to make the window instantly fade to 20% opacity; release to restore 100% clarity!
                             </p>
                         </div>
                     </div>
                 </section>
 
-                <!-- 9. 系統托盤與實例守護 -->
+                <!-- 9. System Tray & Mutex Guard -->
                 <section id="section-tray" class="doc-section bg-white p-8 sm:p-10 rounded-3xl border border-slate-200 shadow-sm">
                     <div class="flex items-center gap-3 text-brand-600 mb-4">
                         <span class="w-8 h-8 rounded-xl bg-brand-100 flex items-center justify-center font-black text-sm">09</span>
-                        <h2 class="text-2xl font-black text-slate-900">系統托盤常駐管理與單一實例守護</h2>
+                        <h2 class="text-2xl font-black text-slate-900">System Tray Management & Single Instance Guard</h2>
                     </div>
                     <p class="text-slate-600 text-sm leading-relaxed mb-6">
-                        KyteView 啟動後安靜常駐於 Windows 右下角系統托盤，記憶體佔用極低（平常小於 60MB），不拖慢系統效能：
+                        KyteView runs as a lightweight daemon in the Windows notification area, consuming under 60MB RAM with zero impact on system responsiveness:
                     </p>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl">
-                            <span class="text-xs font-bold text-brand-600"><i class="fa-solid fa-bars mr-1"></i>托盤右鍵快捷選單</span>
-                            <p class="text-xs text-slate-500 mt-2 leading-relaxed">右鍵點擊托盤圖示可隨時開啟偏好設定、切換開機自啟動、查看授權狀態、複製診斷資訊或優雅結束程式。</p>
+                            <span class="text-xs font-bold text-brand-600"><i class="fa-solid fa-bars mr-1"></i>Tray Context Menu</span>
+                            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Right-click the tray icon to quickly access Preferences, toggle Autostart, inspect license status, copy diagnostics, or exit.</p>
                         </div>
                         <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl">
-                            <span class="text-xs font-bold text-brand-600"><i class="fa-solid fa-shield mr-1"></i>單一實例 (Mutex) 守護</span>
-                            <p class="text-xs text-slate-500 mt-2 leading-relaxed">底層採用 Windows 原生具名互斥鎖，避免多次重複點擊導致重複開程式，自動保持全域單一守護實例。</p>
+                            <span class="text-xs font-bold text-brand-600"><i class="fa-solid fa-shield mr-1"></i>Mutex Guard</span>
+                            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Native Windows named mutex locks prevent duplicate daemon processes from launching if you click the executable repeatedly.</p>
                         </div>
                         <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl">
-                            <span class="text-xs font-bold text-brand-600"><i class="fa-solid fa-power-off mr-1"></i>開機靜默隨選即開</span>
-                            <p class="text-xs text-slate-500 mt-2 leading-relaxed">支援 Windows 開機時背景靜音載入，免去每次手動點開的麻煩，開機後在檔案總管按空白鍵隨時可開。</p>
+                            <span class="text-xs font-bold text-brand-600"><i class="fa-solid fa-power-off mr-1"></i>Silent Autostart</span>
+                            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Supports starting quietly minimized in the background at Windows boot, ready for Spacebar previews without manual launching.</p>
                         </div>
                     </div>
                 </section>
 
-                <!-- 10. 偏好設定功能與常見問題 -->
+                <!-- 10. Preferences & FAQ -->
                 <section id="section-settings" class="doc-section bg-white p-8 sm:p-10 rounded-3xl border border-slate-200 shadow-sm">
                     <div class="flex items-center gap-3 text-brand-600 mb-4">
                         <span class="w-8 h-8 rounded-xl bg-brand-100 flex items-center justify-center font-black text-sm">10</span>
-                        <h2 class="text-2xl font-black text-slate-900">偏好設定功能與常見問題 (FAQ)</h2>
+                        <h2 class="text-2xl font-black text-slate-900">Preferences & Frequently Asked Questions (FAQ)</h2>
                     </div>
                     <p class="text-slate-600 text-sm leading-relaxed mb-6">
-                        點擊預覽視窗右上角的<b>齒輪圖示 ⚙️</b> 或右下角<b>系統托盤圖示</b>，即可開啟完整偏好設定面板：
+                        Click the <b>gear icon ⚙️</b> in the preview title bar or right-click the <b>system tray icon</b> to open the full preferences window:
                     </p>
 
-                    <!-- 設定分頁導覽特色 -->
+                    <!-- Preferences Highlights -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                         <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl">
                             <h4 class="text-xs font-bold text-slate-800 mb-1 flex items-center gap-1.5">
                                 <i class="fa-solid fa-palette text-brand-600"></i>
-                                <span>外觀風格與 Win11 Mica 效果</span>
+                                <span>Theme Styling & Win11 Mica Effect</span>
                             </h4>
                             <p class="text-xs text-slate-500 leading-relaxed">
-                                提供深色 (Dark)、淺色 (Light) 或跟隨 Windows 系統主題。支援開啟 Windows 11 原生 Mica / Acrylic 半透明亞克力毛玻璃視窗底色。
+                                Choose between Dark, Light, or follow Windows system appearance. Supports native Windows 11 Mica / Acrylic translucent backdrop material.
                             </p>
                         </div>
                         <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl">
                             <h4 class="text-xs font-bold text-slate-800 mb-1 flex items-center gap-1.5">
                                 <i class="fa-solid fa-window-maximize text-brand-600"></i>
-                                <span>視窗模式與避讓開關</span>
+                                <span>Window Modes & Offsetting Toggle</span>
                             </h4>
                             <p class="text-xs text-slate-500 leading-relaxed">
-                                可自由切換「動態自適應螢幕」或「固定記憶尺寸」；並可一鍵啟用或關閉「智慧避讓偏移機制 (Smart Offset)」。
+                                Toggle between "Adaptive Screen Size" and "Fixed Memory Size", and enable or disable Smart Offsetting based on your multi-monitor workflow.
                             </p>
                         </div>
                         <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl">
                             <h4 class="text-xs font-bold text-slate-800 mb-1 flex items-center gap-1.5">
                                 <i class="fa-solid fa-clipboard-list text-brand-600"></i>
-                                <span>一鍵複製系統診斷資訊</span>
+                                <span>One-Click System Diagnostics Copy</span>
                             </h4>
                             <p class="text-xs text-slate-500 leading-relaxed">
-                                設定面板底部提供「📋 複製系統診斷資訊」，自動收集 OS 版本、DPR 螢幕縮放比與 Office COM 引擎狀態，方便向客服快速回報排除問題。
+                                Click "📋 Copy System Diagnostics" at the bottom of Settings to gather OS version, DPR screen scaling, and Office COM status for fast support troubleshooting.
                             </p>
                         </div>
                         <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl">
                             <h4 class="text-xs font-bold text-slate-800 mb-1 flex items-center gap-1.5">
                                 <i class="fa-solid fa-key text-brand-600"></i>
-                                <span>授權中心與裝置換機管理</span>
+                                <span>License Management & Device Migration</span>
                             </h4>
                             <p class="text-xs text-slate-500 leading-relaxed">
-                                直觀查看目前方案（14 天免費試用剩餘天數 / 永久專業版），支援輸入序號一鍵線上啟用，以及更換新電腦時自主「解除綁定」釋放額度。
+                                View current plan (14-day trial remaining / perpetual Pro license), activate keys online with one click, or self-service "Deactivate Device" to transfer to a new PC.
                             </p>
                         </div>
                     </div>
 
-                    <!-- 常見問題 FAQ -->
-                    <h3 class="text-base font-extrabold text-slate-800 mb-4 border-b border-slate-200 pb-2">常見問題與解答</h3>
+                    <!-- FAQ -->
+                    <h3 class="text-base font-extrabold text-slate-800 mb-4 border-b border-slate-200 pb-2">Frequently Asked Questions</h3>
                     <div class="space-y-3 mb-6 text-xs text-slate-600">
                         <div class="p-4 rounded-xl border border-slate-200 bg-slate-50">
-                            <h4 class="font-bold text-slate-800 mb-1">Q: 為什麼在檔案總管按空白鍵沒有反應？</h4>
-                            <p>請檢查 Windows 右下角系統托盤是否有 KyteView 執行圖示。若執行緒被防毒軟體攔截，請至安全中心將其新增至允許清單。</p>
+                            <h4 class="font-bold text-slate-800 mb-1">Q: Why is there no response when pressing Space in Windows Explorer?</h4>
+                            <p>Please verify that KyteView is running in your Windows system tray. If your antivirus intercepted the background hook, please add KyteView to your security whitelist.</p>
                         </div>
                         <div class="p-4 rounded-xl border border-slate-200 bg-slate-50">
-                            <h4 class="font-bold text-slate-800 mb-1">Q: 一組序號可以在幾台電腦使用？更換電腦怎麼辦？</h4>
-                            <p>每組專業版序號支援 2 台個人電腦同時授權綁定。若更換新電腦，可在舊電腦的「偏好設定 ➔ 授權」點選「解除綁定」，額度將即時釋放給新電腦使用。</p>
+                            <h4 class="font-bold text-slate-800 mb-1">Q: How many devices can one license key activate? How do I transfer to a new PC?</h4>
+                            <p>Each Pro license permits simultaneous activation on 2 personal PCs. When upgrading to a new PC, open "Preferences ➔ License" on the old machine and click "Deactivate Device" to instantly free up the slot.</p>
                         </div>
                         <div class="p-4 rounded-xl border border-slate-200 bg-slate-50">
-                            <h4 class="font-bold text-slate-800 mb-1">Q: 如何讓 KyteView 開機時自動啟動？</h4>
-                            <p>在安裝時勾選「開機時自動啟動」，或在偏好設定中勾選「開機自動啟動」即可。</p>
+                            <h4 class="font-bold text-slate-800 mb-1">Q: How do I make KyteView launch automatically on Windows boot?</h4>
+                            <p>Check "Launch at system startup" during the installer setup, or toggle the "Autostart on boot" switch in Preferences at any time.</p>
                         </div>
                         <div class="p-4 rounded-xl border border-slate-200 bg-slate-50">
-                            <h4 class="font-bold text-slate-800 mb-1">Q: 一次性買斷的維護期與後續更新政策是什麼？</h4>
-                            <p>本商品為一次性買斷，享有一年內免費維護與 Bug 修復。若未來作業系統大型改版（如 Windows 升級）導致軟體需重構，新版本將另行販售。</p>
+                            <h4 class="font-bold text-slate-800 mb-1">Q: What is the maintenance period and update policy for one-time purchases?</h4>
+                            <p>Licenses are one-time perpetual purchases including one year of free maintenance and bug fixes. If future major operating system overhauls (such as major Windows version upgrades) necessitate substantial software refactoring, new major releases will be sold separately.</p>
                         </div>
                     </div>
                 </section>
@@ -491,18 +488,18 @@ ightarrow$ 刪除暫存」的痛苦流程：
         </div>
     </div>
 
-    <!-- 頁尾 -->
+    <!-- Footer -->
     <footer class="py-12 px-6 border-t border-slate-200 text-center text-xs text-slate-500 bg-white">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-2">
                 <img src="assets/icon.png" alt="KyteView" class="w-6 h-6 rounded-md">
                 <span class="font-bold text-slate-800">KyteView</span>
-                <span>— 官方全功能使用說明指南</span>
+                <span>— Official Comprehensive User Guide</span>
             </div>
             <div class="flex items-center gap-6">
-                <a href="index.html" class="hover:text-brand-600 transition">回到產品首頁</a>
-                <a href="https://ais7896-hue.github.io/Kyteindex/" class="hover:text-brand-600 transition font-bold text-indigo-600">Kyte 全系列</a>
-                <a href="LICENSE" class="hover:text-brand-600 transition">授權條款 (License)</a>
+                <a href="index.html" class="hover:text-brand-600 transition">Back to Home</a>
+                <a href="https://ais7896-hue.github.io/Kyteindex/" class="hover:text-brand-600 transition font-bold text-indigo-600">Kyte Suite</a>
+                <a href="LICENSE" class="hover:text-brand-600 transition">License</a>
             </div>
         </div>
         <div class="mt-8 text-[11px] text-slate-400">
