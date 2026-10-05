@@ -1,4 +1,4 @@
-# build_installer.ps1
+build_installer.ps1
 # KyteView 一鍵打包與安裝程式編譯腳本
 
 $ErrorActionPreference = "Stop"
@@ -87,11 +87,13 @@ if ($foundIscc) {
         Write-Host " [SUCCESS] 安裝精靈打包成功！ " -ForegroundColor Green
         Write-Host " 安裝檔位置：dist\KyteView_Setup_1.4.0.exe " -ForegroundColor Green
         Write-Host "=============================================" -ForegroundColor Green
-    } else {
+    }
+    else {
         Write-Host "`n[ERROR] Inno Setup 封裝失敗，請檢查 setup.iss 設定！ " -ForegroundColor Red
         exit 1
     }
-} else {
+}
+else {
     Write-Host "`n[WARNING] 未偵測到 Inno Setup 編譯器 (ISCC.exe)。 " -ForegroundColor Yellow
     Write-Host "已為您完成 dist\KyteView 免安裝獨立目錄版。 " -ForegroundColor Yellow
     Write-Host "安裝 Inno Setup 後再次執行本腳本即可產生安裝檔。 " -ForegroundColor Yellow
