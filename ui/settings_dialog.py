@@ -36,36 +36,37 @@ from PySide6.QtWidgets import (
 
 from config.settings import settings
 from config.theme import get_theme_colors
+from i18n import t, i18n
 
 # 專屬深色模式風格
 DARK_CODE_THEMES = [
-    ("Monokai (經典深色)", "monokai"),
-    ("One Dark (Atom 風格)", "one-dark"),
-    ("Dracula (吸血鬼深色)", "dracula"),
-    ("GitHub Dark (現代深色)", "github-dark"),
-    ("Nord (極地冷調深色)", "nord"),
-    ("Material (質感深色)", "material"),
-    ("Solarized Dark (低對比護眼)", "solarized-dark"),
+    "monokai",
+    "one-dark",
+    "dracula",
+    "github-dark",
+    "nord",
+    "material",
+    "solarized-dark",
 ]
 
 # 專屬淺色模式風格
 LIGHT_CODE_THEMES = [
-    ("Friendly (柔和淺色)", "friendly"),
-    ("Visual Studio (清爽淺色)", "vs"),
-    ("Default (經典簡約)", "default"),
-    ("Solarized Light (暖調護眼)", "solarized-light"),
-    ("Gruvbox Light (復古暖黃)", "gruvbox-light"),
-    ("Tango (清晰淺色)", "tango"),
-    ("Pastie (Ruby 風格淺色)", "pastie"),
+    "friendly",
+    "vs",
+    "default",
+    "solarized-light",
+    "gruvbox-light",
+    "tango",
+    "pastie",
 ]
 
 
 class SettingsDialog(QDialog):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
-        self.setWindowTitle("KyteView 設定")
-        self.resize(740, 560)
-        self.setMinimumSize(660, 500)
+        self.setWindowTitle(t("settings.title"))
+        self.resize(760, 560)
+        self.setMinimumSize(700, 500)
 
         # 備份進入設定時的狀態，供取消時完整還原
         self._initial_data = copy.deepcopy(settings._data)
@@ -73,6 +74,7 @@ class SettingsDialog(QDialog):
 
         # 監聽主題變化動態重繪
         settings.theme_changed.connect(self._on_theme_updated)
+        i18n.language_changed.connect(self._retranslate_ui)
 
         self._build_ui()
         self._load_values()
@@ -86,27 +88,27 @@ class SettingsDialog(QDialog):
         # ── 左側導航欄 ────────────────────────────────────────────────────────
         self._nav_frame = QFrame()
         self._nav_frame.setObjectName("nav_frame")
-        self._nav_frame.setFixedWidth(190)
+        self._nav_frame.setFixedWidth(215)
         nav_layout = QVBoxLayout(self._nav_frame)
         nav_layout.setContentsMargins(12, 20, 12, 20)
         nav_layout.setSpacing(8)
 
         # Logo / 標題
-        lbl_title = QLabel("KyteView")
-        lbl_title.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
-        lbl_sub = QLabel("偏好設定")
-        lbl_sub.setFont(QFont("Segoe UI", 10))
-        nav_layout.addWidget(lbl_title)
-        nav_layout.addWidget(lbl_sub)
+        self._lbl_nav_title = QLabel(t("app.name"))
+        self._lbl_nav_title.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
+        self._lbl_nav_sub = QLabel(t("settings.subtitle"))
+        self._lbl_nav_sub.setFont(QFont("Segoe UI", 10))
+        nav_layout.addWidget(self._lbl_nav_title)
+        nav_layout.addWidget(self._lbl_nav_sub)
         nav_layout.addSpacing(16)
 
         # 導航按鈕
         self._btn_group = QButtonGroup(self)
         self._nav_buttons: list[QPushButton] = []
         tabs_info = [
-            ("🎨 外觀與主題", 0),
-            ("🔤 字體與排版", 1),
-            ("📐 視窗與行為", 2),
+            (t("settings.tab_appearance"), 0),
+            (t("settings.tab_font"), 1),
+            (t("settings.tab_behavior"), 2),
         ]
         for text, idx in tabs_info:
             btn = QPushButton(text)
@@ -123,7 +125,7 @@ class SettingsDialog(QDialog):
         nav_layout.addStretch()
 
         # 版本提示與技術支援
-        lbl_ver = QLabel("v1.4.0 • 64-bit")
+        lbl_ver = QLabel("v1.5.0 • 64-bit")
         lbl_ver.setStyleSheet("color: #71717a; font-size: 11px;")
         nav_layout.addWidget(lbl_ver)
 
@@ -134,10 +136,10 @@ class SettingsDialog(QDialog):
             "3.%20%E9%A0%90%E8%A6%BD%E5%93%AA%E7%A8%AE%E9%A1%9E%E5%9E%8B%E7%9A%84%E6%AA%94%E6%A1%88%E6%99%82%E7%99%BC%E7%94%9F%20(%E4%BE%8B%E5%A6%82%20.xlsx%20/%20.mp4)%EF%BC%9A%0A"
             "4.%20%E6%88%AA%E5%9C%96%E6%88%96%E9%8C%AF%E8%AA%A4%E8%A8%8A%E6%81%AF%EF%BC%9A%0A"
         )
-        lbl_support = QLabel(f"<a href='{mailto_support}' style='color: #818cf8; text-decoration: none;'>✉ 聯絡技術支援</a>")
-        lbl_support.setOpenExternalLinks(True)
-        lbl_support.setStyleSheet("font-size: 11px;")
-        nav_layout.addWidget(lbl_support)
+        self._lbl_support = QLabel(f"<a href='{mailto_support}' style='color: #818cf8; text-decoration: none;'>{t('settings.support_email')}</a>")
+        self._lbl_support.setOpenExternalLinks(True)
+        self._lbl_support.setStyleSheet("font-size: 11px;")
+        nav_layout.addWidget(self._lbl_support)
 
         main_layout.addWidget(self._nav_frame)
 
@@ -160,11 +162,11 @@ class SettingsDialog(QDialog):
         bottom_bar.setSpacing(10)
 
         # 系統診斷資訊小按鈕
-        self._btn_diag = QPushButton("📋 複製系統診斷資訊")
+        self._btn_diag = QPushButton(t("settings.copy_diag"))
         self._btn_diag.setObjectName("btn_dialog_diag")
         self._btn_diag.setFixedHeight(34)
         self._btn_diag.setCursor(Qt.CursorShape.PointingHandCursor)
-        self._btn_diag.setToolTip("收集當前作業系統、軟體版本、螢幕解析度與 Office 狀態複製至剪貼簿，方便回報問題")
+        self._btn_diag.setToolTip(t("settings.copy_diag_tip"))
         self._btn_diag.clicked.connect(self._copy_diagnostic_info)
         bottom_bar.addWidget(self._btn_diag)
 
@@ -175,14 +177,14 @@ class SettingsDialog(QDialog):
 
         bottom_bar.addStretch()
 
-        self._btn_cancel = QPushButton("關閉 (Close)")
+        self._btn_cancel = QPushButton(t("settings.cancel"))
         self._btn_cancel.setObjectName("btn_dialog_cancel")
         self._btn_cancel.setFixedWidth(100)
         self._btn_cancel.setFixedHeight(34)
         self._btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
         self._btn_cancel.clicked.connect(self.reject)
 
-        self._btn_save = QPushButton("儲存設定 (Save)")
+        self._btn_save = QPushButton(t("settings.save"))
         self._btn_save.setObjectName("btn_dialog_save")
         self._btn_save.setFixedWidth(125)
         self._btn_save.setFixedHeight(34)
@@ -209,14 +211,14 @@ class SettingsDialog(QDialog):
         layout.setSpacing(18)
 
         # 1. 外觀模式
-        grp_theme = QGroupBox("外觀模式 (Appearance Mode)")
-        grp_theme_layout = QVBoxLayout(grp_theme)
+        self._grp_theme = QGroupBox(t("settings.grp_theme_mode"))
+        grp_theme_layout = QVBoxLayout(self._grp_theme)
         grp_theme_layout.setSpacing(10)
 
         theme_btn_row = QHBoxLayout()
-        self._rb_theme_system = QRadioButton("跟隨系統 (System)")
-        self._rb_theme_dark = QRadioButton("深色模式 (Dark)")
-        self._rb_theme_light = QRadioButton("淺色模式 (Light)")
+        self._rb_theme_system = QRadioButton(t("settings.theme_system"))
+        self._rb_theme_dark = QRadioButton(t("settings.theme_dark"))
+        self._rb_theme_light = QRadioButton(t("settings.theme_light"))
 
         self._theme_btn_group = QButtonGroup(self)
         self._theme_btn_group.addButton(self._rb_theme_system, 0)
@@ -230,32 +232,51 @@ class SettingsDialog(QDialog):
         theme_btn_row.addStretch()
         grp_theme_layout.addLayout(theme_btn_row)
 
-        lbl_theme_hint = QLabel("💡 選擇跟隨系統將自動即時響應 Windows 11/10 的深淺色切換。")
-        lbl_theme_hint.setStyleSheet("font-size: 11px; color: #71717a;")
-        grp_theme_layout.addWidget(lbl_theme_hint)
-        layout.addWidget(grp_theme)
+        self._lbl_theme_hint = QLabel(t("settings.theme_hint"))
+        self._lbl_theme_hint.setStyleSheet("font-size: 11px; color: #71717a;")
+        grp_theme_layout.addWidget(self._lbl_theme_hint)
+        layout.addWidget(self._grp_theme)
 
-        # 2. 背景材質效果
-        grp_material = QGroupBox("視窗材質 (Background Effect)")
-        grp_material_layout = QVBoxLayout(grp_material)
-        self._cb_acrylic = QCheckBox("啟用毛玻璃半透明效果 (Acrylic / Mica Effect)")
+        # 2. 介面語言
+        self._grp_lang = QGroupBox(t("settings.grp_language"))
+        grp_lang_layout = QVBoxLayout(self._grp_lang)
+        grp_lang_layout.setSpacing(10)
+
+        lang_row = QHBoxLayout()
+        self._lbl_lang_desc = QLabel(t("settings.grp_language") + "：")
+        self._combo_language = QComboBox()
+        self._combo_language.setView(QListView())
+        self._combo_language.addItem(t("settings.lang_system"), "system")
+        self._combo_language.addItem(t("settings.lang_zh_tw"), "zh_TW")
+        self._combo_language.addItem(t("settings.lang_en_us"), "en_US")
+        self._combo_language.currentIndexChanged.connect(self._on_language_combo_changed)
+        lang_row.addWidget(self._lbl_lang_desc)
+        lang_row.addWidget(self._combo_language, 1)
+        grp_lang_layout.addLayout(lang_row)
+        layout.addWidget(self._grp_lang)
+
+        # 3. 背景材質效果
+        self._grp_material = QGroupBox(t("settings.grp_acrylic"))
+        grp_material_layout = QVBoxLayout(self._grp_material)
+        self._cb_acrylic = QCheckBox(t("settings.enable_acrylic"))
         self._cb_acrylic.toggled.connect(self._on_acrylic_toggled)
         grp_material_layout.addWidget(self._cb_acrylic)
-        lbl_mat_hint = QLabel("若顯卡或筆電處於省電模式，關閉毛玻璃可降低 GPU 渲染功耗。")
-        lbl_mat_hint.setStyleSheet("font-size: 11px; color: #71717a;")
-        grp_material_layout.addWidget(lbl_mat_hint)
-        layout.addWidget(grp_material)
+        self._lbl_mat_hint = QLabel(t("settings.acrylic_hint"))
+        self._lbl_mat_hint.setStyleSheet("font-size: 11px; color: #71717a;")
+        grp_material_layout.addWidget(self._lbl_mat_hint)
+        layout.addWidget(self._grp_material)
 
-        # 3. 程式碼著色風格與即時預覽
-        grp_code = QGroupBox("程式碼著色風格 (Code Highlighter Theme)")
-        grp_code_layout = QVBoxLayout(grp_code)
+        # 4. 程式碼著色風格與即時預覽
+        self._grp_code = QGroupBox(t("settings.grp_code_style"))
+        grp_code_layout = QVBoxLayout(self._grp_code)
         grp_code_layout.setSpacing(10)
 
         code_row = QHBoxLayout()
-        code_row.addWidget(QLabel("主題風格："))
+        self._lbl_code_theme = QLabel(t("settings.code_theme_lbl"))
         self._combo_code_theme = QComboBox()
         self._combo_code_theme.setView(QListView())
         self._combo_code_theme.currentIndexChanged.connect(self._on_code_theme_changed)
+        code_row.addWidget(self._lbl_code_theme)
         code_row.addWidget(self._combo_code_theme, 1)
         grp_code_layout.addLayout(code_row)
 
@@ -265,7 +286,7 @@ class SettingsDialog(QDialog):
         self._code_preview.setStyleSheet("border-radius: 6px; border: 1px solid rgba(128, 128, 128, 0.2);")
         grp_code_layout.addWidget(self._code_preview)
 
-        layout.addWidget(grp_code)
+        layout.addWidget(self._grp_code)
         layout.addStretch()
         return w
 
@@ -277,8 +298,8 @@ class SettingsDialog(QDialog):
         layout.setSpacing(18)
 
         # 1. 字體大小滑桿
-        grp_size = QGroupBox("字體大小 (Font Size)")
-        grp_size_layout = QVBoxLayout(grp_size)
+        self._grp_size = QGroupBox(t("settings.grp_font_size"))
+        grp_size_layout = QVBoxLayout(self._grp_size)
         grp_size_layout.setSpacing(10)
 
         size_row = QHBoxLayout()
@@ -292,26 +313,26 @@ class SettingsDialog(QDialog):
         self._lbl_font_size_val.setFixedWidth(50)
         self._lbl_font_size_val.setFont(QFont("Segoe UI", 11, QFont.Weight.Bold))
 
-        btn_reset_font = QPushButton("重設")
-        btn_reset_font.setFixedWidth(60)
-        btn_reset_font.clicked.connect(lambda: self._slider_font_size.setValue(13))
+        self._btn_reset_font = QPushButton(t("settings.btn_reset_font"))
+        self._btn_reset_font.setFixedWidth(60)
+        self._btn_reset_font.clicked.connect(lambda: self._slider_font_size.setValue(13))
 
         size_row.addWidget(self._slider_font_size, 1)
         size_row.addWidget(self._lbl_font_size_val)
-        size_row.addWidget(btn_reset_font)
+        size_row.addWidget(self._btn_reset_font)
         grp_size_layout.addLayout(size_row)
 
         self._slider_font_size.valueChanged.connect(self._on_font_size_changed)
-        layout.addWidget(grp_size)
+        layout.addWidget(self._grp_size)
 
         # 2. 字型設定
-        grp_family = QGroupBox("字型族系 (Font Families)")
-        grp_family_layout = QVBoxLayout(grp_family)
+        self._grp_family = QGroupBox(t("settings.grp_font_family"))
+        grp_family_layout = QVBoxLayout(self._grp_family)
         grp_family_layout.setSpacing(12)
 
         # 程式碼等寬字型
         code_f_row = QHBoxLayout()
-        code_f_row.addWidget(QLabel("等寬字型（程式碼/文字）："))
+        self._lbl_code_font = QLabel(t("settings.lbl_mono_font"))
         self._combo_code_font = QComboBox()
         self._combo_code_font.setView(QListView())
         common_mono = [
@@ -329,12 +350,13 @@ class SettingsDialog(QDialog):
         if self._combo_code_font.count() == 0:
             self._combo_code_font.addItem("Consolas", "Consolas")
         self._combo_code_font.currentIndexChanged.connect(self._on_code_font_changed)
+        code_f_row.addWidget(self._lbl_code_font)
         code_f_row.addWidget(self._combo_code_font, 1)
         grp_family_layout.addLayout(code_f_row)
 
         # 閱讀字型
         text_f_row = QHBoxLayout()
-        text_f_row.addWidget(QLabel("閱讀字型（Markdown/文字）："))
+        self._lbl_text_font = QLabel(t("settings.lbl_reading_font"))
         self._combo_text_font = QComboBox()
         self._combo_text_font.setView(QListView())
         common_text = [
@@ -349,25 +371,26 @@ class SettingsDialog(QDialog):
         if self._combo_text_font.count() == 0:
             self._combo_text_font.addItem("Microsoft JhengHei UI", "Microsoft JhengHei UI")
         self._combo_text_font.currentIndexChanged.connect(self._on_text_font_changed)
+        text_f_row.addWidget(self._lbl_text_font)
         text_f_row.addWidget(self._combo_text_font, 1)
         grp_family_layout.addLayout(text_f_row)
 
-        layout.addWidget(grp_family)
+        layout.addWidget(self._grp_family)
 
         # 3. 排版選項
-        grp_opt = QGroupBox("排版選項 (Typography Options)")
-        grp_opt_layout = QVBoxLayout(grp_opt)
+        self._grp_opt = QGroupBox(t("settings.grp_typography_options"))
+        grp_opt_layout = QVBoxLayout(self._grp_opt)
         grp_opt_layout.setSpacing(10)
 
-        self._cb_ligatures = QCheckBox("啟用連字效果 (Font Ligatures，若字型支援如 !=、-> 自動轉化)")
+        self._cb_ligatures = QCheckBox(t("settings.chk_ligatures"))
         self._cb_ligatures.toggled.connect(lambda v: setattr(settings, "enable_ligatures", v))
         grp_opt_layout.addWidget(self._cb_ligatures)
 
-        self._cb_word_wrap = QCheckBox("長行自動換行 (Word Wrap，避免超出視窗邊界強制橫向滾動)")
+        self._cb_word_wrap = QCheckBox(t("settings.chk_word_wrap"))
         self._cb_word_wrap.toggled.connect(lambda v: setattr(settings, "word_wrap", v))
         grp_opt_layout.addWidget(self._cb_word_wrap)
 
-        layout.addWidget(grp_opt)
+        layout.addWidget(self._grp_opt)
         layout.addStretch()
         return w
 
@@ -379,18 +402,19 @@ class SettingsDialog(QDialog):
         layout.setSpacing(18)
 
         # 1. 預設視窗大小模式
-        grp_size_mode = QGroupBox("預設視窗大小模式 (Window Sizing)")
-        grp_size_mode_layout = QVBoxLayout(grp_size_mode)
+        self._grp_size_mode = QGroupBox(t("settings.grp_window_size"))
+        grp_size_mode_layout = QVBoxLayout(self._grp_size_mode)
         grp_size_mode_layout.setSpacing(10)
 
         mode_row = QHBoxLayout()
-        mode_row.addWidget(QLabel("尺寸策略："))
+        self._lbl_size_strategy = QLabel(t("settings.lbl_size_strategy"))
         self._combo_size_mode = QComboBox()
         self._combo_size_mode.setView(QListView())
-        self._combo_size_mode.addItem("智慧記憶 (自動記憶最後調整的大小)", "remember")
-        self._combo_size_mode.addItem("自訂固定解析度 (依下方自訂寬高固定顯示)", "fixed")
-        self._combo_size_mode.addItem("螢幕比例自適應 (寬55% x 高60%)", "adaptive")
+        self._combo_size_mode.addItem(t("settings.size_mode_remember"), "remember")
+        self._combo_size_mode.addItem(t("settings.size_mode_fixed"), "fixed")
+        self._combo_size_mode.addItem(t("settings.size_mode_adaptive"), "adaptive")
         self._combo_size_mode.currentIndexChanged.connect(self._on_size_mode_changed)
+        mode_row.addWidget(self._lbl_size_strategy)
         mode_row.addWidget(self._combo_size_mode, 1)
         grp_size_mode_layout.addLayout(mode_row)
 
@@ -398,7 +422,7 @@ class SettingsDialog(QDialog):
         self._fixed_row = QHBoxLayout()
         self._fixed_row.setSpacing(8)
 
-        lbl_w = QLabel("自訂寬度：")
+        self._lbl_w = QLabel(t("settings.lbl_fixed_w"))
         self._edit_fixed_w = QLineEdit()
         self._edit_fixed_w.setValidator(QIntValidator(200, 3840, self))
         self._edit_fixed_w.setFixedWidth(85)
@@ -407,7 +431,7 @@ class SettingsDialog(QDialog):
         lbl_w_unit = QLabel("px")
         lbl_w_unit.setStyleSheet("color: #71717a; font-size: 12px;")
 
-        lbl_h = QLabel("自訂高度：")
+        self._lbl_h = QLabel(t("settings.lbl_fixed_h"))
         self._edit_fixed_h = QLineEdit()
         self._edit_fixed_h.setValidator(QIntValidator(150, 2160, self))
         self._edit_fixed_h.setFixedWidth(85)
@@ -416,11 +440,11 @@ class SettingsDialog(QDialog):
         lbl_h_unit = QLabel("px")
         lbl_h_unit.setStyleSheet("color: #71717a; font-size: 12px;")
 
-        self._fixed_row.addWidget(lbl_w)
+        self._fixed_row.addWidget(self._lbl_w)
         self._fixed_row.addWidget(self._edit_fixed_w)
         self._fixed_row.addWidget(lbl_w_unit)
         self._fixed_row.addSpacing(16)
-        self._fixed_row.addWidget(lbl_h)
+        self._fixed_row.addWidget(self._lbl_h)
         self._fixed_row.addWidget(self._edit_fixed_h)
         self._fixed_row.addWidget(lbl_h_unit)
         self._fixed_row.addStretch()
@@ -430,62 +454,63 @@ class SettingsDialog(QDialog):
         self._lbl_size_hint.setStyleSheet("font-size: 11px; color: #71717a; margin-top: 2px;")
         grp_size_mode_layout.addWidget(self._lbl_size_hint)
 
-        layout.addWidget(grp_size_mode)
+        layout.addWidget(self._grp_size_mode)
 
         # 2. 圖片顯示設定
-        grp_img = QGroupBox("圖片預覽設定 (Image Preview)")
-        grp_img_layout = QVBoxLayout(grp_img)
+        self._grp_img = QGroupBox(t("settings.grp_img"))
+        grp_img_layout = QVBoxLayout(self._grp_img)
         grp_img_layout.setSpacing(10)
 
         img_ratio_row = QHBoxLayout()
-        img_ratio_row.addWidget(QLabel("大圖片縮放上限 (螢幕佔比)："))
+        self._lbl_img_ratio_title = QLabel(t("settings.lbl_img_max_ratio"))
         self._slider_img_ratio = QSlider(Qt.Orientation.Horizontal)
         self._slider_img_ratio.setRange(50, 90)
         self._slider_img_ratio.setValue(settings.img_max_screen_ratio)
         self._lbl_img_ratio_val = QLabel(f"{settings.img_max_screen_ratio}%")
         self._slider_img_ratio.valueChanged.connect(self._on_img_ratio_changed)
+        img_ratio_row.addWidget(self._lbl_img_ratio_title)
         img_ratio_row.addWidget(self._slider_img_ratio, 1)
         img_ratio_row.addWidget(self._lbl_img_ratio_val)
         grp_img_layout.addLayout(img_ratio_row)
 
-        self._cb_keep_orig_img = QCheckBox("小圖片保持 1:1 原生尺寸顯示（不強制放大）")
+        self._cb_keep_orig_img = QCheckBox(t("settings.chk_keep_orig_img"))
         self._cb_keep_orig_img.toggled.connect(lambda v: setattr(settings, "img_keep_original", v))
         grp_img_layout.addWidget(self._cb_keep_orig_img)
 
-        layout.addWidget(grp_img)
+        layout.addWidget(self._grp_img)
 
         # 3. 智慧避讓與互動輔助
-        grp_interact = QGroupBox("智慧避讓與互動輔助 (Interactions)")
-        grp_interact_layout = QVBoxLayout(grp_interact)
+        self._grp_interact = QGroupBox(t("settings.grp_interact"))
+        grp_interact_layout = QVBoxLayout(self._grp_interact)
         grp_interact_layout.setSpacing(10)
 
-        self._cb_smart_offset = QCheckBox("智慧避讓偏移（依檔案總管視窗位置自動靠左/靠右偏移微調）")
+        self._cb_smart_offset = QCheckBox(t("settings.chk_smart_offset"))
         self._cb_smart_offset.toggled.connect(lambda v: setattr(settings, "smart_offset", v))
         grp_interact_layout.addWidget(self._cb_smart_offset)
 
-        self._cb_enable_peek = QCheckBox("長按修飾鍵（Ctrl / Alt）視窗暫時微透機制")
+        self._cb_enable_peek = QCheckBox(t("settings.chk_enable_peek"))
         self._cb_enable_peek.toggled.connect(lambda v: setattr(settings, "enable_peek", v))
         grp_interact_layout.addWidget(self._cb_enable_peek)
 
-        self._cb_enable_pin = QCheckBox("按 Tab 鍵切換側邊釘選模式 (Split Dock)")
+        self._cb_enable_pin = QCheckBox(t("settings.chk_enable_pin"))
         self._cb_enable_pin.toggled.connect(lambda v: setattr(settings, "enable_pin_dock", v))
         grp_interact_layout.addWidget(self._cb_enable_pin)
 
         # 4. 運行狀態與提醒通知
-        grp_notify = QGroupBox("狀態提示與通知 (Notifications & Presence)")
-        grp_notify_layout = QVBoxLayout(grp_notify)
+        self._grp_notify = QGroupBox(t("settings.grp_notify"))
+        grp_notify_layout = QVBoxLayout(self._grp_notify)
         grp_notify_layout.setSpacing(10)
 
-        self._cb_show_startup_notification = QCheckBox("程式啟動時發送系統通知提示")
+        self._cb_show_startup_notification = QCheckBox(t("settings.chk_startup_notification"))
         self._cb_show_startup_notification.toggled.connect(lambda v: setattr(settings, "show_startup_notification", v))
         grp_notify_layout.addWidget(self._cb_show_startup_notification)
 
-        self._cb_show_explorer_hud = QCheckBox("切換至檔案總管時，右下角淡入待命提示 (HUD)")
+        self._cb_show_explorer_hud = QCheckBox(t("settings.chk_explorer_hud"))
         self._cb_show_explorer_hud.toggled.connect(lambda v: setattr(settings, "show_explorer_hud", v))
         grp_notify_layout.addWidget(self._cb_show_explorer_hud)
 
-        layout.addWidget(grp_interact)
-        layout.addWidget(grp_notify)
+        layout.addWidget(self._grp_interact)
+        layout.addWidget(self._grp_notify)
         layout.addStretch()
         return w
 
@@ -501,6 +526,12 @@ class SettingsDialog(QDialog):
             self._rb_theme_light.setChecked(True)
 
         self._cb_acrylic.setChecked(settings.enable_acrylic)
+
+        # 程式碼風格（依深淺色模式動態過濾）
+        # 介面語言
+        l_idx = self._combo_language.findData(settings.language)
+        if l_idx >= 0:
+            self._combo_language.setCurrentIndex(l_idx)
 
         # 程式碼風格（依深淺色模式動態過濾）
         self._populate_code_themes()
@@ -554,16 +585,16 @@ class SettingsDialog(QDialog):
         current_val = settings.code_theme
         selected_idx = 0
 
-        for idx, (label, val) in enumerate(themes):
+        for idx, val in enumerate(themes):
+            label = t(f"code_theme.{val}")
             self._combo_code_theme.addItem(label, val)
             if val == current_val:
                 selected_idx = idx
 
         # 若目前設定的風格不在本模式清單中，自動採用第 1 款預設風格
-        val_list = [v for _, v in themes]
-        if current_val not in val_list and themes:
+        if current_val not in themes and themes:
             selected_idx = 0
-            settings.code_theme = themes[0][1]
+            settings.code_theme = themes[0]
 
         self._combo_code_theme.setCurrentIndex(selected_idx)
         self._combo_code_theme.blockSignals(False)
@@ -578,6 +609,11 @@ class SettingsDialog(QDialog):
         if 0 <= btn_id < len(modes):
             settings.theme_mode = modes[btn_id]
             self._populate_code_themes()
+
+    def _on_language_combo_changed(self, idx: int) -> None:
+        val = self._combo_language.itemData(idx)
+        if val:
+            i18n.apply_language(val)
 
     def _on_acrylic_toggled(self, enabled: bool) -> None:
         settings.enable_acrylic = enabled
@@ -609,15 +645,15 @@ class SettingsDialog(QDialog):
         if val == "fixed":
             self._edit_fixed_w.setEnabled(True)
             self._edit_fixed_h.setEnabled(True)
-            self._lbl_size_hint.setText("💡 固定尺寸模式：視窗開啟時一律強制以自訂的像素寬高呈現。")
+            self._lbl_size_hint.setText(t("settings.size_hint_fixed"))
         elif val == "remember":
             self._edit_fixed_w.setEnabled(True)
             self._edit_fixed_h.setEnabled(True)
-            self._lbl_size_hint.setText("💡 智慧記憶模式：上方數值為預設基準；手動拉伸視窗時將自動記憶最新大小。")
+            self._lbl_size_hint.setText(t("settings.size_hint_remember"))
         elif val == "adaptive":
             self._edit_fixed_w.setEnabled(False)
             self._edit_fixed_h.setEnabled(False)
-            self._lbl_size_hint.setText("💡 螢幕自適應模式：按螢幕解析度比例自動計算視窗大小，自訂尺寸暫不生效。")
+            self._lbl_size_hint.setText(t("settings.size_hint_adaptive"))
 
     def _on_img_ratio_changed(self, val: int) -> None:
         self._lbl_img_ratio_val.setText(f"{val}%")
@@ -643,6 +679,7 @@ class SettingsDialog(QDialog):
         mode_idx = self._theme_btn_group.checkedId()
         modes = ["system", "dark", "light"]
         theme_m = modes[mode_idx] if 0 <= mode_idx < len(modes) else "system"
+        selected_lang = self._combo_language.currentData() or "system"
 
         updates: dict[str, Any] = {
             "window_size_mode": size_mode,
@@ -651,12 +688,13 @@ class SettingsDialog(QDialog):
             "window_width": w_val,
             "window_height": h_val,
             "theme_mode": theme_m,
+            "language": selected_lang,
             "enable_acrylic": self._cb_acrylic.isChecked(),
             "font_size": self._slider_font_size.value(),
             "enable_ligatures": self._cb_ligatures.isChecked(),
             "word_wrap": self._cb_word_wrap.isChecked(),
             "img_max_screen_ratio": self._slider_img_ratio.value(),
-            "img_keep_original": self._cb_keep_orig_img.isChecked(),
+            "img_keep_orig_img": self._cb_keep_orig_img.isChecked(),
             "smart_offset": self._cb_smart_offset.isChecked(),
             "enable_peek": self._cb_enable_peek.isChecked(),
             "enable_pin_dock": self._cb_enable_pin.isChecked(),
@@ -683,13 +721,109 @@ class SettingsDialog(QDialog):
         self._is_saved = True
 
         # 介面即時反饋：顯示已儲存提示，視窗保持開啟
-        self._lbl_save_status.setText("✓ 設定已儲存")
-        self._btn_save.setText("✓ 已儲存")
+        self._lbl_save_status.setText(t("settings.save_success_msg"))
+        self._btn_save.setText(t("settings.save_success_msg"))
         QTimer.singleShot(1500, self._reset_save_btn_state)
 
     def _reset_save_btn_state(self) -> None:
         self._lbl_save_status.setText("")
-        self._btn_save.setText("儲存設定 (Save)")
+        self._btn_save.setText(t("settings.save"))
+
+    def _retranslate_ui(self) -> None:
+        """動態即時切換語言時重新套用所有介面文字。"""
+        self.setWindowTitle(t("settings.title"))
+        self._lbl_nav_title.setText(t("app.name"))
+        self._lbl_nav_sub.setText(t("settings.subtitle"))
+
+        tabs_text = [
+            t("settings.tab_appearance"),
+            t("settings.tab_font"),
+            t("settings.tab_behavior"),
+        ]
+        for idx, btn in enumerate(self._nav_buttons):
+            if idx < len(tabs_text):
+                btn.setText(tabs_text[idx])
+
+        mailto_support = (
+            "mailto:support@aisming.com?subject=%5B%E5%95%8F%E9%A1%8C%E5%9B%9E%E5%A0%B1%5D%20KyteView%20%E4%BD%BF%E7%94%A8%E8%AB%AE%E8%A9%A2%20-%20%E8%A8%82%E5%96%AE/%E5%BA%8F%E8%99%9F%EF%BC%9A(%E8%8B%A5%E6%9C%89%E8%AB%8B%E5%A1%AB%E5%AF%AB)"
+            "&body=1.%20%E4%BD%9C%E6%A5%AD%E7%B3%BB%E7%B5%B1%E7%89%88%E6%9C%AC%20(%E4%BE%8B%E5%A6%82%20Win11%2023H2)%EF%BC%9A%0A"
+            "2.%20%E7%99%BC%E7%94%9F%E7%9A%84%E5%95%8F%E9%A1%8C%E6%8F%8F%E8%BF%B0%EF%BC%9A%0A"
+            "3.%20%E9%A0%90%E8%A6%BD%E5%93%AA%E7%A8%AE%E9%A1%9E%E5%9E%8B%E7%9A%84%E6%AA%94%E6%A1%88%E6%99%82%E7%99%BC%E7%94%9F%20(%E4%BE%8B%E5%A6%82%20.xlsx%20/%20.mp4)%EF%BC%9A%0A"
+            "4.%20%E6%88%AA%E5%9C%96%E6%88%96%E9%8C%AF%E8%AA%A4%E8%A8%8A%E6%81%AF%EF%BC%9A%0A"
+        )
+        self._lbl_support.setText(f"<a href='{mailto_support}' style='color: #818cf8; text-decoration: none;'>{t('settings.support_email')}</a>")
+        self._btn_diag.setText(t("settings.copy_diag"))
+        self._btn_diag.setToolTip(t("settings.copy_diag_tip"))
+        self._btn_cancel.setText(t("settings.cancel"))
+        self._btn_save.setText(t("settings.save"))
+
+        # 外觀分頁
+        self._grp_theme.setTitle(t("settings.grp_theme_mode"))
+        self._rb_theme_system.setText(t("settings.theme_system"))
+        self._rb_theme_dark.setText(t("settings.theme_dark"))
+        self._rb_theme_light.setText(t("settings.theme_light"))
+        self._lbl_theme_hint.setText(t("settings.theme_hint"))
+
+        self._grp_lang.setTitle(t("settings.grp_language"))
+        self._lbl_lang_desc.setText(t("settings.grp_language") + "：")
+        cur_lang = self._combo_language.currentData()
+        self._combo_language.blockSignals(True)
+        self._combo_language.clear()
+        self._combo_language.addItem(t("settings.lang_system"), "system")
+        self._combo_language.addItem(t("settings.lang_zh_tw"), "zh_TW")
+        self._combo_language.addItem(t("settings.lang_en_us"), "en_US")
+        l_idx = self._combo_language.findData(cur_lang)
+        if l_idx >= 0:
+            self._combo_language.setCurrentIndex(l_idx)
+        self._combo_language.blockSignals(False)
+
+        self._grp_material.setTitle(t("settings.grp_acrylic"))
+        self._cb_acrylic.setText(t("settings.enable_acrylic"))
+        self._lbl_mat_hint.setText(t("settings.acrylic_hint"))
+
+        self._grp_code.setTitle(t("settings.grp_code_style"))
+        self._lbl_code_theme.setText(t("settings.code_theme_lbl"))
+        self._populate_code_themes()
+
+        # 字體分頁
+        self._grp_size.setTitle(t("settings.grp_font_size"))
+        self._btn_reset_font.setText(t("settings.btn_reset_font"))
+        self._grp_family.setTitle(t("settings.grp_font_family"))
+        self._lbl_code_font.setText(t("settings.lbl_mono_font"))
+        self._lbl_text_font.setText(t("settings.lbl_reading_font"))
+        self._grp_opt.setTitle(t("settings.grp_typography_options"))
+        self._cb_ligatures.setText(t("settings.chk_ligatures"))
+        self._cb_word_wrap.setText(t("settings.chk_word_wrap"))
+
+        # 視窗行為分頁
+        self._grp_size_mode.setTitle(t("settings.grp_window_size"))
+        self._lbl_size_strategy.setText(t("settings.lbl_size_strategy"))
+        cur_sm = self._combo_size_mode.currentData()
+        self._combo_size_mode.blockSignals(True)
+        self._combo_size_mode.clear()
+        self._combo_size_mode.addItem(t("settings.size_mode_remember"), "remember")
+        self._combo_size_mode.addItem(t("settings.size_mode_fixed"), "fixed")
+        self._combo_size_mode.addItem(t("settings.size_mode_adaptive"), "adaptive")
+        sm_idx = self._combo_size_mode.findData(cur_sm)
+        if sm_idx >= 0:
+            self._combo_size_mode.setCurrentIndex(sm_idx)
+        self._combo_size_mode.blockSignals(False)
+        self._lbl_w.setText(t("settings.lbl_fixed_w"))
+        self._lbl_h.setText(t("settings.lbl_fixed_h"))
+        self._on_size_mode_changed(self._combo_size_mode.currentIndex())
+
+        self._grp_img.setTitle(t("settings.grp_img"))
+        self._lbl_img_ratio_title.setText(t("settings.lbl_img_max_ratio"))
+        self._cb_keep_orig_img.setText(t("settings.chk_keep_orig_img"))
+
+        self._grp_interact.setTitle(t("settings.grp_interact"))
+        self._cb_smart_offset.setText(t("settings.chk_smart_offset"))
+        self._cb_enable_peek.setText(t("settings.chk_enable_peek"))
+        self._cb_enable_pin.setText(t("settings.chk_enable_pin"))
+
+        self._grp_notify.setTitle(t("settings.grp_notify"))
+        self._cb_show_startup_notification.setText(t("settings.chk_startup_notification"))
+        self._cb_show_explorer_hud.setText(t("settings.chk_explorer_hud"))
 
     def reject(self) -> None:
         """點擊關閉或按 ESC 時，若有未儲存的暫存更動則還原回最後一次儲存的快照。"""
@@ -698,6 +832,11 @@ class SettingsDialog(QDialog):
             settings._save()
             settings.theme_changed.emit(settings.effective_theme)
             settings.settings_changed.emit("all")
+            try:
+                from i18n import i18n
+                i18n.apply_language(settings.language)
+            except Exception:
+                pass
         super().reject()
 
     def _update_code_preview(self) -> None:
@@ -942,8 +1081,8 @@ class SettingsDialog(QDialog):
 
         lines = [
             "```yaml",
-            "# KyteView 系統環境診斷報告",
-            "KyteView_Version: v1.4.0 (64-bit)",
+            f"{t('diag.report_title')}",
+            "KyteView_Version: v1.5.0 (64-bit)",
             f"Python_Version: {platform.python_version()} ({platform.architecture()[0]})",
             f"OS: {platform.system()} {sys.getwindowsversion().major}.{sys.getwindowsversion().minor} (Build {sys.getwindowsversion().build})",
         ]
@@ -978,7 +1117,6 @@ class SettingsDialog(QDialog):
         diag_text = "\n".join(lines)
         QApplication.clipboard().setText(diag_text)
 
-        self._btn_diag.setText("✅ 已複製診斷資訊！")
-        self._lbl_save_status.setText("系統診斷資訊已複製到剪貼簿")
-        QTimer.singleShot(2500, lambda: self._btn_diag.setText("📋 複製系統診斷資訊"))
-        QTimer.singleShot(3500, lambda: self._lbl_save_status.setText("") if self._lbl_save_status.text() == "系統診斷資訊已複製到剪貼簿" else None)
+        self._btn_diag.setText(t("settings.diag_copied"))
+        self._lbl_save_status.setText("")
+        QTimer.singleShot(2500, lambda: self._btn_diag.setText(t("settings.copy_diag")))

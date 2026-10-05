@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
 from core.license import LicenseManager
 from config.settings import settings
 from config.theme import get_theme_colors
+from i18n import t, i18n
 
 
 class LicenseDialog(QDialog):
@@ -30,7 +31,7 @@ class LicenseDialog(QDialog):
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
         self.license_mgr = LicenseManager.get_instance()
-        self.setWindowTitle("KyteView 軟體授權與專業版啟用")
+        self.setWindowTitle(t("license.title"))
         self.setFixedSize(500, 545)
         self.setWindowFlags(
             Qt.WindowType.Dialog
@@ -40,6 +41,7 @@ class LicenseDialog(QDialog):
         )
 
         self.license_mgr.license_changed.connect(self.refresh_ui_state)
+        i18n.language_changed.connect(self._retranslate_ui)
         self._build_ui()
         self.refresh_ui_state()
 
@@ -88,12 +90,12 @@ class LicenseDialog(QDialog):
 
         header_text = QVBoxLayout()
         header_text.setSpacing(2)
-        title_label = QLabel("KyteView 專業版授權")
-        title_label.setStyleSheet(f"font-size: 18px; font-weight: 800; color: {c['title_color']};")
-        subtitle_label = QLabel("一次買斷 · 永久使用 · 支持個人電腦獨立啟動")
-        subtitle_label.setStyleSheet(f"font-size: 12px; color: {c['subtitle_color']};")
-        header_text.addWidget(title_label)
-        header_text.addWidget(subtitle_label)
+        self.title_label = QLabel(t("license.dialog_header_title"))
+        self.title_label.setStyleSheet(f"font-size: 18px; font-weight: 800; color: {c['title_color']};")
+        self.subtitle_label = QLabel(t("license.dialog_header_subtitle"))
+        self.subtitle_label.setStyleSheet(f"font-size: 12px; color: {c['subtitle_color']};")
+        header_text.addWidget(self.title_label)
+        header_text.addWidget(self.subtitle_label)
         header_layout.addLayout(header_text)
         header_layout.addStretch()
 
@@ -124,18 +126,18 @@ class LicenseDialog(QDialog):
         input_layout.setContentsMargins(16, 14, 16, 14)
         input_layout.setSpacing(10)
 
-        key_label = QLabel("輸入授權序號：")
-        key_label.setStyleSheet(f"font-size: 13px; font-weight: 600; color: {c['title_color']};")
-        input_layout.addWidget(key_label)
+        self.key_label = QLabel(t("license.key_label"))
+        self.key_label.setStyleSheet(f"font-size: 13px; font-weight: 600; color: {c['title_color']};")
+        input_layout.addWidget(self.key_label)
 
         self.key_input = QLineEdit()
-        self.key_input.setPlaceholderText("例：KYTEVIEW-XXXX-XXXX-XXXX")
+        self.key_input.setPlaceholderText(t("license.key_placeholder"))
         self.key_input.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.key_input.setFixedHeight(38)
         self.key_input.returnPressed.connect(self._on_activate_clicked)
         input_layout.addWidget(self.key_input)
 
-        self.btn_activate = QPushButton("立即驗證並啟用")
+        self.btn_activate = QPushButton(t("license.btn_activate"))
         self.btn_activate.setFixedHeight(36)
         self.btn_activate.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_activate.clicked.connect(self._on_activate_clicked)
@@ -149,29 +151,29 @@ class LicenseDialog(QDialog):
 
         # 機器碼列
         mid_row = QHBoxLayout()
-        mid_label = QLabel(f"本機識別碼: <code style='color: #6366f1;'>{self.license_mgr.machine_id[:16]}...</code>")
-        mid_label.setStyleSheet(f"font-size: 11px; color: {c['subtitle_color']};")
-        mid_row.addWidget(mid_label)
+        self.mid_label = QLabel(f"{t('license.mid_label')}: <code style='color: #6366f1;'>{self.license_mgr.machine_id[:16]}...</code>")
+        self.mid_label.setStyleSheet(f"font-size: 11px; color: {c['subtitle_color']};")
+        mid_row.addWidget(self.mid_label)
         mid_row.addStretch()
 
-        btn_copy_mid = QPushButton("複製機器碼")
-        btn_copy_mid.setFixedHeight(22)
-        btn_copy_mid.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_copy_mid.clicked.connect(self._copy_machine_id)
-        mid_row.addWidget(btn_copy_mid)
+        self.btn_copy_mid = QPushButton(t("license.btn_copy_mid"))
+        self.btn_copy_mid.setFixedHeight(22)
+        self.btn_copy_mid.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_copy_mid.clicked.connect(self._copy_machine_id)
+        mid_row.addWidget(self.btn_copy_mid)
         bottom_box.addLayout(mid_row)
 
         # 購買與支援列
         action_row = QHBoxLayout()
         action_row.setSpacing(10)
 
-        self.btn_buy = QPushButton("🛒 前往購買正式授權")
+        self.btn_buy = QPushButton(t("license.btn_buy"))
         self.btn_buy.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_buy.setFixedHeight(34)
         self.btn_buy.clicked.connect(self._open_buy_url)
         action_row.addWidget(self.btn_buy, 1)
 
-        self.btn_deactivate = QPushButton("解除授權綁定")
+        self.btn_deactivate = QPushButton(t("license.btn_deactivate"))
         self.btn_deactivate.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_deactivate.setFixedHeight(34)
         self.btn_deactivate.setVisible(False)
@@ -188,13 +190,13 @@ class LicenseDialog(QDialog):
             "3.%20%E9%A0%90%E8%A6%BD%E5%93%AA%E7%A8%AE%E9%A1%9E%E5%9E%8B%E7%9A%84%E6%AA%94%E6%A1%88%E6%99%82%E7%99%BC%E7%94%9F%20(%E4%BE%8B%E5%A6%82%20.xlsx%20/%20.mp4)%EF%BC%9A%0A"
             "4.%20%E6%88%AA%E5%9C%96%E6%88%96%E9%8C%AF%E8%AA%A4%E8%A8%8A%E6%81%AF%EF%BC%9A%0A"
         )
-        support_lbl = QLabel(
-            f"技術支援與售後聯絡：<a href='{mailto_url}' style='color: #818cf8; text-decoration: underline;'>support@aisming.com</a>"
+        self.support_lbl = QLabel(
+            f"{t('license.support_contact')}：<a href='{mailto_url}' style='color: #818cf8; text-decoration: underline;'>support@aisming.com</a>"
         )
-        support_lbl.setOpenExternalLinks(True)
-        support_lbl.setStyleSheet(f"font-size: 11px; color: {c['subtitle_color']}; padding-top: 4px;")
-        support_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        bottom_box.addWidget(support_lbl)
+        self.support_lbl.setOpenExternalLinks(True)
+        self.support_lbl.setStyleSheet(f"font-size: 11px; color: {c['subtitle_color']}; padding-top: 4px;")
+        self.support_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        bottom_box.addWidget(self.support_lbl)
 
         layout.addLayout(bottom_box)
 
@@ -281,67 +283,83 @@ class LicenseDialog(QDialog):
         plan = info["plan_type"]
 
         if plan == "pro":
-            self.status_badge.setText("★ 已啟用永久專業版 (Pro)")
+            self.status_badge.setText(t("license.status_pro_badge"))
             self.status_badge.setStyleSheet("color: #10b981; font-size: 15px; font-weight: 700;")
             self.status_desc.setText(
-                f"感謝您的支持！所有進階功能（程式碼高亮、完整表格、壓縮檔單檔抽出、PPTX大綱、Mica毛玻璃）已全面永久解鎖。\n"
-                f"啟用序號: {info['masked_key']}\n"
-                f"啟用時間: {info['activated_at']}"
+                t("license.status_pro_desc", key=info.get('masked_key', ''), date=info.get('activated_at', ''))
             )
             self.input_card.setVisible(False)
             self.btn_deactivate.setVisible(True)
             self.btn_buy.setVisible(False)
         elif plan == "trial":
             days = info["trial_days_left"]
-            self.status_badge.setText(f"✨ 14 天免費全功能試用中 (剩餘 {days} 天)")
+            self.status_badge.setText(t("license.status_trial_badge", days=days))
             self.status_badge.setStyleSheet("color: #6366f1; font-size: 15px; font-weight: 700;")
-            self.status_desc.setText(
-                "試用期間享有所有專業版完整功能無任何限制！\n"
-                "試用期結束後將溫和降級為基礎免費版（核心預覽永遠可用，進階功能設為專業版專屬）。"
-            )
+            self.status_desc.setText(t("license.status_trial_desc", days=days))
             self.input_card.setVisible(True)
             self.btn_deactivate.setVisible(False)
             self.btn_buy.setVisible(True)
         else:
-            self.status_badge.setText("🔒 免費版 (溫和降級模式)")
+            self.status_badge.setText(t("license.status_expired_badge"))
             self.status_badge.setStyleSheet("color: #f59e0b; font-size: 15px; font-weight: 700;")
-            self.status_desc.setText(
-                "您的 14 天試用期已結束，核心 Space 預覽操作與基礎檢視仍可永久免費使用。\n"
-                "進階功能（程式碼高亮、完整表格、單檔直接拖曳抽出、商務文件、Mica/側邊釘選）為專業版專屬，歡迎輸入序號一鍵永久解鎖！"
-            )
+            self.status_desc.setText(t("license.status_expired_desc"))
             self.input_card.setVisible(True)
             self.btn_deactivate.setVisible(False)
             self.btn_buy.setVisible(True)
+
+    def _retranslate_ui(self) -> None:
+        """動態即時切換語言。"""
+        self.setWindowTitle(t("license.title"))
+        self.title_label.setText(t("license.dialog_header_title"))
+        self.subtitle_label.setText(t("license.dialog_header_subtitle"))
+        self.key_label.setText(t("license.key_label"))
+        self.key_input.setPlaceholderText(t("license.key_placeholder"))
+        self.btn_activate.setText(t("license.btn_activate"))
+        self.mid_label.setText(f"{t('license.mid_label')}: <code style='color: #6366f1;'>{self.license_mgr.machine_id[:16]}...</code>")
+        self.btn_copy_mid.setText(t("license.btn_copy_mid"))
+        self.btn_buy.setText(t("license.btn_buy"))
+        self.btn_deactivate.setText(t("license.btn_deactivate"))
+        mailto_url = (
+            "mailto:support@aisming.com?subject=%5B%E5%95%8F%E9%A1%8C%E5%9B%9E%E5%A0%B1%5D%20KyteView%20%E4%BD%BF%E7%94%A8%E8%AB%AE%E8%A9%A2%20-%20%E8%A8%82%E5%96%AE/%E5%BA%8F%E8%99%9F%EF%BC%9A(%E8%8B%A5%E6%9C%89%E8%AB%8B%E5%A1%AB%E5%AF%AB)"
+            "&body=1.%20%E4%BD%9C%E6%A5%AD%E7%B3%BB%E7%B5%B1%E7%89%88%E6%9C%AC%20(%E4%BE%8B%E5%A6%82%20Win11%2023H2)%EF%BC%9A%0A"
+            "2.%20%E7%99%BC%E7%94%9F%E7%9A%84%E5%95%8F%E9%A1%8C%E6%8F%8F%E8%BF%B0%EF%BC%9A%0A"
+            "3.%20%E9%A0%90%E8%A6%BD%E5%93%AA%E7%A8%AE%E9%A1%9E%E5%9E%8B%E7%9A%84%E6%AA%94%E6%A1%88%E6%99%82%E7%99%BC%E7%94%9F%20(%E4%BE%8B%E5%A6%82%20.xlsx%20/%20.mp4)%EF%BC%9A%0A"
+            "4.%20%E6%88%AA%E5%9C%96%E6%88%96%E9%8C%AF%E8%AA%A4%E8%A8%8A%E6%81%AF%EF%BC%9A%0A"
+        )
+        self.support_lbl.setText(
+            f"{t('license.support_contact')}：<a href='{mailto_url}' style='color: #818cf8; text-decoration: underline;'>support@aisming.com</a>"
+        )
+        self.refresh_ui_state()
 
     def _on_activate_clicked(self) -> None:
         key = self.key_input.text().strip()
         if not key:
-            QMessageBox.warning(self, "提示", "請先輸入授權序號。")
+            QMessageBox.warning(self, t("license.warn_empty_key"), t("license.warn_empty_key"))
             return
 
         success, msg = self.license_mgr.activate_license(key)
         if success:
-            QMessageBox.information(self, "啟用成功", msg)
+            QMessageBox.information(self, t("license.activate_success_title"), msg)
             self.key_input.clear()
             self.refresh_ui_state()
         else:
-            QMessageBox.critical(self, "啟用失敗", msg)
+            QMessageBox.critical(self, t("license.activate_fail_title"), msg)
 
     def _on_deactivate_clicked(self) -> None:
         reply = QMessageBox.question(
             self,
-            "解除授權確認",
-            "確定要解除本機的授權綁定嗎？解除後本機將恢復為免費版模式，序號可在其他電腦重新啟用。",
+            t("license.confirm_deactivate_title"),
+            t("license.confirm_deactivate_msg"),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         if reply == QMessageBox.StandardButton.Yes:
             success, msg = self.license_mgr.deactivate_license()
-            QMessageBox.information(self, "解除授權", msg)
+            QMessageBox.information(self, t("license.deactivate_result_title"), msg)
             self.refresh_ui_state()
 
     def _copy_machine_id(self) -> None:
         QApplication.clipboard().setText(self.license_mgr.machine_id)
-        QMessageBox.information(self, "已複製", "本機識別碼已複製到剪貼簿。")
+        QMessageBox.information(self, t("license.mid_copied_title"), t("license.mid_copied_msg"))
 
     def _open_buy_url(self) -> None:
         webbrowser.open(self.PURCHASE_URL)

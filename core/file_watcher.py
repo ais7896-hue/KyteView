@@ -104,18 +104,20 @@ def get_file_nav_context(
 ) -> tuple[str, str]:
     """
     回傳 (index_info, breadcrumb)。
-    例如: ("第 5 / 24 個檔案", "Downloads > Projects")
+    例如: ("第 5 / 24 個檔案" 或 "5 of 24", "Downloads > Projects")
     """
+    from i18n import t
+
     parts = path.parts
     if len(parts) >= 3:
         breadcrumb = f"{parts[-3]} > {parts[-2]}"
     elif len(parts) >= 2:
         breadcrumb = f"{parts[-2]}"
     else:
-        breadcrumb = "本機"
+        breadcrumb = t("preview.this_pc")
 
     if total_selected > 1:
-        return f"選取 {current_index + 1} / {total_selected}", breadcrumb
+        return t("preview.selected_format", current=current_index + 1, total=total_selected), breadcrumb
 
     try:
         parent = path.parent
@@ -128,7 +130,7 @@ def get_file_nav_context(
             files.sort(key=lambda p: p.name.lower())
             if path in files:
                 idx = files.index(path) + 1
-                return f"第 {idx} / {len(files)} 個檔案", breadcrumb
+                return t("preview.file_index_format", current=idx, total=len(files)), breadcrumb
     except Exception:
         pass
 

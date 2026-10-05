@@ -50,6 +50,7 @@ def _resolve_config_path() -> Path:
 _DEFAULTS: dict[str, Any] = {
     # 一、 外觀與主題
     "theme_mode": "system",           # "system" | "dark" | "light"
+    "language": "system",             # "system" | "zh_TW" | "en_US"
     "enable_acrylic": True,            # 是否啟用毛玻璃半透明
     "code_theme": "monokai",          # Pygments 程式碼主題
     # 二、 字體與排版
@@ -102,6 +103,12 @@ class SettingsManager(QObject):
         else:
             self._save()
 
+        try:
+            from i18n import i18n
+            i18n.apply_language(self._data.get("language", "system"))
+        except Exception:
+            pass
+
     def _save(self) -> None:
         """寫入設定檔（Windows 安全覆寫）。"""
         try:
@@ -117,6 +124,12 @@ class SettingsManager(QObject):
         for k, v in updates.items():
             self._data[k] = v
         self._save()
+        if "language" in updates:
+            try:
+                from i18n import i18n
+                i18n.apply_language(updates["language"])
+            except Exception:
+                pass
         new_theme = self.effective_theme
         if old_theme != new_theme:
             self.theme_changed.emit(new_theme)
@@ -162,6 +175,22 @@ class SettingsManager(QObject):
             self._save()
             self.theme_changed.emit(self.effective_theme)
             self.settings_changed.emit("theme_mode")
+
+    @property
+    def language(self) -> str:
+        return self._data.get("language", "system")
+
+    @language.setter
+    def language(self, val: str) -> None:
+        if val in ("system", "zh_TW", "en_US"):
+            self._data["language"] = val
+            self._save()
+            try:
+                from i18n import i18n
+                i18n.apply_language(val)
+            except Exception:
+                pass
+            self.settings_changed.emit("language")
 
     @property
     def effective_theme(self) -> str:

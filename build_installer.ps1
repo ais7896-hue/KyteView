@@ -64,7 +64,14 @@ Write-Host "`n[OK] PyInstaller 打包成功！綠色免安裝目錄位於 dist\K
 
 # 2.5 打包免安裝綠色版 (Portable Zip)
 Write-Host "`n>>> 正在打包免安裝綠色版 (Portable Zip)... " -ForegroundColor Yellow
-$portableZip = "dist\KyteView_1.4.0_Portable.zip"
+$appVersion = "1.5.0"
+if (Test-Path "setup.iss") {
+    $issContent = Get-Content "setup.iss" -Raw
+    if ($issContent -match '#define\s+MyAppVersion\s+"([^"]+)"') {
+        $appVersion = $matches[1]
+    }
+}
+$portableZip = "dist\KyteView_$($appVersion)_Portable.zip"
 if (Test-Path $portableZip) { Remove-Item -Force $portableZip }
 Compress-Archive -Path "dist\KyteView\*" -DestinationPath $portableZip -Force
 Write-Host " [SUCCESS] 綠色免安裝包已產出：$portableZip " -ForegroundColor Green
@@ -98,7 +105,7 @@ if ($foundIscc) {
     if ($LASTEXITCODE -eq 0) {
         Write-Host "`n=============================================" -ForegroundColor Green
         Write-Host " [SUCCESS] 安裝精靈打包成功！ " -ForegroundColor Green
-        Write-Host " 安裝檔位置：dist\KyteView_Setup_1.4.0.exe " -ForegroundColor Green
+        Write-Host " 安裝檔位置：dist\KyteView_Setup_$($appVersion).exe " -ForegroundColor Green
         Write-Host "=============================================" -ForegroundColor Green
     }
     else {

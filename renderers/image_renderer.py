@@ -187,7 +187,8 @@ class ImageRenderer(BaseRenderer):
         pixmap = QPixmap.fromImageReader(reader)
 
         if pixmap.isNull():
-            label = QLabel(f"⚠️ 無法讀取圖片格式\n{path.name}")
+            from i18n import t
+            label = QLabel(t("renderer.image_cannot_read", name=path.name))
             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             label.setStyleSheet("color: #ff6b6b; font-size: 13px;")
             layout.addWidget(label)

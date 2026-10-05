@@ -24,6 +24,7 @@ from core.file_watcher import get_selected_files, is_explorer_window, get_file_n
 from core.hotkey_listener import HotkeyListener
 from ui.preview_window import PreviewWindow
 from ui.status_pill import StatusPill
+from i18n import t, i18n
 
 IPC_SERVER_NAME = "KyteView_SingleInstance_IPC"
 
@@ -85,6 +86,7 @@ class KyteViewApp(QObject):
         self._setup_tray()
         self._setup_hotkey()
         self._setup_focus_monitor()
+        i18n.language_changed.connect(lambda _: self._update_tray_texts())
 
     # ── 單一實例 IPC ──────────────────────────────────────────────────────────
 
@@ -142,50 +144,54 @@ class KyteViewApp(QObject):
     def notify_already_running(self) -> None:
         """通知使用者程式早已在運行中，避免重複開啟。"""
         self._tray.showMessage(
-            "KyteView 正在背景運行中",
-            "程式已在此常駐！在檔案總管中選取檔案，按下 [空白鍵 Space] 即可預覽。\n請勿重複啟動。",
+            t("tray.already_running_title"),
+            t("tray.already_running_msg"),
             QSystemTrayIcon.MessageIcon.Information,
             4000,
         )
-        self._pill.flash("⚡ KyteView 正在運行中 · [Space] 預覽", 3000)
+        self._pill.flash(t("pill.running"), 3000)
 
     # ── 托盤 ──────────────────────────────────────────────────────────────────
 
     def _setup_tray(self) -> None:
         self._tray = QSystemTrayIcon(_make_tray_icon(), self._app)
-        self._tray.setToolTip("KyteView (運行中)\n在檔案總管選取檔案後按 [Space] 快速預覽")
         self._tray.activated.connect(self._on_tray_activated)
-
-        menu = QMenu()
-        menu.addAction("KyteView (運行中)").setEnabled(False)
-        menu.addSeparator()
-
-        act_theme = menu.addAction(f"切換主題 (目前: {'深色' if settings.is_dark() else '淺色'})")
-        def _toggle_and_update():
-            settings.toggle_theme()
-            act_theme.setText(f"切換主題 (目前: {'深色' if settings.is_dark() else '淺色'})")
-        act_theme.triggered.connect(_toggle_and_update)
-
-        act_pin = menu.addAction("切換側邊釘選模式 (Tab)")
-        act_pin.triggered.connect(self._window.toggle_pin_mode)
-
-        act_settings = menu.addAction("⚙️ 偏好設定...")
-        act_settings.triggered.connect(self._window.open_settings)
-
-        menu.addSeparator()
-        menu.addAction("結束").triggered.connect(self._quit)
-
-        self._tray.setContextMenu(menu)
+        self._update_tray_texts()
         self._tray.show()
 
         # 啟動時發送歡迎提示（如果設定開啟）
         if settings.get("show_startup_notification", True):
             QTimer.singleShot(600, self._show_startup_balloon)
 
+    def _update_tray_texts(self) -> None:
+        self._tray.setToolTip(t("tray.tooltip"))
+        menu = QMenu()
+        menu.addAction(t("tray.running")).setEnabled(False)
+        menu.addSeparator()
+
+        theme_name = t("tray.theme_dark") if settings.is_dark() else t("tray.theme_light")
+        act_theme = menu.addAction(t("tray.toggle_theme", theme=theme_name))
+        def _toggle_and_update():
+            settings.toggle_theme()
+            cur_theme = t("tray.theme_dark") if settings.is_dark() else t("tray.theme_light")
+            act_theme.setText(t("tray.toggle_theme", theme=cur_theme))
+        act_theme.triggered.connect(_toggle_and_update)
+
+        act_pin = menu.addAction(t("tray.toggle_pin"))
+        act_pin.triggered.connect(self._window.toggle_pin_mode)
+
+        act_settings = menu.addAction(t("tray.settings"))
+        act_settings.triggered.connect(self._window.open_settings)
+
+        menu.addSeparator()
+        menu.addAction(t("tray.quit")).triggered.connect(self._quit)
+
+        self._tray.setContextMenu(menu)
+
     def _show_startup_balloon(self) -> None:
         self._tray.showMessage(
-            "KyteView 已在背景就緒",
-            "在檔案總管中選取任意檔案，按下 [空白鍵] 即可快速預覽！",
+            t("tray.startup_ready_title"),
+            t("tray.startup_ready_msg"),
             QSystemTrayIcon.MessageIcon.Information,
             3000,
         )
@@ -197,7 +203,7 @@ class KyteViewApp(QObject):
                 self._window.activateWindow()
                 self._window.raise_()
             else:
-                self._pill.flash("⚡ KyteView 待命中 · [Space] 預覽", 2000)
+                self._pill.flash(t("pill.standby"), 2000)
 
     # ── 熱鍵 ──────────────────────────────────────────────────────────────────
 

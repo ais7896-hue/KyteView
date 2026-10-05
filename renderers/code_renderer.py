@@ -200,7 +200,8 @@ class CodeRenderer(BaseRenderer):
             cache.set(theme_cache_path, (html, truncated, error))
 
         if error:
-            err_label = QLabel(f"⚠️ 無法讀取程式碼檔案\n{error}")
+            from i18n import t
+            err_label = QLabel(t("renderer.code_cannot_read", error=str(error)))
             err_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             err_label.setStyleSheet("color: #ff6b6b; font-size: 13px;")
             layout.addWidget(err_label)
@@ -277,7 +278,8 @@ class CodeRenderer(BaseRenderer):
         code_top_layout.setContentsMargins(12, 4, 12, 4)
         code_top_layout.addStretch()
 
-        btn_copy_code = QPushButton("📋 複製純代碼" if is_pro else "🔒 複製純代碼")
+        from i18n import t
+        btn_copy_code = QPushButton(t("renderer.copy_code") if is_pro else t("renderer.copy_code_locked"))
         btn_copy_code.setFixedHeight(22)
         btn_copy_code.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_copy_code.setStyleSheet(f"""
@@ -300,13 +302,13 @@ class CodeRenderer(BaseRenderer):
             if is_pro:
                 src_text, _, _ = self._read_source(path)
                 QApplication.clipboard().setText(src_text)
-                btn_copy_code.setText("✓ 已複製代碼")
+                btn_copy_code.setText(t("renderer.code_copied"))
             else:
                 from PySide6.QtWidgets import QMessageBox
                 reply = QMessageBox.information(
                     container,
-                    "專業版專屬功能",
-                    "程式碼語法高亮與快速複製為 KyteView 專業版專屬功能。\n一次買斷即可永久享受 500+ 種語言語法著色與無限制複製！",
+                    t("renderer.pdf_pro_title"),
+                    t("renderer.unlock_code"),
                     QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Open,
                 )
                 if reply == QMessageBox.StandardButton.Open:
@@ -321,7 +323,7 @@ class CodeRenderer(BaseRenderer):
         layout.addWidget(browser)
 
         if not is_pro:
-            banner_pro = QPushButton("🔒 免費版僅支援無顏色純文字 ｜ 點擊輸入序號解鎖 500+ 語言語法著色與快速複製")
+            banner_pro = QPushButton(t("renderer.unlock_code"))
             banner_pro.setCursor(Qt.CursorShape.PointingHandCursor)
             banner_pro.setStyleSheet("""
                 QPushButton {
@@ -348,7 +350,7 @@ class CodeRenderer(BaseRenderer):
 
         if truncated:
             bar = QLabel(
-                f"⚠️ 僅預覽前 {MAX_CODE_LINES} 行  ·  檔案大小：{path.stat().st_size:,} bytes"
+                t("renderer.code_preview_limit", lines=MAX_CODE_LINES, size=f"{path.stat().st_size:,}")
             )
             bar.setStyleSheet("""
                 background: #1e1e24;
@@ -381,6 +383,7 @@ class CodeRenderer(BaseRenderer):
                         return "".join(lines), truncated, ""
                 except UnicodeDecodeError:
                     continue
-            return "", False, "無法解讀編碼"
+            from i18n import t
+            return "", False, t("renderer.cannot_decode")
         except OSError as e:
             return "", False, str(e)

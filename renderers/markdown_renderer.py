@@ -156,7 +156,8 @@ class MarkdownRenderer(BaseRenderer):
                 cached_html = f"<!DOCTYPE html><html><head>{css}</head><body>{html_content}</body></html>"
                 cache.set(theme_cache_path, cached_html)
             except Exception as e:
-                err_label = QLabel(f"⚠️ 無法解析 Markdown\n{e}")
+                from i18n import t
+                err_label = QLabel(t("renderer.markdown_cannot_parse", error=str(e)))
                 err_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 err_label.setStyleSheet("color: #ff6b6b; font-size: 13px;")
                 layout.addWidget(err_label)

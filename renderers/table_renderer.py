@@ -85,7 +85,8 @@ class TableRenderer(BaseRenderer):
                 widget = self._render_csv(path)
             layout.addWidget(widget)
         except Exception as e:
-            err_label = QLabel(f"⚠️ 無法讀取表格內容\n{e}")
+            from i18n import t
+            err_label = QLabel(t("renderer.table_cannot_read", error=str(e)))
             err_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             err_label.setStyleSheet("color: #ff6b6b; font-size: 13px;")
             layout.addWidget(err_label)
@@ -116,10 +117,12 @@ class TableRenderer(BaseRenderer):
                         break
                     rows.append([c.strip() for c in row[:MAX_TABLE_COLS]])
         except Exception as e:
-            return QLabel(f"無法解析 CSV 檔案: {e}")
+            from i18n import t
+            return QLabel(t("renderer.csv_cannot_parse", error=str(e)))
 
         if not rows:
-            return QLabel("空白表格或無法讀取")
+            from i18n import t
+            return QLabel(t("renderer.table_empty"))
 
         # 首列作為表頭，其餘為數據
         headers = [f"Col {j + 1}" if not col else col for j, col in enumerate(rows[0])]
@@ -140,7 +143,8 @@ class TableRenderer(BaseRenderer):
 
         if not is_pro:
             from PySide6.QtWidgets import QPushButton
-            banner_table = QPushButton("🔒 已顯示前 10 行預覽 ｜ 點擊輸入序號解鎖完整試算表")
+            from i18n import t
+            banner_table = QPushButton(t("renderer.unlock_table"))
             banner_table.setCursor(Qt.CursorShape.PointingHandCursor)
             banner_table.setStyleSheet("""
                 QPushButton {
@@ -166,8 +170,9 @@ class TableRenderer(BaseRenderer):
             layout.addWidget(banner_table)
 
         # 底部統計
+        from i18n import t
         stat = QLabel(
-            f"編碼: {encoding.upper()} · 分隔符: '{delimiter}' · 預覽 {len(data_rows)} 列 · 共 {max_col} 欄"
+            t("renderer.csv_stat", encoding=encoding.upper(), delimiter=delimiter, rows=len(data_rows), cols=max_col)
         )
         stat.setStyleSheet("color: #777; font-size: 11px; padding: 2px 4px;")
         layout.addWidget(stat)
@@ -230,11 +235,13 @@ class TableRenderer(BaseRenderer):
         sheet_names = wb.sheet_names
 
         if not sheet_names:
-            return QLabel("Excel 活頁簿中無工作表")
+            from i18n import t
+            return QLabel(t("renderer.excel_no_sheets"))
 
         # 頂部工作表切換器
+        from i18n import t
         top_bar = QHBoxLayout()
-        top_bar.addWidget(QLabel("工作表:"))
+        top_bar.addWidget(QLabel(t("renderer.sheet_label")))
         sheet_combo = QComboBox()
         sheet_combo.addItems(sheet_names)
         sheet_combo.setStyleSheet("""
@@ -269,7 +276,8 @@ class TableRenderer(BaseRenderer):
             sheet = wb.get_sheet_by_index(idx)
             raw_data = sheet.to_python()
             if not raw_data:
-                content_layout.addWidget(QLabel("此工作表為空"))
+                from i18n import t
+                content_layout.addWidget(QLabel(t("renderer.sheet_empty")))
                 return
 
             from core.license import LicenseManager
@@ -294,7 +302,8 @@ class TableRenderer(BaseRenderer):
 
             if not is_pro and len(raw_data) > 11:
                 from PySide6.QtWidgets import QPushButton
-                banner_excel = QPushButton("🔒 已顯示前 10 行預覽 ｜ 點擊輸入序號解鎖完整試算表")
+                from i18n import t
+                banner_excel = QPushButton(t("renderer.unlock_table"))
                 banner_excel.setCursor(Qt.CursorShape.PointingHandCursor)
                 banner_excel.setStyleSheet("""
                     QPushButton {
@@ -319,8 +328,9 @@ class TableRenderer(BaseRenderer):
                 banner_excel.clicked.connect(_open_lic)
                 content_layout.addWidget(banner_excel)
 
+            from i18n import t
             info = QLabel(
-                f"工作表: {sheet.name} · 預覽 {len(rows)} 列 · 共 {max_col} 欄 (總行數: {sheet.total_height})"
+                t("renderer.excel_stat", name=sheet.name, rows=len(rows), cols=max_col, total=sheet.total_height)
             )
             info.setStyleSheet("color: #777; font-size: 11px; padding: 2px 4px;")
             content_layout.addWidget(info)

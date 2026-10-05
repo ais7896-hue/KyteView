@@ -110,10 +110,11 @@ class _VideoOverlay(QFrame):
         layout.addWidget(self.slider, 1)
 
         # 靜音切換按鈕
+        from i18n import t
         self.btn_mute = QPushButton("🔇")
         self.btn_mute.setFixedSize(26, 26)
         self.btn_mute.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_mute.setToolTip("靜音 / 取消靜音")
+        self.btn_mute.setToolTip(t("renderer.video_mute_tip"))
         self.btn_mute.clicked.connect(self._player_widget.toggle_mute)
         layout.addWidget(self.btn_mute)
 
@@ -342,19 +343,25 @@ class VideoPlayerWidget(QWidget):
         title_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         fb_layout.addWidget(title_lbl)
 
+        from i18n import t
         try:
             size_mb = self._path.stat().st_size / (1024 * 1024)
             size_str = f"{size_mb:.1f} MB"
         except Exception:
-            size_str = "未知大小"
+            size_str = t("renderer.unknown_size")
 
         ext_str = self._path.suffix.upper().lstrip(".")
-        desc_lbl = QLabel(f"格式：{ext_str} 視訊  ·  大小：{size_str}\n（Windows 系統內建解碼器未支援該編碼或硬體受限）")
+        desc_lbl = QLabel(t(
+            "renderer.video_fallback_desc",
+            ext=ext_str,
+            size=size_str,
+        ))
         desc_lbl.setStyleSheet("color: #a1a1aa; font-size: 11px;")
         desc_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         fb_layout.addWidget(desc_lbl)
 
-        btn_open = QPushButton("↗ 使用系統預設播放器開啟")
+        from i18n import t
+        btn_open = QPushButton(t("renderer.open_default_player"))
         btn_open.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_open.setFixedHeight(34)
         btn_open.setStyleSheet("""

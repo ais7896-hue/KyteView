@@ -235,8 +235,9 @@ class ArchiveBrowserWidget(QWidget):
         top_bar = QHBoxLayout()
         top_bar.setSpacing(10)
 
+        from i18n import t
         self._search_edit = QLineEdit()
-        self._search_edit.setPlaceholderText("🔍  即時搜尋壓縮包內部檔案...")
+        self._search_edit.setPlaceholderText(t("renderer.archive_search_placeholder"))
         self._search_edit.setFixedHeight(32)
         self._search_edit.textChanged.connect(self._on_search_changed)
         top_bar.addWidget(self._search_edit, 1)
@@ -245,10 +246,10 @@ class ArchiveBrowserWidget(QWidget):
         is_pro = LicenseManager.get_instance().is_unlimited()
 
         if is_pro:
-            lbl_drag_hint = QLabel("💡 支援選中檔案直接拖曳抽出")
+            lbl_drag_hint = QLabel(t("renderer.archive_drag_pro"))
             lbl_drag_hint.setStyleSheet("color: #71717a; font-size: 11px;")
         else:
-            lbl_drag_hint = QPushButton("🔒 拖曳抽出與巢狀預覽 (點擊解鎖)")
+            lbl_drag_hint = QPushButton(t("renderer.unlock_archive"))
             lbl_drag_hint.setCursor(Qt.CursorShape.PointingHandCursor)
             lbl_drag_hint.setStyleSheet("""
                 QPushButton {
@@ -274,7 +275,12 @@ class ArchiveBrowserWidget(QWidget):
 
         # 樹狀視圖
         self._model = QStandardItemModel(0, 4)
-        self._model.setHorizontalHeaderLabels(["名稱", "原始大小", "壓縮大小", "修改日期"])
+        self._model.setHorizontalHeaderLabels([
+            t("renderer.archive_col_name"),
+            t("renderer.archive_col_orig_size"),
+            t("renderer.archive_col_comp_size"),
+            t("renderer.archive_col_date"),
+        ])
 
         self._proxy_model = QSortFilterProxyModel(self)
         self._proxy_model.setSourceModel(self._model)
@@ -303,9 +309,10 @@ class ArchiveBrowserWidget(QWidget):
         comp_str = _format_size(self._total_compressed)
         ratio_pct = int(self._total_compressed / max(1, self._total_uncompressed) * 100)
 
-        status_text = f"共 {total_files} 個項目  ·  未壓縮：{uncomp_str}  ·  壓縮後：{comp_str} ({ratio_pct}%)"
+        from i18n import t
+        status_text = t("renderer.archive_status", count=total_files, uncomp=uncomp_str, comp=comp_str, ratio=ratio_pct)
         if self._is_truncated:
-            status_text += "  ⚠️ (超過 1,000 個檔案已啟用安全截斷以保證流暢)"
+            status_text += t("renderer.archive_truncated")
 
         self._lbl_status = QLabel(status_text)
         self._lbl_status.setStyleSheet("color: #a1a1aa; font-size: 11px;")
@@ -485,10 +492,11 @@ class ArchiveBrowserWidget(QWidget):
         from core.license import LicenseManager
         if not LicenseManager.get_instance().is_unlimited():
             from PySide6.QtWidgets import QMessageBox
+            from i18n import t
             reply = QMessageBox.information(
                 self,
-                "專業版專屬功能",
-                "「單檔直接拖曳抽出」為 KyteView 專業版專屬功能。\n升級專業版即可直接拖曳壓縮檔內單一檔案至桌面或資料夾，省去整包解壓縮的繁瑣步驟！",
+                t("renderer.pdf_pro_title"),
+                t("renderer.archive_drag_pro_msg"),
                 QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Open,
             )
             if reply == QMessageBox.StandardButton.Open:
@@ -517,10 +525,11 @@ class ArchiveBrowserWidget(QWidget):
         from core.license import LicenseManager
         if not LicenseManager.get_instance().is_unlimited():
             from PySide6.QtWidgets import QMessageBox
+            from i18n import t
             reply = QMessageBox.information(
                 self,
-                "專業版專屬功能",
-                "壓縮包「巢狀就地預覽」為 KyteView 專業版專屬功能。\n升級專業版即可就地檢視壓縮包內部的文字、代碼與圖片，並可一鍵返回目錄樹！",
+                t("renderer.pdf_pro_title"),
+                t("renderer.archive_nested_pro_msg"),
                 QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Open,
             )
             if reply == QMessageBox.StandardButton.Open:

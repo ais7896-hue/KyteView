@@ -27,7 +27,8 @@ class TextRenderer(BaseRenderer):
         text, truncated, error = _read_text(path)
 
         if error:
-            label = QLabel(f"⚠️ 無法讀取檔案\n{error}")
+            from i18n import t
+            label = QLabel(t("renderer.text_cannot_read", error=str(error)))
             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             label.setStyleSheet("color: #ff6b6b; font-size: 13px;")
             layout.addWidget(label)
@@ -54,8 +55,9 @@ class TextRenderer(BaseRenderer):
         layout.addWidget(editor)
 
         if truncated:
+            from i18n import t
             bar = QLabel(
-                f"⚠️ 僅顯示前 {MAX_LINES} 行  ·  完整檔案：{path.stat().st_size:,} bytes"
+                t("renderer.text_preview_limit", lines=MAX_LINES, size=f"{path.stat().st_size:,}")
             )
             bar.setStyleSheet("""
                 background: #2a2a2a;
@@ -73,12 +75,13 @@ def _read_text(path: Path) -> tuple[str, bool, str]:
     回傳 (text, is_truncated, error_msg)。
     若為二進位檔案則回傳錯誤提示，避免亂碼。
     """
+    from i18n import t
     try:
         # 二進位檢查：讀取前 1024 bytes，檢查是否有 null byte
         with path.open("rb") as f:
             chunk = f.read(1024)
             if b"\x00" in chunk:
-                return "", False, f"此檔案為二進位檔案（{path.suffix or '無副檔名'}），目前尚未提供內容解析"
+                return "", False, t("renderer.binary_file_tip", ext=path.suffix or 'bin')
 
         for encoding in ("utf-8-sig", "utf-8", "gbk", "cp950", "big5"):
             try:
@@ -99,6 +102,6 @@ def _read_text(path: Path) -> tuple[str, bool, str]:
             except UnicodeDecodeError:
                 continue
 
-        return "", False, "無法以文字編碼解讀此檔案（非純文字格式）"
+        return "", False, t("renderer.cannot_decode_text")
     except OSError as e:
         return "", False, str(e)

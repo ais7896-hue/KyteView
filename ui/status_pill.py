@@ -26,7 +26,8 @@ class StatusPill(QWidget):
         layout = QHBoxLayout(self)
         layout.setContentsMargins(16, 10, 16, 10)
 
-        self._label = QLabel("⚡ KyteView 待命中 · [Space] 預覽")
+        from i18n import t
+        self._label = QLabel(t("pill.standby"))
         self._label.setStyleSheet("""
             QLabel {
                 color: #e0e7ff;
@@ -53,10 +54,11 @@ class StatusPill(QWidget):
 
     def flash(self, message: str | None = None, display_ms: int = 1500) -> None:
         """淡入顯示並在指定毫秒後淡出。"""
+        from i18n import t
         if message:
             self._label.setText(message)
         else:
-            self._label.setText("⚡ KyteView 待命中 · [Space] 預覽")
+            self._label.setText(t("pill.standby"))
 
         self.adjustSize()
         screen = self.screen().availableGeometry()

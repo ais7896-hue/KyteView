@@ -315,7 +315,8 @@ class AsyncWordWidget(QWidget):
         icon_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         l_layout.addWidget(icon_lbl)
 
-        txt_lbl = QLabel("正在使用微軟官方引擎排版中...")
+        from i18n import t
+        txt_lbl = QLabel(t("renderer.docx_rendering"))
         txt_color = "#a1a1aa" if is_dark else "#71717a"
         txt_lbl.setStyleSheet(f"color: {txt_color}; font-size: 13px; font-weight: 500;")
         txt_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -393,11 +394,11 @@ def _read_doc_com(path: Path) -> Optional[str]:
 
 def _extract_docx_meta(path: Path) -> dict:
     meta = {
-        "creator": "未知",
-        "modified": "未知",
-        "created": "未知",
-        "words": "未知",
-        "pages": "未知",
+        "creator": "",
+        "modified": "",
+        "created": "",
+        "words": "",
+        "pages": "",
     }
     try:
         import zipfile
@@ -457,7 +458,8 @@ class DocxRenderer(BaseRenderer):
 
         from core.license import LicenseManager
         if not LicenseManager.get_instance().is_unlimited():
-            return self._create_pro_card(path, "Word 高保真排版預覽為專業版專屬功能")
+            from i18n import t
+            return self._create_pro_card(path, t("renderer.docx_pro_hint"))
 
         # ── 1. 檢查本機向量 PDF 快取 (依路徑與修改時間，命中則 5ms 秒開) ──
         cache_dir = Path(os.environ.get("LOCALAPPDATA", tempfile.gettempdir())) / "KyteView" / "office_pdf_cache"
@@ -523,10 +525,11 @@ class DocxRenderer(BaseRenderer):
             css = _DOCX_CSS_DARK if is_dark else _DOCX_CSS_LIGHT
             paragraphs = doc_text.replace("\r\n", "\n").split("\n")
             p_html = "".join(f"<p>{p.strip()}</p>" for p in paragraphs if p.strip())
+            from i18n import t
             header_notice = (
                 '<div style="background: rgba(99, 102, 241, 0.15); border-left: 3px solid #6366f1; '
-                'padding: 8px 12px; margin-bottom: 16px; border-radius: 4px; font-size: 12px; color: #a1a1aa;">'
-                'ℹ️ 舊版 Word 97-2003 格式 (.doc) 摘要預覽</div>'
+                f'padding: 8px 12px; margin-bottom: 16px; border-radius: 4px; font-size: 12px; color: #a1a1aa;">'
+                f'{t("renderer.doc_legacy_summary")}</div>'
             )
             full_html = f"<!DOCTYPE html><html><head>{css}</head><body>{header_notice}{p_html}</body></html>"
             browser = self._create_browser(full_html, is_dark)
@@ -534,7 +537,8 @@ class DocxRenderer(BaseRenderer):
             return container
 
         # 若無 COM 或解析失敗，平滑降級為文檔資訊卡片
-        return self._create_fallback_card(path, "舊版 Word 97-2003 二進位格式 (.doc)")
+        from i18n import t
+        return self._create_fallback_card(path, t("renderer.doc_legacy_binary"))
 
     def _create_browser(self, html: str, is_dark: bool) -> QTextBrowser:
         browser = QTextBrowser()
@@ -623,7 +627,8 @@ class DocxRenderer(BaseRenderer):
             size_kb = path.stat().st_size / 1024
             size_str = f"{size_kb:.1f} KB" if size_kb < 1024 else f"{size_kb/1024:.1f} MB"
         except Exception:
-            size_str = "未知大小"
+            from i18n import t
+            size_str = t("renderer.unknown_size")
 
         card = QFrame()
         card.setFixedWidth(380)
@@ -651,20 +656,21 @@ class DocxRenderer(BaseRenderer):
             row.addWidget(lbl_v)
             c_layout.addLayout(row)
 
-        add_row("文件大小", size_str)
-        if meta["words"] != "未知":
-            add_row("總字數", f"{meta['words']} 字")
-        if meta["pages"] != "未知":
-            add_row("預估頁數", f"{meta['pages']} 頁")
-        if meta["creator"] != "未知":
-            add_row("建立者", meta["creator"])
-        if meta["modified"] != "未知":
-            add_row("最後修改", meta["modified"])
+        from i18n import t
+        add_row(t("renderer.doc_size"), size_str)
+        if meta["words"]:
+            add_row(t("renderer.total_words"), t("renderer.words_format", words=meta['words']))
+        if meta["pages"]:
+            add_row(t("renderer.est_pages"), t("renderer.pages_format", pages=meta['pages']))
+        if meta["creator"]:
+            add_row(t("renderer.author"), meta["creator"])
+        if meta["modified"]:
+            add_row(t("renderer.last_modified"), meta["modified"])
 
         layout.addWidget(card)
 
         # 專業版提示橫條
-        tip_lbl = QLabel(f"🔒 {reason}，免費版提供基礎屬性卡片檢視")
+        tip_lbl = QLabel(f"🔒 {reason}")
         tip_lbl.setStyleSheet(f"color: {c.text_secondary}; font-size: 11px;")
         tip_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(tip_lbl)
@@ -673,7 +679,7 @@ class DocxRenderer(BaseRenderer):
         btn_box.setSpacing(10)
         btn_box.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        btn_unlock = QPushButton("★ 解鎖完整圖文排版")
+        btn_unlock = QPushButton(t("renderer.unlock_docx"))
         btn_unlock.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_unlock.setFixedHeight(32)
         btn_unlock.setStyleSheet("""
@@ -694,7 +700,7 @@ class DocxRenderer(BaseRenderer):
         btn_unlock.clicked.connect(lambda: show_license_dialog(container.window()))
         btn_box.addWidget(btn_unlock)
 
-        btn_open = QPushButton("↗ 系統預設程式開啟")
+        btn_open = QPushButton(t("renderer.open_default"))
         btn_open.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_open.setFixedHeight(32)
         btn_open_bg = "rgba(255, 255, 255, 0.08)" if is_dark else "rgba(0, 0, 0, 0.06)"
@@ -738,19 +744,23 @@ class DocxRenderer(BaseRenderer):
             size_kb = path.stat().st_size / 1024
             size_str = f"{size_kb:.1f} KB" if size_kb < 1024 else f"{size_kb/1024:.1f} MB"
         except Exception:
-            size_str = "未知大小"
+            from i18n import t
+            size_str = t("renderer.unknown_size")
 
+        from i18n import t
         ext_str = path.suffix.upper().lstrip(".")
-        desc_lbl = QLabel(
-            f"類型：Microsoft Word {ext_str} 文件  ·  大小：{size_str}\n"
-            f"說明：{reason}\n"
-            "建議轉換為現代 .docx 格式以獲得即時圖文排版預覽。"
-        )
+        desc_lbl = QLabel(t(
+            "renderer.doc_fallback_desc",
+            ext=ext_str,
+            size=size_str,
+            reason=reason,
+        ))
         desc_lbl.setStyleSheet("color: #a1a1aa; font-size: 11px; line-height: 1.5;")
         desc_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(desc_lbl)
 
-        btn_open = QPushButton("↗ 使用系統預設程式開啟")
+        from i18n import t
+        btn_open = QPushButton(t("renderer.open_default"))
         btn_open.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_open.setFixedHeight(34)
         btn_open.setStyleSheet("""

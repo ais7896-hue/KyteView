@@ -31,7 +31,8 @@ class FontRenderer(BaseRenderer):
         self._font_id = font_id
 
         if font_id == -1:
-            err = QLabel(f"⚠️ 無法解析此字型檔案\n{path.name}")
+            from i18n import t
+            err = QLabel(t("renderer.font_cannot_parse", name=path.name))
             err.setAlignment(Qt.AlignmentFlag.AlignCenter)
             err.setStyleSheet("color: #ff6b6b; font-size: 13px;")
             layout.addWidget(err)
@@ -51,10 +52,15 @@ class FontRenderer(BaseRenderer):
         c_layout.setSpacing(20)
 
         # 字型標題
+        from i18n import t
         title_box = QVBoxLayout()
         name_lbl = QLabel(family_name)
         name_lbl.setStyleSheet("color: #6366f1; font-size: 22px; font-weight: bold;")
-        sub_lbl = QLabel(f"格式: {path.suffix.upper().lstrip('.')}  ·  檔案大小: {path.stat().st_size / 1024:.1f} KB")
+        sub_lbl = QLabel(t(
+            "renderer.font_format_info",
+            format=path.suffix.upper().lstrip('.'),
+            size=f"{path.stat().st_size / 1024:.1f} KB",
+        ))
         sub_lbl.setStyleSheet("color: #888888; font-size: 12px;")
         title_box.addWidget(name_lbl)
         title_box.addWidget(sub_lbl)

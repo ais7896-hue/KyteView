@@ -111,13 +111,17 @@ class AudioRenderer(BaseRenderer):
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # 讀取音訊基本資訊
-        info_str = "音訊檔案"
+        from i18n import t
+        info_str = t("renderer.audio_file")
         try:
             info = miniaudio.get_file_info(str(path))
             duration_sec = info.duration
-            info_str = (
-                f"{info.file_format.name.upper()} · {info.sample_rate} Hz · "
-                f"{info.nchannels} 聲道 · {duration_sec:.1f} 秒"
+            info_str = t(
+                "renderer.audio_info_format",
+                format=info.file_format.name.upper(),
+                rate=info.sample_rate,
+                channels=info.nchannels,
+                duration=duration_sec,
             )
         except Exception:
             pass

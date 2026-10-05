@@ -30,6 +30,7 @@ from PySide6.QtWidgets import (
 from core.preview_router import get_renderer
 from config.settings import settings
 from config.theme import get_theme_colors
+from i18n import t, i18n
 import win32gui
 
 
@@ -91,7 +92,7 @@ class _Toolbar(QWidget):
         title_row.setSpacing(8)
 
         # 巢狀導航返回按鈕
-        self.btn_back = QPushButton("⬅ 返回壓縮包")
+        self.btn_back = QPushButton(t("toolbar.back_archive"))
         self.btn_back.setObjectName("btn_back")
         self.btn_back.setFixedHeight(22)
         self.btn_back.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -122,7 +123,7 @@ class _Toolbar(QWidget):
         layout.addLayout(left_box, 1)
 
         # 授權方案膠囊徽章
-        self.btn_license = QPushButton("✨ 試用")
+        self.btn_license = QPushButton("")
         self.btn_license.setObjectName("btn_license")
         self.btn_license.setFixedHeight(24)
         self.btn_license.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
@@ -131,30 +132,30 @@ class _Toolbar(QWidget):
         layout.addWidget(self.btn_license)
 
         # 右側操作按鈕群（統一俐落單色字元）
-        self.btn_pin = self._make_btn("◨", "快速側邊釘選模式 (Tab)")
+        self.btn_pin = self._make_btn("◨", t("toolbar.pin_tip"))
         self.btn_pin.clicked.connect(parent.toggle_pin_mode)
         layout.addWidget(self.btn_pin)
 
-        self.btn_theme = self._make_btn("☼", "切換深色/淺色主題")
+        self.btn_theme = self._make_btn("☼", t("toolbar.theme_tip"))
         self.btn_theme.clicked.connect(parent.toggle_theme)
         layout.addWidget(self.btn_theme)
 
-        self.btn_settings = self._make_btn("⚙", "偏好設定 (Ctrl + ,)")
+        self.btn_settings = self._make_btn("⚙", t("toolbar.settings_tip"))
         self.btn_settings.clicked.connect(parent.open_settings)
         layout.addWidget(self.btn_settings)
 
-        btn_copy = self._make_btn("⎘", "複製路徑")
-        btn_copy.clicked.connect(parent.copy_path)
-        layout.addWidget(btn_copy)
+        self.btn_copy = self._make_btn("⎘", t("toolbar.copy_path_tip"))
+        self.btn_copy.clicked.connect(parent.copy_path)
+        layout.addWidget(self.btn_copy)
 
-        btn_open = self._make_btn("↗", "用預設程式開啟")
-        btn_open.clicked.connect(parent.open_externally)
-        layout.addWidget(btn_open)
+        self.btn_open = self._make_btn("↗", t("toolbar.open_external_tip"))
+        self.btn_open.clicked.connect(parent.open_externally)
+        layout.addWidget(self.btn_open)
 
-        btn_close = self._make_btn("✕", "關閉 (ESC)")
-        btn_close.setObjectName("btn_close")
-        btn_close.clicked.connect(parent.hide_window)
-        layout.addWidget(btn_close)
+        self.btn_close = self._make_btn("✕", t("toolbar.close_tip"))
+        self.btn_close.setObjectName("btn_close")
+        self.btn_close.clicked.connect(parent.hide_window)
+        layout.addWidget(self.btn_close)
 
         self.setFixedHeight(46)
         self.apply_theme()
@@ -171,8 +172,8 @@ class _Toolbar(QWidget):
         lic = LicenseManager.get_instance()
         plan = lic.get_plan_type()
         if plan == "pro":
-            self.btn_license.setText("★ 專業版")
-            self.btn_license.setToolTip("KyteView 專業版已永久啟用")
+            self.btn_license.setText(t("toolbar.license_pro"))
+            self.btn_license.setToolTip(t("toolbar.license_pro_tip"))
             self.btn_license.setStyleSheet("""
                 QPushButton#btn_license {
                     background: rgba(245, 158, 11, 0.18);
@@ -192,8 +193,8 @@ class _Toolbar(QWidget):
             """)
         elif plan == "trial":
             days = lic.get_trial_days_left()
-            self.btn_license.setText(f"✨ 試用剩 {days} 天")
-            self.btn_license.setToolTip(f"14 天全功能試用中 (剩餘 {days} 天)，點擊管理授權")
+            self.btn_license.setText(t("toolbar.license_trial", days=days))
+            self.btn_license.setToolTip(t("toolbar.license_trial_tip", days=days))
             self.btn_license.setStyleSheet("""
                 QPushButton#btn_license {
                     background: rgba(99, 102, 241, 0.15);
@@ -212,8 +213,8 @@ class _Toolbar(QWidget):
                 }
             """)
         else:
-            self.btn_license.setText("🔒 免費版")
-            self.btn_license.setToolTip("試用期已結束，點擊輸入序號解鎖專業版進階功能")
+            self.btn_license.setText(t("toolbar.license_expired"))
+            self.btn_license.setToolTip(t("toolbar.license_expired_tip"))
             self.btn_license.setStyleSheet("""
                 QPushButton#btn_license {
                     background: rgba(148, 163, 184, 0.15);
@@ -301,6 +302,16 @@ class _Toolbar(QWidget):
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
         return btn
 
+    def retranslate_ui(self) -> None:
+        self.btn_back.setText(t("toolbar.back_archive"))
+        self.btn_pin.setToolTip(t("toolbar.pin_tip"))
+        self.btn_theme.setToolTip(t("toolbar.theme_tip"))
+        self.btn_settings.setToolTip(t("toolbar.settings_tip"))
+        self.btn_copy.setToolTip(t("toolbar.copy_path_tip"))
+        self.btn_open.setToolTip(t("toolbar.open_external_tip"))
+        self.btn_close.setToolTip(t("toolbar.close_tip"))
+        self.apply_theme()
+
     def set_file_info(self, path: Path, index_info: str = "", breadcrumb: str = "") -> None:
         self.title.setText(path.name)
         if index_info:
@@ -363,6 +374,7 @@ class PreviewWindow(QWidget):
         self.apply_theme()
         settings.theme_changed.connect(self._on_theme_changed)
         settings.settings_changed.connect(self._on_settings_changed)
+        i18n.language_changed.connect(self._retranslate_ui)
 
         # 視窗最小與預設大小（允許自由縮小至 200x150）
         self.setMinimumSize(200, 150)
@@ -570,6 +582,22 @@ class PreviewWindow(QWidget):
         self._adjust_window_geometry(path)
         self._show_window()
 
+    def _retranslate_ui(self) -> None:
+        if hasattr(self, "_toolbar"):
+            self._toolbar.retranslate_ui()
+        if self._current_path:
+            from core.file_watcher import get_file_nav_context
+            index_info, breadcrumb = get_file_nav_context(self._current_path)
+            self._last_index_info = index_info
+            self._last_breadcrumb = breadcrumb
+            self._toolbar.set_file_info(
+                self._current_path,
+                self._last_index_info,
+                self._last_breadcrumb,
+            )
+            if self.isVisible():
+                self._load_content(self._current_path)
+
     def open_nested_preview(self, nested_path: Path) -> None:
         """從壓縮包內部雙擊單檔觸發的巢狀就地預覽。"""
         if self._current_path:
@@ -577,7 +605,8 @@ class PreviewWindow(QWidget):
             self._toolbar.btn_back.setVisible(True)
 
         self._current_path = nested_path
-        self._toolbar.set_file_info(nested_path, "", f"壓縮包 ➔ {nested_path.name}")
+        self._last_breadcrumb = t("toolbar.archive_breadcrumb", name=nested_path.name)
+        self._toolbar.set_file_info(nested_path, "", self._last_breadcrumb)
         self._load_content(nested_path)
 
     def navigate_back(self) -> None:

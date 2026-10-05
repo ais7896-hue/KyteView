@@ -115,17 +115,19 @@ class _PptLegacyWidget(QWidget):
         except OSError:
             sz_str, dt_str = "—", "—"
 
-        lbl_desc = QLabel(
-            f"舊版 PowerPoint 簡報 (Office 97-2003 二進位格式)\n"
-            f"檔案大小：{sz_str}   ·   修改日期：{dt_str}\n\n"
-            f"建議使用微軟 PowerPoint 或預設程式開啟完整檢視"
-        )
+        from i18n import t
+        lbl_desc = QLabel(t(
+            "renderer.ppt_legacy_desc",
+            size=sz_str,
+            date=dt_str,
+        ))
         lbl_desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
         lbl_desc.setStyleSheet(f"color: {c['subtitle_color']}; font-size: 13px; line-height: 1.6;")
         layout.addWidget(lbl_desc)
 
         # 開啟按鈕
-        btn_open = QPushButton("↗  使用系統預設程式開啟 (Enter)")
+        from i18n import t
+        btn_open = QPushButton(t("renderer.open_default_enter"))
         btn_open.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_open.setFixedHeight(36)
         btn_open.setStyleSheet(f"""
@@ -207,7 +209,8 @@ class PptxBrowserWidget(QWidget):
                             pass
 
                 if not title:
-                    title = f"投影片 {i + 1}"
+                    from i18n import t
+                    title = t("renderer.slide_num", num=i + 1)
 
                 self._slides.append(SlideData(
                     index=i + 1,
@@ -254,7 +257,8 @@ class PptxBrowserWidget(QWidget):
         top_bar.addStretch()
 
         if self._thumb_bytes:
-            self._btn_toggle_view = QPushButton("📄 切換大綱檢視")
+            from i18n import t
+            self._btn_toggle_view = QPushButton(t("renderer.toggle_outline"))
             self._btn_toggle_view.setCursor(Qt.CursorShape.PointingHandCursor)
             self._btn_toggle_view.setFixedHeight(24)
             self._btn_toggle_view.setStyleSheet(f"""
@@ -306,7 +310,8 @@ class PptxBrowserWidget(QWidget):
         outline_layout.setContentsMargins(20, 16, 20, 16)
         outline_layout.setSpacing(12)
 
-        self._lbl_slide_title = QLabel("投影片標題")
+        from i18n import t
+        self._lbl_slide_title = QLabel(t("renderer.slide_title"))
         self._lbl_slide_title.setStyleSheet(f"""
             color: {c['title_color']};
             font-size: 17px;
@@ -345,7 +350,13 @@ class PptxBrowserWidget(QWidget):
             sz_str = _format_size(self._path.stat().st_size)
         except OSError:
             sz_str = "—"
-        self._lbl_summary = QLabel(f"共 {total_p} 張投影片 · {self._ratio_label} 比例 · {sz_str}")
+        from i18n import t
+        self._lbl_summary = QLabel(t(
+            "renderer.pptx_ratio",
+            total=total_p,
+            ratio=self._ratio_label,
+            size=sz_str,
+        ))
         self._lbl_summary.setStyleSheet(f"color: {c['subtitle_color']}; font-size: 11px;")
         nav_box.addWidget(self._lbl_summary)
 
@@ -380,8 +391,9 @@ class PptxBrowserWidget(QWidget):
         cap_layout.setContentsMargins(4, 2, 8, 2)
         cap_layout.setSpacing(4)
 
+        from i18n import t
         self._btn_prev = QPushButton("◀")
-        self._btn_prev.setToolTip("上一張 (Left / PageUp)")
+        self._btn_prev.setToolTip(t("renderer.prev_slide"))
         self._btn_prev.setCursor(Qt.CursorShape.PointingHandCursor)
         self._btn_prev.clicked.connect(self.prev_slide)
         cap_layout.addWidget(self._btn_prev)
@@ -391,7 +403,7 @@ class PptxBrowserWidget(QWidget):
         cap_layout.addWidget(self._lbl_page_num)
 
         self._btn_next = QPushButton("▶")
-        self._btn_next.setToolTip("下一張 (Right / PageDown)")
+        self._btn_next.setToolTip(t("renderer.next_slide"))
         self._btn_next.setCursor(Qt.CursorShape.PointingHandCursor)
         self._btn_next.clicked.connect(self.next_slide)
         cap_layout.addWidget(self._btn_next)
@@ -401,12 +413,13 @@ class PptxBrowserWidget(QWidget):
 
     def _toggle_view_mode(self) -> None:
         """在視覺封面與大綱視圖間手動切換。"""
+        from i18n import t
         if self._view_mode == "cover":
             self._view_mode = "outline"
-            self._btn_toggle_view.setText("🖼️ 切換封面檢視")
+            self._btn_toggle_view.setText(t("renderer.toggle_cover"))
         else:
             self._view_mode = "cover"
-            self._btn_toggle_view.setText("📄 切換大綱檢視")
+            self._btn_toggle_view.setText(t("renderer.toggle_outline"))
         self._update_slide_display()
 
     def _update_slide_display(self) -> None:
@@ -425,8 +438,9 @@ class PptxBrowserWidget(QWidget):
             self._stack.setCurrentWidget(self._cover_container)
             self._render_cover_image()
             if hasattr(self, "_btn_toggle_view"):
+                from i18n import t
                 self._btn_toggle_view.setVisible(True)
-                self._btn_toggle_view.setText("📄 切換大綱檢視")
+                self._btn_toggle_view.setText(t("renderer.toggle_outline"))
         else:
             # 顯示大綱內容
             self._stack.setCurrentWidget(self._outline_container)
@@ -449,7 +463,8 @@ class PptxBrowserWidget(QWidget):
                 </ul>
                 """
             else:
-                html = f"<p style='color: {bullet_color}; font-style: italic; margin-top: 10px;'>此投影片以圖表或圖像為主，無主要文字要點</p>"
+                from i18n import t
+                html = f"<p style='color: {bullet_color}; font-style: italic; margin-top: 10px;'>{t('renderer.slide_no_text')}</p>"
 
             self._txt_bullets.setHtml(html)
 
@@ -530,10 +545,10 @@ class PptxBrowserWidget(QWidget):
 
 def _extract_pptx_meta(path: Path) -> dict:
     meta = {
-        "creator": "未知",
-        "modified": "未知",
-        "created": "未知",
-        "slides": "未知",
+        "creator": "",
+        "modified": "",
+        "created": "",
+        "slides": "",
     }
     try:
         with zipfile.ZipFile(path, "r") as zf:
@@ -610,7 +625,8 @@ class _PptxProCardWidget(QWidget):
             size_kb = path.stat().st_size / 1024
             size_str = f"{size_kb:.1f} KB" if size_kb < 1024 else f"{size_kb/1024:.1f} MB"
         except Exception:
-            size_str = "未知大小"
+            from i18n import t
+            size_str = t("renderer.unknown_size")
 
         card = QFrame()
         card.setFixedWidth(380)
@@ -638,18 +654,19 @@ class _PptxProCardWidget(QWidget):
             row.addWidget(lbl_v)
             c_layout.addLayout(row)
 
-        add_row("簡報大小", size_str)
-        if meta["slides"] != "未知":
-            add_row("投影片張數", f"{meta['slides']} 頁")
-        if meta["creator"] != "未知":
-            add_row("建立者", meta["creator"])
-        if meta["modified"] != "未知":
-            add_row("最後修改", meta["modified"])
+        from i18n import t
+        add_row(t("renderer.doc_size"), size_str)
+        if meta["slides"]:
+            add_row(t("renderer.slides_count"), t("renderer.pages_format", pages=meta['slides']))
+        if meta["creator"]:
+            add_row(t("renderer.author"), meta["creator"])
+        if meta["modified"]:
+            add_row(t("renderer.last_modified"), meta["modified"])
 
         layout.addWidget(card)
 
         # 專業版提示橫條
-        tip_lbl = QLabel("🔒 多頁投影片翻頁與大綱解析為專業版專屬功能，免費版提供封面與屬性預覽")
+        tip_lbl = QLabel(t("renderer.pdf_pro_title"))
         tip_lbl.setStyleSheet(f"color: {c.text_secondary}; font-size: 11px;")
         tip_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(tip_lbl)
@@ -658,7 +675,7 @@ class _PptxProCardWidget(QWidget):
         btn_box.setSpacing(10)
         btn_box.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        btn_unlock = QPushButton("★ 解鎖完整簡報多頁翻閱")
+        btn_unlock = QPushButton(t("renderer.unlock_pptx"))
         btn_unlock.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_unlock.setFixedHeight(32)
         btn_unlock.setStyleSheet("""
@@ -679,7 +696,7 @@ class _PptxProCardWidget(QWidget):
         btn_unlock.clicked.connect(lambda: show_license_dialog(self.window()))
         btn_box.addWidget(btn_unlock)
 
-        btn_open = QPushButton("↗ 系統預設程式開啟")
+        btn_open = QPushButton(t("renderer.open_default"))
         btn_open.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_open.setFixedHeight(32)
         btn_open_bg = "rgba(255, 255, 255, 0.08)" if is_dark else "rgba(0, 0, 0, 0.06)"

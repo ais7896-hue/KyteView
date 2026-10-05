@@ -45,14 +45,16 @@ class PdfRenderer(BaseRenderer):
             self._current_page = 0
             container.destroyed.connect(lambda: self.cleanup())
         except Exception as e:
-            err = QLabel(f"⚠️ 無法開啟 PDF 檔案\n{e}")
+            from i18n import t
+            err = QLabel(t("renderer.pdf_cannot_open", error=str(e)))
             err.setAlignment(Qt.AlignmentFlag.AlignCenter)
             err.setStyleSheet("color: #ff6b6b; font-size: 13px;")
             layout.addWidget(err)
             return container
 
+        from i18n import t
         if self._total_pages == 0:
-            layout.addWidget(QLabel("PDF 文件為空"))
+            layout.addWidget(QLabel(t("renderer.pdf_empty")))
             return container
 
         # 頂部控制列（頁碼切換）
@@ -62,8 +64,8 @@ class PdfRenderer(BaseRenderer):
         bar_layout.setContentsMargins(12, 6, 12, 6)
         bar_layout.setSpacing(8)
 
-        btn_prev = QPushButton("◀ 上一頁")
-        btn_next = QPushButton("下一頁 ▶")
+        btn_prev = QPushButton(t("renderer.prev_page"))
+        btn_next = QPushButton(t("renderer.next_page"))
         for b in (btn_prev, btn_next):
             b.setCursor(Qt.CursorShape.PointingHandCursor)
             b.setStyleSheet("""
@@ -112,10 +114,11 @@ class PdfRenderer(BaseRenderer):
             is_pro = LicenseManager.get_instance().is_unlimited()
             if not is_pro and page_idx >= 3:
                 from PySide6.QtWidgets import QMessageBox
+                from i18n import t
                 reply = QMessageBox.information(
                     container,
-                    "專業版專屬功能",
-                    "免費版支援前 3 頁 PDF 預覽。\n升級至專業版即可無限制翻閱完整合約、報告與電子書！",
+                    t("renderer.pdf_pro_title"),
+                    t("renderer.pdf_pro_msg"),
                     QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Open,
                 )
                 if reply == QMessageBox.StandardButton.Open:
