@@ -336,7 +336,7 @@ const TRANSLATIONS = {
         "price.t2_f4": "<b>Drag & drop single file extraction</b> (extract direct to desktop)",
         "price.t2_f5": "<b>Win11 Mica material, side pinning & peek translucency</b>",
         "price.t2_f6": "<b>Includes 1 year of free maintenance & bug fixes</b> (major OS rewrites sold separately)",
-        "price.t2_btn": "Get Early Bird License (NT$ 290 Lifetime)",
+        "price.t2_btn": "Get Early Bird License (NT$ 299 Lifetime)",
         "price.t2_sub1": "100% Offline Safe",
         "price.t2_sub2": "Self-Serve Device Transfer",
 
@@ -406,6 +406,11 @@ function applyLanguage(lang) {
     const langBtnText = document.getElementById('lang-btn-text');
     if (langBtnText) {
         langBtnText.textContent = lang === 'zh_TW' ? 'EN' : '繁中';
+    }
+
+    // 同步更新 Mockup 視圖中目前 tab 的標題
+    if (typeof currentMockTab !== 'undefined' && typeof switchMockTab === 'function') {
+        switchMockTab(currentMockTab);
     }
 }
 
