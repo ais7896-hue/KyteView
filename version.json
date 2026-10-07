@@ -5,5 +5,6 @@
   "min_supported_version": "1.0.0",
   "mandatory": false,
   "notes": "1. [修復] 修正手動檢查版本更新功能在部分設定狀態下無反應之問題\n2. [優化] 英文介面模式下托盤「檢查版本更新」與授權提示完整在地化\n3. [優化] 提升程式運行穩定性與授權驗證效能",
+  "notes_en": "1. [Fix] Resolved update checker unresponsive issue under specific settings\n2. [Optimize] Full English localization for tray update menu and license notices\n3. [Optimize] Improved app stability and license verification performance",
   "download_url": "https://github.com/ais7896-hue/KyteView/releases/download/v1.5.2/KyteView_Setup_1.5.2.exe"
 }
