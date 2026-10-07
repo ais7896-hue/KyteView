@@ -75,6 +75,9 @@ _DEFAULTS: dict[str, Any] = {
     # 四、 提醒與狀態指示
     "show_startup_notification": True, # 啟動時發送托盤提示
     "show_explorer_hud": True,         # 切換至檔案總管時右下角淡入待命提示
+    # 五、 版本更新
+    "last_update_check_time": 0.0,
+    "skipped_version": ""
 }
 
 

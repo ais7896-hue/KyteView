@@ -16,12 +16,13 @@ sys.path.insert(0, os.path.dirname(__file__))
 import win32gui
 from PySide6.QtCore import QTimer, Qt, QObject, Signal
 from PySide6.QtGui import QIcon, QPixmap, QPainter, QColor, QFont
-from PySide6.QtWidgets import QApplication, QSystemTrayIcon, QMenu
+from PySide6.QtWidgets import QApplication, QSystemTrayIcon, QMenu, QMessageBox
 from PySide6.QtNetwork import QLocalServer, QLocalSocket
 
 from config.settings import settings
 from core.file_watcher import get_selected_files, is_explorer_window, get_file_nav_context
 from core.hotkey_listener import HotkeyListener
+from core.updater import CheckUpdateWorker, UpdateDialog
 from ui.preview_window import PreviewWindow
 from ui.status_pill import StatusPill
 from i18n import t, i18n
@@ -53,6 +54,10 @@ def _make_tray_icon() -> QIcon:
 
 
 class KyteViewApp(QObject):
+    APP_VERSION = "1.5.1"
+    REPO_NAME = "ais7896-hue/KyteView"
+    CNAME_DOMAIN = "kyteview.aisming.com"
+
     # Signal 是執行緒安全的，hook 執行緒 emit → 主執行緒 slot 執行
     _sig_open       = Signal(object)  # hwnd (64-bit safe)
     _sig_close      = Signal()
@@ -87,6 +92,11 @@ class KyteViewApp(QObject):
         self._setup_hotkey()
         self._setup_focus_monitor()
         i18n.language_changed.connect(lambda _: self._update_tray_texts())
+
+        # 啟動 3 秒後靜默檢查更新 (不影響啟動速度)
+        self._updater_worker = None
+        self._is_silent_check = True
+        QTimer.singleShot(3000, lambda: self.check_for_updates(silent=True))
 
     # ── 單一實例 IPC ──────────────────────────────────────────────────────────
 
@@ -182,6 +192,9 @@ class KyteViewApp(QObject):
 
         act_settings = menu.addAction(t("tray.settings"))
         act_settings.triggered.connect(self._window.open_settings)
+
+        act_update = menu.addAction(t("tray.check_update", default="檢查版本更新..."))
+        act_update.triggered.connect(lambda: self.check_for_updates(silent=False))
 
         menu.addSeparator()
         menu.addAction(t("tray.quit")).triggered.connect(self._quit)
@@ -299,6 +312,63 @@ class KyteViewApp(QObject):
         self._tray.hide()
         self._pill.hide()
         self._app.quit()
+
+    def check_for_updates(self, silent: bool = True):
+        """檢查版本更新 (silent=True 為背景自動檢查；silent=False 為使用者手動點擊)"""
+        last_check = float(settings.get("last_update_check_time", 0.0) or 0.0)
+        # 背景靜默檢查且 24 小時內已檢查過則略過
+        if silent and (time.time() - last_check < 86400):
+            return
+
+        self._is_silent_check = silent
+        settings.set("last_update_check_time", time.time())
+
+        # 避免重複觸發
+        if self._updater_worker and self._updater_worker.isRunning():
+            return
+
+        self._updater_worker = CheckUpdateWorker(
+            current_ver=self.APP_VERSION,
+            repo=self.REPO_NAME,
+            cname_domain=self.CNAME_DOMAIN,
+            parent=self
+        )
+        self._updater_worker.checked.connect(self._on_update_result)
+        self._updater_worker.error.connect(self._on_update_error)
+        self._updater_worker.start()
+
+    def _on_update_result(self, has_update: bool, latest_ver: str, notes: str, download_url: str):
+        if has_update:
+            skipped_ver = settings.get("skipped_version", "")
+            # 若為靜默檢查且使用者曾選擇「略過此版本」則不打擾
+            if self._is_silent_check and skipped_ver == latest_ver:
+                return
+
+            dlg = UpdateDialog(
+                app_name="KyteView",
+                current_ver=self.APP_VERSION,
+                new_ver=latest_ver,
+                notes=notes,
+                download_url=download_url,
+                on_skip_cb=lambda v: settings.set("skipped_version", v),
+                parent=None
+            )
+            dlg.exec()
+        elif not self._is_silent_check:
+            QMessageBox.information(
+                None, 
+                t("update.latest_title", default="檢查更新"), 
+                t("update.latest_msg", ver=self.APP_VERSION, default=f"目前已是最新版本 (v{self.APP_VERSION})！")
+            )
+
+    def _on_update_error(self, err: str):
+        if not self._is_silent_check:
+            QMessageBox.warning(
+                None, 
+                t("update.latest_title", default="檢查更新"), 
+                t("update.err_conn", err=err, default=f"連線至伺服器時發生錯誤：\n{err}")
+            )
+
 
 
 def main() -> None:

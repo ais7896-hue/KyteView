@@ -1,0 +1,9 @@
+{
+  "app_name": "KyteView",
+  "version": "1.5.1",
+  "release_date": "2026-10-07",
+  "min_supported_version": "1.0.0",
+  "mandatory": false,
+  "notes": "1. [新功能] 內建自動版本檢測與一鍵無縫下載升級\n2. [優化] 系統托盤選單新增「檢查版本更新...」功能\n3. [修復] 強化 Office 向量預覽與壓縮檔預覽效能",
+  "download_url": "https://github.com/ais7896-hue/KyteView/releases/download/v1.5.1/KyteView_Setup_1.5.1.exe"
+}

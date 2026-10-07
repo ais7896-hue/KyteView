@@ -1,5 +1,5 @@
-{
-    "version": "1.5.0",
+﻿{
+    "version": "1.5.1",
     "description": "A modern, ultra-fast Windows multi-format media and document previewer.",
     "homepage": "https://github.com/ais7896-hue/KyteView",
     "license": {
@@ -8,7 +8,7 @@
     },
     "architecture": {
         "64bit": {
-            "url": "https://github.com/ais7896-hue/KyteView/releases/download/v1.5.0/KyteView_1.5.0_Portable.zip",
+            "url": "https://github.com/ais7896-hue/KyteView/releases/download/v1.5.1/KyteView_1.5.1_Portable.zip",
             "hash": "38E7D0464529CB222C201B4B3E7A03521FB306E7E451329119D43C9E020FAB57"
         }
     },
