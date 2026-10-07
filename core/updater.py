@@ -15,7 +15,10 @@ from typing import Optional, Callable
 from PySide6.QtCore import QThread, Signal, Qt
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
-    QTextEdit, QPushButton, Qtry:
+    QTextEdit, QPushButton, QProgressBar, QMessageBox, QApplication
+)
+
+try:
     from i18n import t as _core_t, i18n
 except Exception:
     _core_t = None
