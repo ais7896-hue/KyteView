@@ -74,4 +74,20 @@ def run_all_tests():
 
 if __name__ == "__main__":
     exit_code = run_all_tests()
+
+    # 安全終止所有背景非同步轉譯執行緒，防止 QThread: Destroyed while thread is still running
+    try:
+        from renderers.docx_renderer import wait_all_export_threads
+        wait_all_export_threads()
+    except Exception:
+        pass
+
+    try:
+        from PySide6.QtWidgets import QApplication
+        app = QApplication.instance()
+        if app:
+            app.processEvents()
+    except Exception:
+        pass
+
     sys.exit(exit_code)

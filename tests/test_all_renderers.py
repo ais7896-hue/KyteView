@@ -22,6 +22,11 @@ class TestAllRenderers(unittest.TestCase):
 
     def tearDown(self):
         try:
+            from renderers.docx_renderer import wait_all_export_threads
+            wait_all_export_threads()
+        except Exception:
+            pass
+        try:
             self.td.cleanup()
         except Exception:
             pass
@@ -30,6 +35,8 @@ class TestAllRenderers(unittest.TestCase):
         r = get_renderer(path)
         w = r.render(path)
         self.assertIsNotNone(w)
+        if hasattr(w, "cleanup"):
+            w.cleanup()
         if hasattr(r, "cleanup"):
             r.cleanup()
         if w is not None:
@@ -114,13 +121,19 @@ class TestAllRenderers(unittest.TestCase):
         docx_f = self.tdp / "test.docx"
         pw.show_file(docx_f, "1 / 1", "")
         pw.hide_window()
+        pw.close()
+        pw.deleteLater()
 
         sd = SettingsDialog(None)
         sd._on_save_clicked()
+        sd.close()
+        sd.deleteLater()
 
         ld = LicenseDialog(None)
         ld.refresh_ui_state()
         ld.reject()
+        ld.close()
+        ld.deleteLater()
 
 
 if __name__ == "__main__":

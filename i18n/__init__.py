@@ -73,7 +73,7 @@ class I18nManager(QObject):
             self._resolved_lang = "en_US"
         self.language_changed.emit(self._resolved_lang)
 
-    def translate(self, key: str, default: Optional[str] = None, **kwargs: Any) -> str:
+    def translate(self, key: str, /, default: Optional[str] = None, **kwargs: Any) -> str:
         dic = self._dictionaries.get(self._resolved_lang, ZH_TW_DICT)
         text = dic.get(key)
         if text is None:

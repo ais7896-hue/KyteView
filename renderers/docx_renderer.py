@@ -241,7 +241,22 @@ def _has_word_application() -> bool:
         return False
 
 
-_active_export_threads: set[WordPdfExportThread] = set()
+_active_export_threads: set['WordPdfExportThread'] = set()
+
+
+def wait_all_export_threads(timeout_ms: int = 1500):
+    """安全等待並終止所有背景轉譯執行緒，防止處理序退出時崩潰。"""
+    threads = list(_active_export_threads)
+    for th in threads:
+        try:
+            if th.isRunning():
+                th.quit()
+                if not th.wait(timeout_ms):
+                    th.terminate()
+                    th.wait(500)
+        except Exception:
+            pass
+    _active_export_threads.clear()
 
 
 class WordPdfExportThread(QThread):
@@ -365,6 +380,9 @@ class AsyncWordWidget(QWidget):
             try:
                 self._thread.disconnect()
                 self._thread.quit()
+                if not self._thread.wait(1000):
+                    self._thread.terminate()
+                    self._thread.wait(500)
             except Exception:
                 pass
 

@@ -1,4 +1,4 @@
-param(
+﻿param(
     [switch]$SkipTests
 )
 
@@ -43,6 +43,9 @@ if (-not $SkipTests) {
     }
 }
 
+# 0.8 確保沒有正在運行的實例鎖定檔案
+Get-Process KyteView -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+
 # 1. 清理過往建置產物
 Write-Host "`n>>> [1/3] 正在清理過往建置目錄... " -ForegroundColor Yellow
 Remove-Item -Recurse -Force build, dist -ErrorAction SilentlyContinue
@@ -80,9 +83,14 @@ Write-Host "`n[OK] PyInstaller 打包成功！綠色免安裝目錄位於 dist\K
 # 2.5 打包免安裝綠色版 (Portable Zip)
 Write-Host "`n>>> 正在打包免安裝綠色版 (Portable Zip)... " -ForegroundColor Yellow
 $appVersion = "1.5.2"
-if (Test-Path "setup.iss") {
-    $issContent = Get-Content "setup.iss" -Raw
-    if ($issContent -match '#define\s+MyAppVersion\s+"([^"]+)"') {
+if (Test-Path "version.json") {
+    try {
+        $vJson = Get-Content "version.json" -Raw | ConvertFrom-Json
+        if ($vJson.version) { $appVersion = $vJson.version }
+    } catch {}
+} elseif (Test-Path "setup.iss") {
+    $line = Get-Content "setup.iss" | Where-Object { $_ -match "MyAppVersion" } | Select-Object -First 1
+    if ($line -match '"([^"]+)"') {
         $appVersion = $matches[1]
     }
 }
