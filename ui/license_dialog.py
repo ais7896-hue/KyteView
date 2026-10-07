@@ -26,7 +26,7 @@ from i18n import t, i18n
 
 class LicenseDialog(QDialog):
     """授權啟用與狀態管理對話框。"""
-    PURCHASE_URL = "https://github.com/ais7896-hue/KyteView"
+    PURCHASE_URL = "https://kyteview.aisming.com/#pricing"
 
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)

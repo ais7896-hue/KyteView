@@ -35,9 +35,20 @@ OutputBaseFilename=KyteView_Setup_{#MyAppVersion}
 Name: "chinesetrad"; MessagesFile: "compiler:Languages\ChineseTraditional.isl"
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
+[CustomMessages]
+chinesetrad.CreateDesktopIcon=建立桌面捷徑
+chinesetrad.AdditionalIcons=額外捷徑:
+chinesetrad.AutoStart=開機時自動啟動 KyteView (推薦)
+chinesetrad.AutoStartGroup=啟動選項:
+
+english.CreateDesktopIcon=Create a &desktop shortcut
+english.AdditionalIcons=Additional shortcuts:
+english.AutoStart=Launch KyteView on Windows startup (Recommended)
+english.AutoStartGroup=Startup options:
+
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "autostart"; Description: "開機時自動啟動 KyteView (推薦)"; GroupDescription: "啟動選項:"; Flags: checkablealone
+Name: "autostart"; Description: "{cm:AutoStart}"; GroupDescription: "{cm:AutoStartGroup}"; Flags: checkablealone
 
 [Files]
 ; 來源檔案為 PyInstaller 產生的 dist\KyteView 目錄
