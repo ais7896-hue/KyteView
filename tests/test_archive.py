@@ -6,68 +6,81 @@ import sys
 import tempfile
 import zipfile
 import tarfile
+import unittest
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+BASE_DIR = Path(__file__).resolve().parent.parent
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(BASE_DIR))
 
 from PySide6.QtWidgets import QApplication
 
 from core.preview_router import get_renderer
 from renderers.archive_renderer import ArchiveRenderer, ArchiveBrowserWidget
 
-def test_archive():
-    app = QApplication.instance() or QApplication([])
+class TestArchiveRenderer(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.app = QApplication.instance() or QApplication([])
 
-    with tempfile.TemporaryDirectory() as td:
-        tdp = Path(td)
-        zip_path = tdp / "test_sample.zip"
+    def setUp(self):
+        self.td = tempfile.TemporaryDirectory()
+        self.tdp = Path(self.td.name)
 
-        # 建立測試 ZIP，包含多層目錄與多個檔案
+    def tearDown(self):
+        self.td.cleanup()
+
+    def test_zip_routing_and_render(self):
+        """1. 驗證 ZIP 路由、Widget 讀取與渲染"""
+        zip_path = self.tdp / "test_sample.zip"
         with zipfile.ZipFile(zip_path, "w") as zf:
             zf.writestr("root.txt", "Hello KyteView Root")
             zf.writestr("subfolder/inner.txt", "Inner text content")
             zf.writestr("subfolder/deep/doc.pdf", b"%PDF-1.4 mock")
 
-        # 1. 驗證路由
         renderer = get_renderer(zip_path)
-        assert isinstance(renderer, ArchiveRenderer), f"Expected ArchiveRenderer, got {renderer}"
+        self.assertIsInstance(renderer, ArchiveRenderer)
 
-        # 2. 驗證 widget 讀取與渲染
         widget = renderer.render(zip_path)
-        assert isinstance(widget, ArchiveBrowserWidget)
-        assert len(widget._entries) == 3
-        assert widget._total_uncompressed > 0
-        assert not widget._is_truncated
+        self.assertIsInstance(widget, ArchiveBrowserWidget)
+        self.assertEqual(len(widget._entries), 3)
+        self.assertGreater(widget._total_uncompressed, 0)
+        self.assertFalse(widget._is_truncated)
 
-        # 3. 驗證單檔抽出功能
+        # 驗證單檔抽出功能
         extracted = widget._extract_single_file("subfolder/inner.txt")
-        assert extracted is not None
-        assert extracted.exists()
-        assert extracted.read_text(encoding="utf-8") == "Inner text content"
+        self.assertIsNotNone(extracted)
+        self.assertTrue(extracted.exists())
+        self.assertEqual(extracted.read_text(encoding="utf-8"), "Inner text content")
 
-        # 4. 驗證 1,000 筆上限防卡死截斷保護
-        big_zip_path = tdp / "big.zip"
+    def test_truncation_protection(self):
+        """2. 驗證 1,000 筆上限防卡死截斷保護"""
+        big_zip_path = self.tdp / "big.zip"
         with zipfile.ZipFile(big_zip_path, "w") as zf:
             for i in range(1200):
                 zf.writestr(f"item_{i}.txt", "x")
 
         big_widget = ArchiveBrowserWidget(big_zip_path)
-        assert big_widget._is_truncated is True
-        assert len(big_widget._entries) == 1000
+        self.assertTrue(big_widget._is_truncated)
+        self.assertEqual(len(big_widget._entries), 1000)
 
-        # 5. 驗證 tar.gz 讀取
-        tar_path = tdp / "test_sample.tar.gz"
+    def test_tar_gz_reading(self):
+        """3. 驗證 tar.gz 讀取"""
+        tar_path = self.tdp / "test_sample.tar.gz"
         with tarfile.open(tar_path, "w:gz") as tf:
-            f1 = tdp / "file1.txt"
+            f1 = self.tdp / "file1.txt"
             f1.write_text("Tar content", encoding="utf-8")
             tf.add(f1, arcname="folder/file1.txt")
 
         tar_renderer = get_renderer(tar_path)
-        assert isinstance(tar_renderer, ArchiveRenderer)
+        self.assertIsInstance(tar_renderer, ArchiveRenderer)
         tar_widget = tar_renderer.render(tar_path)
-        assert len(tar_widget._entries) >= 1
+        self.assertGreaterEqual(len(tar_widget._entries), 1)
 
-    print("[SUCCESS] All archive tests passed successfully!")
+def test_archive():
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestArchiveRenderer)
+    runner = unittest.TextTestRunner(verbosity=2)
+    return runner.run(suite)
 
 if __name__ == "__main__":
-    test_archive()
+    unittest.main()

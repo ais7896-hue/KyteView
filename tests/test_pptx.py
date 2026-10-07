@@ -5,54 +5,64 @@ tests/test_pptx.py
 import sys
 import tempfile
 import zipfile
+import unittest
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+BASE_DIR = Path(__file__).resolve().parent.parent
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(BASE_DIR))
 
 from PySide6.QtWidgets import QApplication
 
 from core.preview_router import get_renderer
 from renderers.pptx_renderer import PptxRenderer, PptxBrowserWidget, _PptLegacyWidget, _extract_thumbnail
 
+class TestPptxRenderer(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.app = QApplication.instance() or QApplication([])
 
-def test_pptx():
-    app = QApplication.instance() or QApplication([])
+    def setUp(self):
+        self.td = tempfile.TemporaryDirectory()
+        self.tdp = Path(self.td.name)
 
-    with tempfile.TemporaryDirectory() as td:
-        tdp = Path(td)
-        pptx_path = tdp / "mock_sample.pptx"
+    def tearDown(self):
+        self.td.cleanup()
+
+    def test_pptx_routing_and_thumbnail(self):
+        """1. 測試 PPTX 路由與封面縮圖提取"""
+        pptx_path = self.tdp / "mock_sample.pptx"
 
         # 模擬建立包含封面縮圖的 pptx
         with zipfile.ZipFile(pptx_path, "w") as zf:
-            # 建立假 JPEG 檔頭
             fake_jpeg = b"\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x01\x00`\x00`\x00\x00\xff\xdb"
             zf.writestr("docProps/thumbnail.jpeg", fake_jpeg)
             zf.writestr("[Content_Types].xml", "<Types></Types>")
 
-        # 1. 路由測試
         renderer = get_renderer(pptx_path)
-        assert isinstance(renderer, PptxRenderer)
+        self.assertIsInstance(renderer, PptxRenderer)
 
-        # 2. 封面提取測試
         thumb = _extract_thumbnail(pptx_path)
-        assert thumb is not None
-        assert thumb.startswith(b"\xff\xd8")
+        self.assertIsNotNone(thumb)
+        self.assertTrue(thumb.startswith(b"\xff\xd8"))
 
-        # 3. Widget 載入與結構
         widget = renderer.render(pptx_path)
-        assert isinstance(widget, PptxBrowserWidget)
-        assert len(widget._slides) >= 1
+        self.assertIsInstance(widget, PptxBrowserWidget)
+        self.assertGreaterEqual(len(widget._slides), 1)
 
-        # 4. 舊版 .ppt 降級測試
-        ppt_path = tdp / "old_doc.ppt"
+    def test_ppt_legacy_fallback(self):
+        """2. 舊版 .ppt 降級測試"""
+        ppt_path = self.tdp / "old_doc.ppt"
         ppt_path.write_bytes(b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1 mock ppt")
         ppt_renderer = get_renderer(ppt_path)
-        assert isinstance(ppt_renderer, PptxRenderer)
+        self.assertIsInstance(ppt_renderer, PptxRenderer)
         ppt_widget = ppt_renderer.render(ppt_path)
-        assert isinstance(ppt_widget, _PptLegacyWidget)
+        self.assertIsInstance(ppt_widget, _PptLegacyWidget)
 
-    print("[SUCCESS] All PPTX tests passed successfully!")
-
+def test_pptx():
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestPptxRenderer)
+    runner = unittest.TextTestRunner(verbosity=2)
+    return runner.run(suite)
 
 if __name__ == "__main__":
-    test_pptx()
+    unittest.main()
