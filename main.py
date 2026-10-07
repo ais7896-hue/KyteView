@@ -54,7 +54,7 @@ def _make_tray_icon() -> QIcon:
 
 
 class KyteViewApp(QObject):
-    APP_VERSION = "1.5.1"
+    APP_VERSION = "1.5.2"
     REPO_NAME = "ais7896-hue/KyteView"
     CNAME_DOMAIN = "kyteview.aisming.com"
 
@@ -325,7 +325,12 @@ class KyteViewApp(QObject):
 
         # 避免重複觸發
         if self._updater_worker and self._updater_worker.isRunning():
+            if not silent:
+                self._pill.flash(t("update.checking", default="正在檢查版本更新..."), 1500)
             return
+
+        if not silent:
+            self._pill.flash(t("update.checking", default="正在檢查版本更新..."), 2000)
 
         self._updater_worker = CheckUpdateWorker(
             current_ver=self.APP_VERSION,
@@ -353,21 +358,28 @@ class KyteViewApp(QObject):
                 on_skip_cb=lambda v: settings.set("skipped_version", v),
                 parent=None
             )
+            dlg.setWindowFlags(dlg.windowFlags() | Qt.WindowStaysOnTopHint)
             dlg.exec()
         elif not self._is_silent_check:
-            QMessageBox.information(
-                None, 
-                t("update.latest_title", default="檢查更新"), 
-                t("update.latest_msg", ver=self.APP_VERSION, default=f"目前已是最新版本 (v{self.APP_VERSION})！")
+            box = QMessageBox(
+                QMessageBox.Icon.Information,
+                t("update.latest_title", default="檢查更新"),
+                t("update.latest_msg", ver=self.APP_VERSION, default=f"目前已是最新版本 (v{self.APP_VERSION})！"),
+                QMessageBox.StandardButton.Ok
             )
+            box.setWindowFlags(box.windowFlags() | Qt.WindowStaysOnTopHint)
+            box.exec()
 
     def _on_update_error(self, err: str):
         if not self._is_silent_check:
-            QMessageBox.warning(
-                None, 
-                t("update.latest_title", default="檢查更新"), 
-                t("update.err_conn", err=err, default=f"連線至伺服器時發生錯誤：\n{err}")
+            box = QMessageBox(
+                QMessageBox.Icon.Warning,
+                t("update.latest_title", default="檢查更新"),
+                t("update.err_conn", err=err, default=f"連線至伺服器時發生錯誤：\n{err}"),
+                QMessageBox.StandardButton.Ok
             )
+            box.setWindowFlags(box.windowFlags() | Qt.WindowStaysOnTopHint)
+            box.exec()
 
 
 

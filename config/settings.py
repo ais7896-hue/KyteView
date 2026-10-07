@@ -145,6 +145,12 @@ class SettingsManager(QObject):
         """通用讀取設定項，支援預設值。"""
         return self._data.get(key, default)
 
+    def set(self, key: str, value: Any) -> None:
+        """通用寫入單一設定項並保存。"""
+        self._data[key] = value
+        self._save()
+        self.settings_changed.emit(key)
+
     @property
     def show_startup_notification(self) -> bool:
         return bool(self._data.get("show_startup_notification", True))

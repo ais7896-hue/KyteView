@@ -56,22 +56,48 @@ class TestLicense(unittest.TestCase):
         ok, _ = self.mgr.activate_license("KV-TEST-2026-0000")
         self.assertFalse(ok)
 
-        # 正確序號啟用
-        ok, msg = self.mgr.activate_license(valid_key)
-        self.assertTrue(ok)
-        self.assertTrue(self.mgr.is_activated())
-        self.assertTrue(self.mgr.is_unlimited())
-        self.assertEqual(self.mgr.get_plan_type(), "pro")
-        self.assertTrue(self.mgr.license_file.exists())
+        # 正確序號啟用（mock 線上伺服器成功回應，產生簽名符合本機驗證規範的 Token）
+        import json
+        import base64
+        import hmac
+        import hashlib
+        from unittest.mock import patch, MagicMock
+        from core.license import DEFAULT_JWT_SECRET
 
-        # 本機驗證
-        self.assertTrue(self.mgr.verify_local_license())
+        payload_dict = {"machine_id": self.mgr.machine_id, "key": valid_key}
+        payload_b64 = base64.urlsafe_b64encode(json.dumps(payload_dict).encode()).decode().rstrip("=")
+        sig = hmac.new(DEFAULT_JWT_SECRET.encode("utf-8"), payload_b64.encode("utf-8"), hashlib.sha256).digest()
+        sig_b64 = base64.urlsafe_b64encode(sig).decode().rstrip("=")
+        valid_mock_token = f"{payload_b64}.{sig_b64}"
 
-        # 解除綁定
-        ok, _ = self.mgr.deactivate_license()
-        self.assertTrue(ok)
-        self.assertFalse(self.mgr.is_activated())
-        self.assertFalse(self.mgr.license_file.exists())
+        mock_resp = MagicMock()
+        mock_resp.read.return_value = json.dumps({
+            "success": True,
+            "token": valid_mock_token,
+            "devices_used": 1,
+            "max_devices": 2
+        }).encode("utf-8")
+        mock_resp.__enter__.return_value = mock_resp
+        with patch("urllib.request.urlopen", return_value=mock_resp):
+            ok, msg = self.mgr.activate_license(valid_key)
+            self.assertTrue(ok)
+            self.assertTrue(self.mgr.is_activated())
+            self.assertTrue(self.mgr.is_unlimited())
+            self.assertEqual(self.mgr.get_plan_type(), "pro")
+            self.assertTrue(self.mgr.license_file.exists())
+
+            # 本機驗證
+            self.assertTrue(self.mgr.verify_local_license())
+
+            # 解除綁定
+            mock_deact = MagicMock()
+            mock_deact.read.return_value = b'{"success": true}'
+            mock_deact.__enter__.return_value = mock_deact
+            with patch("urllib.request.urlopen", return_value=mock_deact):
+                ok, _ = self.mgr.deactivate_license()
+                self.assertTrue(ok)
+                self.assertFalse(self.mgr.is_activated())
+                self.assertFalse(self.mgr.license_file.exists())
 
     def test_trial_days_calculation(self):
         """測試試用期狀態。"""

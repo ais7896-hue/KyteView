@@ -64,7 +64,7 @@ Write-Host "`n[OK] PyInstaller 打包成功！綠色免安裝目錄位於 dist\K
 
 # 2.5 打包免安裝綠色版 (Portable Zip)
 Write-Host "`n>>> 正在打包免安裝綠色版 (Portable Zip)... " -ForegroundColor Yellow
-$appVersion = "1.5.1"
+$appVersion = "1.5.2"
 if (Test-Path "setup.iss") {
     $issContent = Get-Content "setup.iss" -Raw
     if ($issContent -match '#define\s+MyAppVersion\s+"([^"]+)"') {

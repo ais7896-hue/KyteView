@@ -125,7 +125,7 @@ class SettingsDialog(QDialog):
         nav_layout.addStretch()
 
         # 版本提示與技術支援
-        lbl_ver = QLabel("v1.5.1 • 64-bit")
+        lbl_ver = QLabel("v1.5.2 • 64-bit")
         lbl_ver.setStyleSheet("color: #71717a; font-size: 11px;")
         nav_layout.addWidget(lbl_ver)
 
@@ -1082,7 +1082,7 @@ class SettingsDialog(QDialog):
         lines = [
             "```yaml",
             f"{t('diag.report_title')}",
-            "KyteView_Version: v1.5.1 (64-bit)",
+            "KyteView_Version: v1.5.2 (64-bit)",
             f"Python_Version: {platform.python_version()} ({platform.architecture()[0]})",
             f"OS: {platform.system()} {sys.getwindowsversion().major}.{sys.getwindowsversion().minor} (Build {sys.getwindowsversion().build})",
         ]

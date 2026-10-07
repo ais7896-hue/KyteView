@@ -19,6 +19,8 @@ from typing import Tuple, Optional
 
 from PySide6.QtCore import QObject, Signal
 
+from i18n import t
+
 
 def get_machine_guid() -> str:
     """取得 Windows 唯一 MachineGuid 機器識別碼。"""
@@ -260,7 +262,7 @@ class LicenseManager(QObject):
         """
         clean_key = key.strip().upper()
         if not clean_key:
-            return False, "請輸入授權序號。"
+            return False, t("license.empty_key_err")
 
         # 必須透過線上伺服器安全驗證與綁定
         return self.activate_online(clean_key)
@@ -286,7 +288,7 @@ class LicenseManager(QObject):
                 data=req_data,
                 headers={
                     "Content-Type": "application/json; charset=utf-8",
-                    "User-Agent": "KyteView-Client/1.5.1 (Windows NT 10.0; Win64; x64)"
+                    "User-Agent": "KyteView-Client/1.5.2 (Windows NT 10.0; Win64; x64)"
                 },
                 method="POST"
             )
@@ -311,9 +313,9 @@ class LicenseManager(QObject):
                     self._is_pro = True
                     self._license_data = save_data
                     self.license_changed.emit(True)
-                    return True, "🎉 授權啟用成功！KyteView 專業版所有進階功能已永久解鎖。"
+                    return True, t("license.activate_success_msg")
                 else:
-                    return False, res_json.get("message", "啟用失敗，請確認序號。")
+                    return False, res_json.get("message", t("license.activate_failed_msg"))
 
         except urllib.error.HTTPError as e:
             try:
@@ -323,7 +325,7 @@ class LicenseManager(QObject):
             except Exception:
                 return False, f"伺服器回應錯誤: {e.code}"
         except urllib.error.URLError as e:
-            return False, f"網路連線失敗，請檢查網路: {e.reason}"
+            return False, t("license.net_err_msg", err=str(e.reason))
         except Exception as e:
             return False, f"啟用異常: {str(e)}"
 
@@ -346,7 +348,7 @@ class LicenseManager(QObject):
                     data=req_data,
                     headers={
                         "Content-Type": "application/json; charset=utf-8",
-                            "User-Agent": "KyteView-Client/1.5.1 (Windows NT 10.0; Win64; x64)"
+                            "User-Agent": "KyteView-Client/1.5.2 (Windows NT 10.0; Win64; x64)"
                     },
                     method="POST"
                 )
@@ -363,7 +365,7 @@ class LicenseManager(QObject):
         self._is_pro = False
         self._license_data = {}
         self.license_changed.emit(False)
-        return True, "已成功解除本機授權綁定，名額已釋放。"
+        return True, t("license.deactivate_success_msg")
 
 
     def get_license_info(self) -> dict:

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * assets/i18n.js - KyteView 官方網站中英雙語字典與切換引擎
  */
 
@@ -6,7 +6,7 @@ const TRANSLATIONS = {
     zh_TW: {
         "page.title": "KyteView - 為 Windows 打造的次世代極速檔案預覽神器 | 媲美 macOS QuickLook",
         
-        "top.badge": "v1.5.1 正式版",
+        "top.badge": "v1.5.2 正式版",
         "top.announcement": "KyteView 釋出：全新多國語言 (繁中/英文) 即時切換、各檔案類型全域國際化支援！",
 
         "nav.brand_sub": "QUICK PREVIEW UTILITY",
@@ -24,7 +24,7 @@ const TRANSLATIONS = {
         "hero.title_pre": "選中檔案，按一下空白鍵",
         "hero.title_post": "內容秒開，工作流絕不卡頓",
         "hero.desc": "不再為了確認內容反覆開啟笨重肥大的微軟 Office 或外部播放器。<br class='hidden sm:inline'>按一下 <kbd class='px-2 py-1 rounded bg-slate-800 border border-slate-700 font-mono-code text-brand-300 font-bold text-sm shadow'>Space</kbd> 瞬間彈出，具備智慧避讓與側邊釘選，為高效專業工作者而生。",
-        "hero.btn_installer": "立即下載 Windows 安裝檔 (v1.5.1)",
+        "hero.btn_installer": "立即下載 Windows 安裝檔 (v1.5.2)",
         "hero.btn_portable": "免安裝綠色版 (.zip)",
         "hero.btn_features": "探索全部殺手級功能",
         "hero.trial_note": "免費下載試用 (14 天全功能暢享) · 零門檻無綁卡 · 開箱即用",
@@ -143,7 +143,7 @@ const TRANSLATIONS = {
         "price.t1_f4": "<b>14 天全功能解鎖</b>：Win11 Mica 毛玻璃、側邊釘選與透視",
         "price.t1_f5": "圖片全螢幕、4K 影音 GPU 硬解播放與代碼語法著色",
         "price.t1_f6": "試用期滿後<b>溫和降級</b>（保留日常必備預覽，工作流不中斷）",
-        "price.t1_btn": "免費下載試用 (v1.5.1)",
+        "price.t1_btn": "免費下載試用 (v1.5.2)",
 
         "price.t2_badge_top": "早鳥特惠 · 限量發售",
         "price.t2_badge_rec": "推薦旗艦",
@@ -187,7 +187,7 @@ const TRANSLATIONS = {
     en_US: {
         "page.title": "KyteView - Next-Gen Instant File Preview Utility for Windows | Best QuickLook Alternative",
         
-        "top.badge": "v1.5.1 Official",
+        "top.badge": "v1.5.2 Official",
         "top.announcement": "KyteView Released: Brand-new multi-language (Traditional Chinese & English) support!",
 
         "nav.brand_sub": "QUICK PREVIEW UTILITY",
@@ -205,7 +205,7 @@ const TRANSLATIONS = {
         "hero.title_pre": "Select Any File, Press Spacebar,",
         "hero.title_post": "Instant Preview with Zero Friction",
         "hero.desc": "Never wait for bulky Microsoft Office or external media players again.<br class='hidden sm:inline'>Press <kbd class='px-2 py-1 rounded bg-slate-800 border border-slate-700 font-mono-code text-brand-300 font-bold text-sm shadow'>Space</kbd> for instant popups with smart offset positioning and side-dock pinning.",
-        "hero.btn_installer": "Download Windows Setup (v1.5.1)",
+        "hero.btn_installer": "Download Windows Setup (v1.5.2)",
         "hero.btn_portable": "Portable .zip Edition",
         "hero.btn_features": "Explore Killer Features",
         "hero.trial_note": "Free 14-day full trial · No credit card required · Ready out of the box",
@@ -324,7 +324,7 @@ const TRANSLATIONS = {
         "price.t1_f4": "<b>14-day Pro unlock</b>: Win11 Mica, side pinning & peek translucent mode",
         "price.t1_f5": "Fullscreen images, 4K GPU video playback & syntax highlighting",
         "price.t1_f6": "Gentle graceful fallback after trial (essential previews preserved)",
-        "price.t1_btn": "Download Free Trial (v1.5.1)",
+        "price.t1_btn": "Download Free Trial (v1.5.2)",
 
         "price.t2_badge_top": "Early Bird · Limited Offer",
         "price.t2_badge_rec": "Recommended Pro",
