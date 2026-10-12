@@ -1,4 +1,4 @@
-/**
+﻿/**
  * assets/i18n.js - KyteView 官方網站中英雙語字典與切換引擎
  */
 
@@ -157,7 +157,7 @@ const TRANSLATIONS = {
         "price.t2_f5": "<b>Win11 Mica 毛玻璃材質、側邊釘選分割與微透機制</b>",
         "price.t2_f6": "<b>享有一年內免費維護與 Bug 修復</b>（若未來 OS 大型改版需重構，新版另行販售）",
         "price.t2_btn": "立即取得早鳥序號 (NT$ 299 終身買斷)",
-        "price.bundle_btn": "選購 Kyte Suite 旗艦三合一套裝 (All-in-One)",
+        "price.bundle_btn": "選購 Kyte Suite 旗艦三合一套裝 (NT$ 599 / $19.99 USD)",
         "price.t2_sub1": "離線安全無後門",
         "price.t2_sub2": "支援自主換機移轉",
 
@@ -338,7 +338,7 @@ const TRANSLATIONS = {
         "price.t2_f5": "<b>Win11 Mica material, side pinning & peek translucency</b>",
         "price.t2_f6": "<b>Includes 1 year of free maintenance & bug fixes</b> (major OS rewrites sold separately)",
         "price.t2_btn": "Get Early Bird License (NT$ 299 Lifetime)",
-        "price.bundle_btn": "Get Kyte Suite Trio (All-in-One Bundle)",
+        "price.bundle_btn": "Get Kyte Suite Trio (Bundle NT$ 599 / $19.99 USD)",
         "price.t2_sub1": "100% Offline Safe",
         "price.t2_sub2": "Self-Serve Device Transfer",
 
