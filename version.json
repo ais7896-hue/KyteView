@@ -1,10 +1,10 @@
 {
   "app_name": "KyteView",
-  "version": "1.5.2",
-  "release_date": "2026-10-07",
+  "version": "1.5.3",
+  "release_date": "2026-10-30",
   "min_supported_version": "1.0.0",
   "mandatory": false,
-  "notes": "1. [修復] 修正手動檢查版本更新功能在部分設定狀態下無反應之問題\n2. [優化] 英文介面模式下托盤「檢查版本更新」與授權提示完整在地化\n3. [優化] 提升程式運行穩定性與授權驗證效能",
-  "notes_en": "1. [Fix] Resolved update checker unresponsive issue under specific settings\n2. [Optimize] Full English localization for tray update menu and license notices\n3. [Optimize] Improved app stability and license verification performance",
-  "download_url": "https://github.com/ais7896-hue/KyteView/releases/download/v1.5.2/KyteView_Setup_1.5.2.exe"
+  "notes": "1. [修復] 修正免費版在深色模式下程式碼文字呈黑色難以辨識之問題\n2. [優化] 完善程式碼檢視器在淺色模式與深色模式下的底色與字體對比度\n3. [修復] 修正主題切換時語法樣式底色連動與授權狀態快取邏輯",
+  "notes_en": "1. [Fix] Resolved dark mode code text illegibility in free tier\n2. [Optimize] Enhanced contrast and background pairing for code viewer across dark and light themes\n3. [Fix] Improved code theme synchronization and license cache invalidation",
+  "download_url": "https://github.com/ais7896-hue/KyteView/releases/download/v1.5.3/KyteView_Setup_1.5.3.exe"
 }

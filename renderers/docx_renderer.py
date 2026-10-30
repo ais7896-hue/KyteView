@@ -636,7 +636,7 @@ class DocxRenderer(BaseRenderer):
 
         title_lbl = QLabel(path.name)
         title_lbl.setFont(QFont("Segoe UI", 13, QFont.Weight.Bold))
-        title_lbl.setStyleSheet(f"color: {c.text};")
+        title_lbl.setStyleSheet(f"color: {c['text_color']};")
         title_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(title_lbl)
 
@@ -666,9 +666,9 @@ class DocxRenderer(BaseRenderer):
         def add_row(k: str, v: str):
             row = QHBoxLayout()
             lbl_k = QLabel(k)
-            lbl_k.setStyleSheet(f"color: {c.text_secondary}; font-size: 11px;")
+            lbl_k.setStyleSheet(f"color: {c['subtitle_color']}; font-size: 11px;")
             lbl_v = QLabel(v)
-            lbl_v.setStyleSheet(f"color: {c.text}; font-size: 11px; font-weight: 500;")
+            lbl_v.setStyleSheet(f"color: {c['text_color']}; font-size: 11px; font-weight: 500;")
             lbl_v.setAlignment(Qt.AlignmentFlag.AlignRight)
             row.addWidget(lbl_k)
             row.addWidget(lbl_v)
@@ -689,7 +689,7 @@ class DocxRenderer(BaseRenderer):
 
         # 專業版提示橫條
         tip_lbl = QLabel(f"🔒 {reason}")
-        tip_lbl.setStyleSheet(f"color: {c.text_secondary}; font-size: 11px;")
+        tip_lbl.setStyleSheet(f"color: {c['subtitle_color']}; font-size: 11px;")
         tip_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(tip_lbl)
 
@@ -725,7 +725,7 @@ class DocxRenderer(BaseRenderer):
         btn_open.setStyleSheet(f"""
             QPushButton {{
                 background: {btn_open_bg};
-                color: {c.text};
+                color: {c['text_color']};
                 font-size: 11px;
                 border-radius: 6px;
                 padding: 4px 14px;

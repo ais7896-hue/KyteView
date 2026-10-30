@@ -363,3 +363,9 @@ class LicenseDialog(QDialog):
 
     def _open_buy_url(self) -> None:
         webbrowser.open(self.PURCHASE_URL)
+
+
+def show_license_dialog(parent: Optional[QWidget] = None) -> None:
+    dlg = LicenseDialog(parent)
+    dlg.exec()
+

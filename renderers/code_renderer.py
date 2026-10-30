@@ -76,32 +76,68 @@ def _get_lexer_for_path(path: Path, code: str):
 
 def _build_html(code: str, path: Path) -> str:
     """利用 Pygments 依當前主題產生 HTML 字串。"""
-    lexer = _get_lexer_for_path(path, code)
-
     is_dark = settings.is_dark()
     c = get_theme_colors()
 
-    bg_color = c["code_bg"]
-    text_color = "#abb2bf" if is_dark else "#24292f"
-    line_color = "#4b5263" if is_dark else "#8c959f"
-    border_color = "rgba(255, 255, 255, 0.08)" if is_dark else "rgba(0, 0, 0, 0.08)"
-    pygments_style = c["code_style"]
-
-    # 動態讀取當前 Pygments Style 的原生背景色，保持整頁底色 100% 渾然一體
-    try:
-        from pygments.styles import get_style_by_name
-        st_obj = get_style_by_name(pygments_style)
-        style_bg = getattr(st_obj, "background_color", None)
-        if style_bg and style_bg.startswith("#"):
-            bg_color = style_bg
-    except Exception:
-        pass
+    from core.license import LicenseManager
+    is_pro = LicenseManager.get_instance().is_unlimited()
 
     font_size = settings.font_size
     font_code = settings.font_family_code or "Cascadia Code"
     white_space_rule = "white-space: pre-wrap; word-break: break-all;" if settings.word_wrap else "white-space: pre;"
     ligatures_rule = 'font-feature-settings: "liga" 1, "calt" 1;' if settings.enable_ligatures else 'font-feature-settings: normal;'
-    line_number_color = "#63636e" if is_dark else "#9ca3af"
+
+    if not is_pro:
+        # 免費降級模式：強制採用介面主底色與高對比文字色，徹底解決深淺模式反差問題
+        bg_color = "#18181b" if is_dark else "#ffffff"
+        text_color = "#abb2bf" if is_dark else "#24292f"
+        line_number_color = "#63636e" if is_dark else "#8c959f"
+
+        lexer = TextLexer()
+        formatter = HtmlFormatter(
+            nowrap=False,
+            linenos="table",
+            linespans="line",
+        )
+        pygments_css = f"""
+        .highlight, .highlight table, .highlight tr, .highlight td, .highlight td.code, .highlight td.code pre, .highlight td.code span, .highlight td.code div {{
+            color: {text_color};
+            background-color: transparent;
+        }}
+        """
+    else:
+        bg_color = c["code_bg"]
+        text_color = "#abb2bf" if is_dark else "#24292f"
+        line_number_color = "#63636e" if is_dark else "#9ca3af"
+        pygments_style = c["code_style"]
+
+        # 動態讀取當前 Pygments Style 的原生背景色，保持整頁底色 100% 渾然一體
+        try:
+            from pygments.styles import get_style_by_name
+            st_obj = get_style_by_name(pygments_style)
+            style_bg = getattr(st_obj, "background_color", None)
+            if style_bg and style_bg.startswith("#"):
+                bg_color = style_bg
+        except Exception:
+            pass
+
+        lexer = _get_lexer_for_path(path, code)
+        try:
+            formatter = HtmlFormatter(
+                nowrap=False,
+                linenos="table",
+                style=pygments_style,
+                linespans="line",
+            )
+        except Exception:
+            fallback_style = "monokai" if is_dark else "friendly"
+            formatter = HtmlFormatter(
+                nowrap=False,
+                linenos="table",
+                style=fallback_style,
+                linespans="line",
+            )
+        pygments_css = formatter.get_style_defs(".highlight")
 
     css_template = f"""
     <style>
@@ -117,11 +153,11 @@ def _build_html(code: str, path: Path) -> str:
         {ligatures_rule}
     }}
     .highlight, table.highlighttable {{
-        background-color: {bg_color} !important;
+        background-color: {bg_color};
         border-collapse: collapse;
         width: 100%;
     }}
-    td.linenos {{
+    td.linenos, td.linenos pre, td.linenos span {{
         color: {line_number_color};
         text-align: right;
         padding-right: 14px;
@@ -129,48 +165,26 @@ def _build_html(code: str, path: Path) -> str:
         vertical-align: top;
         border-right: 1px solid rgba(128, 128, 128, 0.15);
         font-size: {max(10, font_size - 1)}px;
-        opacity: 0.75;
+        opacity: 0.85;
     }}
     td.code {{
         padding-left: 16px;
         vertical-align: top;
-        background-color: {bg_color} !important;
+        background-color: {bg_color};
+        color: {text_color};
         {white_space_rule}
         {ligatures_rule}
     }}
-    td.code pre {{
+    td.code pre, td.code div {{
         margin: 0;
-        background-color: {bg_color} !important;
+        background-color: {bg_color};
+        color: {text_color};
         font-family: inherit;
         {ligatures_rule}
     }}
     /*PYGMENTS_CSS*/
     </style>
     """
-
-    try:
-        formatter = HtmlFormatter(
-            nowrap=False,
-            linenos="table",
-            style=pygments_style,
-            linespans="line",
-        )
-    except Exception:
-        fallback_style = "monokai" if is_dark else "friendly"
-        formatter = HtmlFormatter(
-            nowrap=False,
-            linenos="table",
-            style=fallback_style,
-            linespans="line",
-        )
-    from core.license import LicenseManager
-    is_pro = LicenseManager.get_instance().is_unlimited()
-
-    if not is_pro:
-        # 免費降級模式：無語法著色黑白純文字呈現
-        pygments_css = ".highlight * { color: inherit !important; background: transparent !important; }"
-    else:
-        pygments_css = formatter.get_style_defs(".highlight")
 
     full_css = css_template.replace("/*PYGMENTS_CSS*/", pygments_css)
     highlighted = highlight(code, lexer, formatter)
@@ -185,8 +199,11 @@ class CodeRenderer(BaseRenderer):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
+        from core.license import LicenseManager
+        is_pro = LicenseManager.get_instance().is_unlimited()
+
         # 嘗試從快取讀取已產生的 (html, is_truncated, err)
-        cache_key = f"{path}::{settings.theme}::{settings.code_theme}::{settings.font_size}::{settings.word_wrap}"
+        cache_key = f"{path}::{settings.theme}::{settings.code_theme}::{settings.font_size}::{settings.word_wrap}::{is_pro}"
         theme_cache_path = Path(cache_key)
         cached = cache.get(theme_cache_path)
         if cached:
@@ -211,21 +228,30 @@ class CodeRenderer(BaseRenderer):
         browser.setOpenExternalLinks(False)
         browser.setHtml(html)
         browser.setFrameShape(QTextBrowser.Shape.NoFrame)
-        try:
-            from pygments.styles import get_style_by_name
-            st_obj = get_style_by_name(settings.code_theme)
-            code_bg = getattr(st_obj, "background_color", None) or ("#18181b" if settings.is_dark() else "#ffffff")
-        except Exception:
-            code_bg = "#18181b" if settings.is_dark() else "#ffffff"
+        is_dark = settings.is_dark()
+        c = get_theme_colors()
 
-        scroll_handle_bg = "rgba(255, 255, 255, 0.2)" if settings.is_dark() else "rgba(0, 0, 0, 0.18)"
-        scroll_handle_hover = "rgba(255, 255, 255, 0.38)" if settings.is_dark() else "rgba(0, 0, 0, 0.35)"
+        if not is_pro:
+            code_bg = "#18181b" if is_dark else "#ffffff"
+            text_color = "#abb2bf" if is_dark else "#24292f"
+        else:
+            text_color = "#abb2bf" if is_dark else "#24292f"
+            try:
+                from pygments.styles import get_style_by_name
+                st_obj = get_style_by_name(settings.code_theme)
+                code_bg = getattr(st_obj, "background_color", None) or ("#18181b" if is_dark else "#ffffff")
+            except Exception:
+                code_bg = "#18181b" if is_dark else "#ffffff"
+
+        scroll_handle_bg = "rgba(255, 255, 255, 0.2)" if is_dark else "rgba(0, 0, 0, 0.18)"
+        scroll_handle_hover = "rgba(255, 255, 255, 0.38)" if is_dark else "rgba(0, 0, 0, 0.35)"
 
         browser.setStyleSheet(f"""
             QTextBrowser {{
                 background-color: {code_bg};
+                color: {text_color};
                 border: none;
-                selection-background-color: #264f78;
+                selection-background-color: {'#264f78' if is_dark else '#add6ff'};
             }}
             QScrollBar:vertical {{
                 background: transparent;
@@ -269,8 +295,6 @@ class CodeRenderer(BaseRenderer):
                 background: transparent;
             }}
         """)
-        from core.license import LicenseManager
-        is_pro = LicenseManager.get_instance().is_unlimited()
 
         # 頂部小工具列（複製純代碼）
         code_top = QWidget()
@@ -284,17 +308,17 @@ class CodeRenderer(BaseRenderer):
         btn_copy_code.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_copy_code.setStyleSheet(f"""
             QPushButton {{
-                background: {'rgba(99, 102, 241, 0.15)' if is_pro else 'rgba(148, 163, 184, 0.15)'};
-                color: {'#818cf8' if is_pro else '#94a3b8'};
+                background: {'rgba(99, 102, 241, 0.15)' if is_pro else ('rgba(148, 163, 184, 0.2)' if is_dark else 'rgba(100, 116, 139, 0.12)')};
+                color: {'#818cf8' if is_pro else ('#94a3b8' if is_dark else '#475569')};
                 font-size: 11px;
                 font-weight: 600;
                 padding: 0 8px;
                 border-radius: 4px;
-                border: 1px solid {'rgba(99, 102, 241, 0.3)' if is_pro else 'rgba(148, 163, 184, 0.25)'};
+                border: 1px solid {'rgba(99, 102, 241, 0.3)' if is_pro else ('rgba(148, 163, 184, 0.25)' if is_dark else 'rgba(100, 116, 139, 0.2)')};
             }}
             QPushButton:hover {{
-                background: {'#6366f1' if is_pro else 'rgba(99, 102, 241, 0.2)'};
-                color: #ffffff;
+                background: {'#6366f1' if is_pro else ('rgba(99, 102, 241, 0.2)' if is_dark else 'rgba(99, 102, 241, 0.15)')};
+                color: {'#ffffff' if is_pro else ('#c7d2fe' if is_dark else '#4338ca')};
             }}
         """)
 

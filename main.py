@@ -54,7 +54,7 @@ def _make_tray_icon() -> QIcon:
 
 
 class KyteViewApp(QObject):
-    APP_VERSION = "1.5.2"
+    APP_VERSION = "1.5.3"
     REPO_NAME = "ais7896-hue/KyteView"
     CNAME_DOMAIN = "kyteview.aisming.com"
 

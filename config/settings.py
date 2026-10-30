@@ -237,9 +237,13 @@ class SettingsManager(QObject):
     @property
     def code_theme(self) -> str:
         val = self._data.get("code_theme", "")
-        if not val or val == "github":
-            val = "monokai" if self.is_dark() else "friendly"
-            self._data["code_theme"] = val
+        is_dark = self.is_dark()
+        dark_themes = {"monokai", "one-dark", "dracula", "github-dark", "nord", "material", "solarized-dark"}
+        light_themes = {"friendly", "vs", "default", "solarized-light", "gruvbox-light", "tango", "pastie"}
+        if is_dark and val not in dark_themes:
+            val = "monokai"
+        elif not is_dark and val not in light_themes:
+            val = "friendly"
         return val
 
     @code_theme.setter
