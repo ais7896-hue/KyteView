@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 PackageIdentifier: ais7896-hue.KyteView
 PackageVersion: 1.5.3
 PackageLocale: en-US
@@ -24,4 +24,4 @@ Tags:
   - markdown
 ReleaseNotesUrl: https://github.com/ais7896-hue/KyteView/releases/tag/v1.5.3
 ManifestType: defaultLocale
-ManifestVersion: 1.6.0
+ManifestVersion: 1.28.0
