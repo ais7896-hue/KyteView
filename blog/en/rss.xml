@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>KyteView Blog (EN)</title>
+    <link>https://kyteview.aisming.com/blog/en/</link>
+    <description>Focused on sub-50ms Windows 10/11 file preview technology, macOS QuickLook alternatives, zero-Office PPTX/XLSX viewing, and high-speed desktop workflows.</description>
+    <language>en-us</language>
+    <item>
+      <title>Windows Spacebar File Preview Showdown: KyteView vs QuickLook vs PowerToys Peek</title>
+      <link>https://kyteview.aisming.com/blog/en/windows-quicklook-spacebar-preview-comparison.html</link>
+      <guid>https://kyteview.aisming.com/blog/en/windows-quicklook-spacebar-preview-comparison.html</guid>
+      <pubDate>2026-11-05</pubDate>
+      <description>Want macOS QuickLook spacebar file previews on Windows 10 &amp; 11? We compare KyteView, QuickLook, and PowerToys Peek across startup latency, Office document rendering, archive drag-extraction, and smart window offsetting.</description>
+    </item>
+    <item>
+      <title>How to Preview PPTX, XLSX &amp; Archives in Milliseconds on Windows Without Microsoft Office</title>
+      <link>https://kyteview.aisming.com/blog/en/preview-office-pptx-xlsx-without-microsoft-office.html</link>
+      <guid>https://kyteview.aisming.com/blog/en/preview-office-pptx-xlsx-without-microsoft-office.html</guid>
+      <pubDate>2026-11-05</pubDate>
+      <description>Tired of waiting for Excel or PowerPoint to launch just to check which version of a file is the right one? Learn how KyteView previews Office documents and ZIP/7z archives in under 50ms.</description>
+    </item>
+  </channel>
+</rss>
