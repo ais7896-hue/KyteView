@@ -1,4 +1,4 @@
-﻿param(
+param(
     [switch]$SkipTests
 )
 
@@ -140,4 +140,9 @@ else {
     Write-Host "`n[WARNING] 未偵測到 Inno Setup 編譯器 (ISCC.exe)。 " -ForegroundColor Yellow
     Write-Host "已為您完成 dist\KyteView 免安裝獨立目錄版。 " -ForegroundColor Yellow
     Write-Host "安裝 Inno Setup 後再次執行本腳本即可產生安裝檔。 " -ForegroundColor Yellow
+}
+
+# 4. MSIX 封裝
+if (Test-Path ".\build_msix.ps1") {
+    & .\build_msix.ps1
 }
