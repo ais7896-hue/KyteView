@@ -18,6 +18,7 @@ const TRANSLATIONS = {
         "nav.guide": "操作指南",
         "nav.suite": "Kyte 全系列",
         "nav.faq": "常見問答",
+        "nav.blog": "技術專欄",
         "nav.download": "免費下載",
 
         "hero.badge": "為 Windows 10 / 11 深度打造 · 毫秒級快速預覽神器",
@@ -200,6 +201,7 @@ const TRANSLATIONS = {
         "nav.guide": "User Guide",
         "nav.suite": "Kyte Suite",
         "nav.faq": "FAQ",
+        "nav.blog": "Blog",
         "nav.download": "Free Download",
 
         "hero.badge": "Engineered for Windows 10 & 11 · Millisecond Instant Preview",

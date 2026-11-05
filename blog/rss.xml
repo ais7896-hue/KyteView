@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>KyteView Blog</title>
+    <link>https://kyteview.aisming.com/blog/</link>
+    <description>專注於 Windows 10/11 極速檔案預覽技術、macOS QuickLook 替代方案、Office/PDF/壓縮檔免解壓檢視與高效桌面工作流。</description>
+    <language>zh-tw</language>
+    <item>
+      <title>Windows 空白鍵快速預覽工具深度評比：KyteView vs QuickLook vs PowerToys Peek</title>
+      <link>https://kyteview.aisming.com/blog/windows-quicklook-spacebar-preview-comparison.html</link>
+      <guid>https://kyteview.aisming.com/blog/windows-quicklook-spacebar-preview-comparison.html</guid>
+      <pubDate>2026-11-05</pubDate>
+      <description>想要在 Windows 11 實現 macOS 的空白鍵檔案預覽？本文從啟動延遲、Office 原生預覽、壓縮包單檔拖曳抽出與視窗智慧避讓四大維度，完整評比主流預覽工具。</description>
+    </item>
+    <item>
+      <title>免安裝 Office 也能毫秒預覽 PPTX、XLSX 與壓縮檔：Windows 高效率文件檢視技巧</title>
+      <link>https://kyteview.aisming.com/blog/preview-office-pptx-xlsx-without-microsoft-office.html</link>
+      <guid>https://kyteview.aisming.com/blog/preview-office-pptx-xlsx-without-microsoft-office.html</guid>
+      <pubDate>2026-11-05</pubDate>
+      <description>為了確認一份簡報或財報是不是要找的那個版本，每次都要苦等 PowerPoint 或 Excel 載入嗎？了解如何用 KyteView 在 50ms 內快速檢視 Office 文件與壓縮檔內部結構。</description>
+    </item>
+  </channel>
+</rss>
