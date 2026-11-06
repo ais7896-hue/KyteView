@@ -27,7 +27,7 @@ const TRANSLATIONS = {
         "hero.desc": "不再為了確認內容反覆開啟笨重肥大的微軟 Office 或外部播放器。<br class='hidden sm:inline'>按一下 <kbd class='px-2 py-1 rounded bg-slate-800 border border-slate-700 font-mono-code text-brand-300 font-bold text-sm shadow'>Space</kbd> 瞬間彈出，具備智慧避讓與側邊釘選，為高效專業工作者而生。",
         "hero.btn_installer": "立即下載 Windows 安裝檔 (v1.5.3)",
         "hero.btn_portable": "免安裝綠色版 (.zip)",
-        "hero.btn_msstore": "Microsoft Store (審核中)",
+        "hero.btn_msstore": "Microsoft Store 下載",
         "hero.btn_features": "探索全部殺手級功能",
         "hero.trial_note": "免費下載試用 (14 天全功能暢享) · 零門檻無綁卡 · 開箱即用",
 
@@ -210,7 +210,7 @@ const TRANSLATIONS = {
         "hero.desc": "Never wait for bulky Microsoft Office or external media players again.<br class='hidden sm:inline'>Press <kbd class='px-2 py-1 rounded bg-slate-800 border border-slate-700 font-mono-code text-brand-300 font-bold text-sm shadow'>Space</kbd> for instant popups with smart offset positioning and side-dock pinning.",
         "hero.btn_installer": "Download Windows Setup (v1.5.3)",
         "hero.btn_portable": "Portable .zip Edition",
-        "hero.btn_msstore": "Microsoft Store (In Review)",
+        "hero.btn_msstore": "Get it from Microsoft",
         "hero.btn_features": "Explore Killer Features",
         "hero.trial_note": "Free 14-day full trial · No credit card required · Ready out of the box",
 
@@ -441,7 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 // Microsoft Store 上架開關：審核通過後改為 true 即可全站啟用商店下載按鈕
-const MS_STORE_LIVE = false;
+const MS_STORE_LIVE = true;
 function updateMsStoreButtons(lang) {
     const isEn = lang === 'en_US';
     document.querySelectorAll('.ms-store-btn').forEach(btn => {
